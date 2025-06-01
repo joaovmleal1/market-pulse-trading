@@ -19,28 +19,49 @@ const MultiTradingLogo = ({ size = 'md', showText = true }: MultiTradingLogoProp
     xl: 'text-4xl'
   };
 
+  const iconSizeClasses = {
+    sm: 'w-4 h-4',
+    md: 'w-6 h-6',
+    lg: 'w-8 h-8',
+    xl: 'w-12 h-12'
+  };
+
   return (
     <div className="flex items-center space-x-3">
-      <div className={`${sizeClasses[size]} bg-gradient-to-br from-emerald-400 via-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg`}>
-        <div className="relative">
-          {/* M letter */}
-          <div className="text-white font-bold text-sm">
-            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
-              <path d="M3 3h4l3 6 3-6h4v18h-3V9l-2.5 5h-1L7 9v12H3V3z"/>
+      <div className={`${sizeClasses[size]} bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 rounded-xl flex items-center justify-center shadow-xl relative overflow-hidden`}>
+        {/* Background pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+        
+        {/* Main logo content */}
+        <div className="relative z-10 flex items-center justify-center">
+          {/* MT monogram */}
+          <div className={`${iconSizeClasses[size]} text-white font-black flex items-center justify-center`}>
+            <svg viewBox="0 0 40 24" className="w-full h-full" fill="currentColor">
+              {/* M */}
+              <path d="M2 2h3l3 8 3-8h3v20h-2.5V8L8 18H7L3.5 8v14H2V2z"/>
+              {/* T */}
+              <path d="M28 2v2.5h-3V22h-2.5V4.5h-3V2h8.5z"/>
             </svg>
           </div>
-          {/* Trading lines overlay */}
-          <div className="absolute -top-1 -right-1 w-3 h-3">
-            <div className="w-full h-0.5 bg-green-300 mb-0.5"></div>
-            <div className="w-full h-0.5 bg-red-300 mb-0.5"></div>
-            <div className="w-full h-0.5 bg-yellow-300"></div>
-          </div>
+        </div>
+
+        {/* Trading indicators - small chart lines */}
+        <div className="absolute bottom-1 right-1 flex flex-col space-y-0.5">
+          <div className="w-2 h-0.5 bg-green-300 rounded"></div>
+          <div className="w-1.5 h-0.5 bg-red-300 rounded"></div>
+          <div className="w-2.5 h-0.5 bg-yellow-300 rounded"></div>
         </div>
       </div>
+      
       {showText && (
-        <h1 className={`${textSizeClasses[size]} font-bold text-white`}>
-          Multi Trading
-        </h1>
+        <div>
+          <h1 className={`${textSizeClasses[size]} font-bold text-white leading-tight`}>
+            Multi Trading
+          </h1>
+          <p className="text-green-400 text-xs font-medium tracking-wide">
+            CRYPTO ANALYTICS
+          </p>
+        </div>
       )}
     </div>
   );
