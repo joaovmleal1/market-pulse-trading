@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
-import bcrypt from 'bcryptjs';
 
 interface AuthUser {
   id: string;
@@ -46,19 +45,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .from('users')
             .select('*')
             .eq('email', localUser.email)
-            .single();
+            .maybeSingle();
 
           if (!existingUser) {
-            // Hash da senha
-            const hashedPassword = await bcrypt.hash(localUser.password, 10);
-            
-            // Inserir usuário no Supabase
+            // Inserir usuário no Supabase (senha em texto simples para demo)
             const { error } = await supabase
               .from('users')
               .insert({
                 name: localUser.name,
                 email: localUser.email,
-                password_hash: hashedPassword
+                password_hash: localUser.password // Para demo, usando senha simples
               });
 
             if (error) {
@@ -79,52 +75,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Configurar listener de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        if (session?.user) {
-          // Buscar dados adicionais do usuário na tabela users
-          fetchUserData(session.user.id);
-        } else {
-          setUser(null);
-        }
+    // Verificar se há usuário salvo no localStorage
+    const savedUser = localStorage.getItem('multitrading_user');
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+      } catch (error) {
+        console.error('Erro ao carregar usuário do localStorage:', error);
+        localStorage.removeItem('multitrading_user');
       }
-    );
-
-    // Verificar sessão existente
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      }
-    });
+    }
 
     // Executar migração dos usuários do localStorage
     migrateLocalStorageUsers();
-
-    return () => subscription.unsubscribe();
   }, []);
-
-  const fetchUserData = async (userId: string) => {
-    try {
-      const { data: userData, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (userData && !error) {
-        setUser({
-          id: userData.id,
-          name: userData.name,
-          email: userData.email
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao buscar dados do usuário:', error);
-    }
-  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -133,29 +98,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('users')
         .select('*')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (error || !userData) {
         return false;
       }
 
-      // Verificar senha
-      const isValidPassword = await bcrypt.compare(password, userData.password_hash);
+      // Verificar senha (comparação simples para demo)
+      const isValidPassword = userData.password_hash === password;
       
       if (isValidPassword) {
-        // Simular login com Supabase Auth (para manter compatibilidade)
-        setUser({
+        const userInfo = {
           id: userData.id,
           name: userData.name,
           email: userData.email
-        });
+        };
+        
+        setUser(userInfo);
         
         // Salvar no localStorage para persistência
-        localStorage.setItem('multitrading_user', JSON.stringify({
-          id: userData.id,
-          name: userData.name,
-          email: userData.email
-        }));
+        localStorage.setItem('multitrading_user', JSON.stringify(userInfo));
         
         return true;
       }
@@ -174,22 +136,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('users')
         .select('*')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (existingUser) {
         return false; // Usuário já existe
       }
 
-      // Hash da senha
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Inserir novo usuário
+      // Inserir novo usuário (senha em texto simples para demo)
       const { data: newUser, error } = await supabase
         .from('users')
         .insert({
           name,
           email,
-          password_hash: hashedPassword
+          password_hash: password // Para demo, usando senha simples
         })
         .select()
         .single();
@@ -198,19 +157,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
 
-      // Fazer login automaticamente após registro
-      setUser({
+      const userInfo = {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email
-      });
+      };
+
+      // Fazer login automaticamente após registro
+      setUser(userInfo);
 
       // Salvar no localStorage para persistência
-      localStorage.setItem('multitrading_user', JSON.stringify({
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email
-      }));
+      localStorage.setItem('multitrading_user', JSON.stringify(userInfo));
 
       return true;
     } catch (error) {
