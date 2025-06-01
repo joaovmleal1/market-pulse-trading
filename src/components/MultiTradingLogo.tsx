@@ -19,38 +19,37 @@ const MultiTradingLogo = ({ size = 'md', showText = true }: MultiTradingLogoProp
     xl: 'text-4xl'
   };
 
-  const iconSizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8',
-    xl: 'w-12 h-12'
-  };
-
   return (
     <div className="flex items-center space-x-3">
       <div className={`${sizeClasses[size]} bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 rounded-xl flex items-center justify-center shadow-xl relative overflow-hidden`}>
         {/* Background pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
         
-        {/* Main logo content */}
-        <div className="relative z-10 flex items-center justify-center">
-          {/* MT monogram */}
-          <div className={`${iconSizeClasses[size]} text-white font-black flex items-center justify-center`}>
-            <svg viewBox="0 0 40 24" className="w-full h-full" fill="currentColor">
-              {/* M */}
-              <path d="M2 2h3l3 8 3-8h3v20h-2.5V8L8 18H7L3.5 8v14H2V2z"/>
-              {/* T */}
-              <path d="M28 2v2.5h-3V22h-2.5V4.5h-3V2h8.5z"/>
-            </svg>
-          </div>
+        {/* Main logo - Diamond with trading arrows */}
+        <div className="relative z-10 flex items-center justify-center w-full h-full">
+          <svg viewBox="0 0 32 32" className="w-3/4 h-3/4" fill="none">
+            {/* Diamond shape */}
+            <path 
+              d="M16 4L24 12L16 20L8 12L16 4Z" 
+              fill="white" 
+              fillOpacity="0.9"
+            />
+            {/* Inner trading symbol */}
+            <path 
+              d="M12 10L16 8L20 10M12 14L16 16L20 14" 
+              stroke="rgb(34, 197, 94)" 
+              strokeWidth="1.5" 
+              strokeLinecap="round"
+            />
+            {/* Small dots for data points */}
+            <circle cx="13" cy="11" r="0.5" fill="rgb(59, 130, 246)" />
+            <circle cx="16" cy="13" r="0.5" fill="rgb(59, 130, 246)" />
+            <circle cx="19" cy="11" r="0.5" fill="rgb(59, 130, 246)" />
+          </svg>
         </div>
 
-        {/* Trading indicators - small chart lines */}
-        <div className="absolute bottom-1 right-1 flex flex-col space-y-0.5">
-          <div className="w-2 h-0.5 bg-green-300 rounded"></div>
-          <div className="w-1.5 h-0.5 bg-red-300 rounded"></div>
-          <div className="w-2.5 h-0.5 bg-yellow-300 rounded"></div>
-        </div>
+        {/* Subtle glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-300/20 to-blue-300/20 rounded-xl blur-sm"></div>
       </div>
       
       {showText && (
