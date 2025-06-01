@@ -19,47 +19,48 @@ const MultiTradingLogo = ({ size = 'md', showText = true }: MultiTradingLogoProp
     xl: 'text-4xl'
   };
 
-  const iconSizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8',
-    xl: 'w-12 h-12'
-  };
-
   return (
     <div className="flex items-center space-x-3">
-      <div className={`${sizeClasses[size]} bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 rounded-xl flex items-center justify-center shadow-xl relative overflow-hidden`}>
-        {/* Background pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+      <div className={`${sizeClasses[size]} relative`}>
+        {/* Outer rotating ring */}
+        <div className="absolute inset-0 rounded-full border-4 border-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 animate-spin" style={{ animationDuration: '8s' }}></div>
         
-        {/* Main logo content */}
-        <div className="relative z-10 flex items-center justify-center">
-          {/* MT monogram */}
-          <div className={`${iconSizeClasses[size]} text-white font-black flex items-center justify-center`}>
-            <svg viewBox="0 0 40 24" className="w-full h-full" fill="currentColor">
-              {/* M */}
-              <path d="M2 2h3l3 8 3-8h3v20h-2.5V8L8 18H7L3.5 8v14H2V2z"/>
-              {/* T */}
-              <path d="M28 2v2.5h-3V22h-2.5V4.5h-3V2h8.5z"/>
-            </svg>
+        {/* Main logo container */}
+        <div className="absolute inset-1 bg-gradient-to-br from-slate-800 via-gray-900 to-black rounded-full flex items-center justify-center shadow-2xl">
+          {/* Inner glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 via-purple-500/20 to-pink-500/20 rounded-full blur-sm"></div>
+          
+          {/* Logo symbol */}
+          <div className="relative z-10 flex flex-col items-center justify-center text-white">
+            {/* Stylized MT with trading arrow */}
+            <div className="relative">
+              <svg viewBox="0 0 48 32" className="w-3/4 h-3/4" fill="currentColor">
+                {/* M */}
+                <path d="M2 6h4l4 10 4-10h4v20h-3V12l-3 8h-2l-3-8v14H2V6z" className="fill-cyan-400"/>
+                {/* T */}
+                <path d="M32 6v3h-4v17h-3V9h-4V6h11z" className="fill-purple-400"/>
+                {/* Trading arrow */}
+                <path d="M38 10l6 6-6 6v-4h-8v-4h8v-4z" className="fill-pink-400"/>
+              </svg>
+            </div>
           </div>
-        </div>
-
-        {/* Trading indicators - small chart lines */}
-        <div className="absolute bottom-1 right-1 flex flex-col space-y-0.5">
-          <div className="w-2 h-0.5 bg-green-300 rounded"></div>
-          <div className="w-1.5 h-0.5 bg-red-300 rounded"></div>
-          <div className="w-2.5 h-0.5 bg-yellow-300 rounded"></div>
+          
+          {/* Pulsing dots for activity indicator */}
+          <div className="absolute bottom-2 right-2 flex space-x-1">
+            <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+            <div className="w-1 h-1 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+            <div className="w-1 h-1 bg-red-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+          </div>
         </div>
       </div>
       
       {showText && (
         <div>
-          <h1 className={`${textSizeClasses[size]} font-bold text-white leading-tight`}>
+          <h1 className={`${textSizeClasses[size]} font-bold bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent leading-tight`}>
             Multi Trading
           </h1>
-          <p className="text-green-400 text-xs font-medium tracking-wide">
-            CRYPTO ANALYTICS
+          <p className="text-gray-400 text-xs font-medium tracking-wider uppercase">
+            Advanced Analytics
           </p>
         </div>
       )}
