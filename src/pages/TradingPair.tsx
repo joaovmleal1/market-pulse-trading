@@ -23,14 +23,16 @@ const TradingPair = () => {
     setIsWaiting(true);
     setSignal(null);
 
-    // Simula análise por 30 segundos
+    // Gera tempo aleatório entre 5 e 20 segundos
+    const randomTime = Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000;
+
     setTimeout(() => {
       const signals: Signal[] = ['BUY', 'SELL'];
       const randomSignal = signals[Math.floor(Math.random() * signals.length)];
       setSignal(randomSignal);
       setIsWaiting(false);
       setIsAnalyzing(false);
-    }, 30000); // 30 segundos
+    }, randomTime);
   };
 
   const requestNewAnalysis = () => {
@@ -41,18 +43,22 @@ const TradingPair = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <TradingHeader displayPair={displayPair} cryptoSymbol={cryptoSymbol} />
       
-      <main className="max-w-6xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Lado esquerdo - Análise de Sinais */}
-          <div className="space-y-6">
+      <main className="max-w-7xl mx-auto p-6">
+        {/* Plataforma de Trading em destaque no topo */}
+        <div className="mb-8">
+          <TradingPlatform signal={signal} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Status do Sinal */}
+          <div className="lg:col-span-1">
             <SignalStatus signal={signal} isWaiting={isWaiting} displayPair={displayPair} />
-            <SignalControls onRequestAnalysis={requestNewAnalysis} isAnalyzing={isAnalyzing} />
-            <TradingInfo displayPair={displayPair} isWaiting={isWaiting} signal={signal} />
           </div>
           
-          {/* Lado direito - Plataforma de Trading */}
-          <div className="lg:sticky lg:top-6">
-            <TradingPlatform signal={signal} />
+          {/* Controles e Informações */}
+          <div className="lg:col-span-2 space-y-6">
+            <SignalControls onRequestAnalysis={requestNewAnalysis} isAnalyzing={isAnalyzing} />
+            <TradingInfo displayPair={displayPair} isWaiting={isWaiting} signal={signal} />
           </div>
         </div>
       </main>
