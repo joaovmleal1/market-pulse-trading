@@ -124,7 +124,7 @@ const TradingPair = () => {
                   <span className="font-medium">Status:</span> {isWaiting ? 'Analisando' : 'Sinal Ativo'}
                 </div>
                 <div>
-                  <span className="font-medium">Tempo de análise:</span> 30 segundos
+                  <span className="font-medium">Tempo de expiração:</span> 1 minuto
                 </div>
                 <div>
                   <span className="font-medium">Tipo de análise:</span> Manual
