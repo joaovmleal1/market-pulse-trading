@@ -28,7 +28,7 @@ const Dashboard = () => {
             <img 
               src="/lovable-uploads/4b02a836-64da-4605-90da-a76b17c070b5.png" 
               alt="Multi Trading Logo" 
-              className="h-10 w-auto"
+              className="h-12 w-auto drop-shadow-lg"
             />
           </div>
           <div className="flex items-center space-x-4">

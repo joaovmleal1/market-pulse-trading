@@ -19,7 +19,7 @@ const SplashScreen = () => {
           <img 
             src="/lovable-uploads/4b02a836-64da-4605-90da-a76b17c070b5.png" 
             alt="Multi Trading Logo" 
-            className="w-48 h-auto mx-auto mb-4"
+            className="w-64 h-auto mx-auto mb-4 drop-shadow-2xl"
           />
         </div>
         <p className="text-gray-300 text-lg">Análise de Criptomoedas</p>

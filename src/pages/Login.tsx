@@ -53,7 +53,7 @@ const Login = () => {
           <img 
             src="/lovable-uploads/4b02a836-64da-4605-90da-a76b17c070b5.png" 
             alt="Multi Trading Logo" 
-            className="w-32 h-auto mx-auto mb-4"
+            className="w-40 h-auto mx-auto mb-4 drop-shadow-xl"
           />
           <CardTitle className="text-2xl text-white">Entrar</CardTitle>
           <CardDescription className="text-gray-400">
