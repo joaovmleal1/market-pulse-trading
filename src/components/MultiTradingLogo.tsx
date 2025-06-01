@@ -1,4 +1,5 @@
 
+
 interface MultiTradingLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showText?: boolean;
@@ -21,35 +22,37 @@ const MultiTradingLogo = ({ size = 'md', showText = true }: MultiTradingLogoProp
 
   return (
     <div className="flex items-center space-x-3">
-      <div className={`${sizeClasses[size]} bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 rounded-xl flex items-center justify-center shadow-xl relative overflow-hidden`}>
+      <div className={`${sizeClasses[size]} bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl relative overflow-hidden`}>
         {/* Background pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
         
-        {/* Main logo - Diamond with trading arrows */}
+        {/* Main logo - Upward trending arrow */}
         <div className="relative z-10 flex items-center justify-center w-full h-full">
-          <svg viewBox="0 0 32 32" className="w-3/4 h-3/4" fill="none">
-            {/* Diamond shape */}
+          <svg viewBox="0 0 24 24" className="w-2/3 h-2/3" fill="none">
+            {/* Trending arrow */}
             <path 
-              d="M16 4L24 12L16 20L8 12L16 4Z" 
-              fill="white" 
-              fillOpacity="0.9"
+              d="M7 17L17 7M17 7H11M17 7V13" 
+              stroke="white" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              fill="none"
             />
-            {/* Inner trading symbol */}
+            {/* Additional chart line for context */}
             <path 
-              d="M12 10L16 8L20 10M12 14L16 16L20 14" 
-              stroke="rgb(34, 197, 94)" 
+              d="M3 14L7 10L12 15L21 6" 
+              stroke="white" 
               strokeWidth="1.5" 
-              strokeLinecap="round"
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              opacity="0.6"
+              fill="none"
             />
-            {/* Small dots for data points */}
-            <circle cx="13" cy="11" r="0.5" fill="rgb(59, 130, 246)" />
-            <circle cx="16" cy="13" r="0.5" fill="rgb(59, 130, 246)" />
-            <circle cx="19" cy="11" r="0.5" fill="rgb(59, 130, 246)" />
           </svg>
         </div>
 
-        {/* Subtle glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-300/20 to-blue-300/20 rounded-xl blur-sm"></div>
+        {/* Subtle inner glow */}
+        <div className="absolute inset-1 bg-gradient-to-br from-white/5 to-transparent rounded-xl"></div>
       </div>
       
       {showText && (
@@ -67,3 +70,4 @@ const MultiTradingLogo = ({ size = 'md', showText = true }: MultiTradingLogoProp
 };
 
 export default MultiTradingLogo;
+
