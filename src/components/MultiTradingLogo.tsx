@@ -1,5 +1,4 @@
 
-
 interface MultiTradingLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showText?: boolean;
@@ -26,7 +25,7 @@ const MultiTradingLogo = ({ size = 'md', showText = true }: MultiTradingLogoProp
         {/* Background pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
         
-        {/* Main logo - Upward trending arrow */}
+        {/* Main logo - Upward trending arrow only */}
         <div className="relative z-10 flex items-center justify-center w-full h-full">
           <svg viewBox="0 0 24 24" className="w-2/3 h-2/3" fill="none">
             {/* Trending arrow */}
@@ -36,16 +35,6 @@ const MultiTradingLogo = ({ size = 'md', showText = true }: MultiTradingLogoProp
               strokeWidth="2.5" 
               strokeLinecap="round" 
               strokeLinejoin="round"
-              fill="none"
-            />
-            {/* Additional chart line for context */}
-            <path 
-              d="M3 14L7 10L12 15L21 6" 
-              stroke="white" 
-              strokeWidth="1.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              opacity="0.6"
               fill="none"
             />
           </svg>
@@ -70,4 +59,3 @@ const MultiTradingLogo = ({ size = 'md', showText = true }: MultiTradingLogoProp
 };
 
 export default MultiTradingLogo;
-
