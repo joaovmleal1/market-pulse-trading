@@ -71,11 +71,9 @@ const Register = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-gray-800 border-gray-700">
         <CardHeader className="text-center">
-          <img 
-            src="/lovable-uploads/4b02a836-64da-4605-90da-a76b17c070b5.png" 
-            alt="Multi Trading Logo" 
-            className="w-40 h-auto mx-auto mb-4 drop-shadow-xl"
-          />
+          <div className="w-16 h-16 mx-auto bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mb-4">
+            <span className="text-2xl font-bold text-white">MT</span>
+          </div>
           <CardTitle className="text-2xl text-white">Criar Conta</CardTitle>
           <CardDescription className="text-gray-400">
             Junte-se ao Multi Trading
