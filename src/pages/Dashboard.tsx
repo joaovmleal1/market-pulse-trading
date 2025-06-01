@@ -25,10 +25,11 @@ const Dashboard = () => {
       <header className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-xl font-bold text-white">MT</span>
-            </div>
-            <h1 className="text-2xl font-bold text-white">Multi Trading</h1>
+            <img 
+              src="/lovable-uploads/4b02a836-64da-4605-90da-a76b17c070b5.png" 
+              alt="Multi Trading Logo" 
+              className="h-10 w-auto"
+            />
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-white">Olá, {user?.name}</span>
