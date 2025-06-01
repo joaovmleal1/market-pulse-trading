@@ -3,14 +3,17 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowUp, ArrowDown, RefreshCw, ExternalLink } from 'lucide-react';
+import { ArrowUp, ArrowDown, RefreshCw, ExternalLink, Home, BarChart3, User } from 'lucide-react';
 import CryptoLogo from '@/components/CryptoLogos';
+import MultiTradingLogo from '@/components/MultiTradingLogo';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Signal = 'BUY' | 'SELL' | null;
 
 const TradingPair = () => {
   const { pair } = useParams<{ pair: string }>();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [signal, setSignal] = useState<Signal>(null);
   const [isWaiting, setIsWaiting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -41,16 +44,42 @@ const TradingPair = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <header className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-6">
+            <MultiTradingLogo size="md" />
+            <nav className="hidden md:flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate('/dashboard')}
+                className="text-gray-300 hover:text-white hover:bg-gray-700 flex items-center space-x-2"
+              >
+                <Home className="w-4 h-4" />
+                <span>Dashboard</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="text-gray-300 hover:text-white hover:bg-gray-700 flex items-center space-x-2"
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>Análises</span>
+              </Button>
+            </nav>
+            <div className="flex items-center space-x-3 border-l border-gray-600 pl-6">
+              <CryptoLogo symbol={cryptoSymbol} size="md" />
+              <h1 className="text-2xl font-bold text-white">{displayPair}</h1>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-2 text-gray-300">
+              <User className="w-4 h-4" />
+              <span>Olá, {user?.name}</span>
+            </div>
             <Button 
               variant="outline" 
-              onClick={() => navigate('/dashboard')}
+              onClick={logout}
               className="border-gray-600 text-gray-300 hover:bg-gray-700"
             >
-              ← Voltar
+              Sair
             </Button>
-            <CryptoLogo symbol={cryptoSymbol} size="md" />
-            <h1 className="text-2xl font-bold text-white">{displayPair}</h1>
           </div>
         </div>
       </header>
