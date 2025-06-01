@@ -1,9 +1,9 @@
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
+import CryptoLogo from '@/components/CryptoLogos';
 
 type Signal = 'BUY' | 'SELL' | null;
 
@@ -15,6 +15,7 @@ const TradingPair = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const displayPair = pair?.replace('-', '/') || '';
+  const cryptoSymbol = displayPair.split('/')[0];
 
   const generateSignal = () => {
     setIsAnalyzing(true);
@@ -47,6 +48,7 @@ const TradingPair = () => {
             >
               ← Voltar
             </Button>
+            <CryptoLogo symbol={cryptoSymbol} size="md" />
             <h1 className="text-2xl font-bold text-white">{displayPair}</h1>
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import MultiTradingLogo from '@/components/MultiTradingLogo';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -71,8 +71,8 @@ const Register = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-gray-800 border-gray-700">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 mx-auto bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mb-4">
-            <span className="text-2xl font-bold text-white">MT</span>
+          <div className="flex justify-center mb-4">
+            <MultiTradingLogo size="lg" showText={false} />
           </div>
           <CardTitle className="text-2xl text-white">Criar Conta</CardTitle>
           <CardDescription className="text-gray-400">

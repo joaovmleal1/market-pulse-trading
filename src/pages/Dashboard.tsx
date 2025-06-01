@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import MultiTradingLogo from '@/components/MultiTradingLogo';
+import CryptoLogo from '@/components/CryptoLogos';
 
 const tradingPairs = [
-  { symbol: 'ETH/USDT', name: 'Ethereum', color: 'from-blue-500 to-purple-500' },
-  { symbol: 'XRP/USDT', name: 'Ripple', color: 'from-blue-400 to-cyan-400' },
-  { symbol: 'ADA/USDT', name: 'Cardano', color: 'from-blue-600 to-indigo-600' },
-  { symbol: 'BTC/USDT', name: 'Bitcoin', color: 'from-orange-500 to-yellow-500' },
-  { symbol: 'SOL/USDT', name: 'Solana', color: 'from-purple-500 to-pink-500' },
+  { symbol: 'ETH/USDT', name: 'Ethereum', cryptoSymbol: 'ETH' },
+  { symbol: 'XRP/USDT', name: 'Ripple', cryptoSymbol: 'XRP' },
+  { symbol: 'ADA/USDT', name: 'Cardano', cryptoSymbol: 'ADA' },
+  { symbol: 'BTC/USDT', name: 'Bitcoin', cryptoSymbol: 'BTC' },
+  { symbol: 'SOL/USDT', name: 'Solana', cryptoSymbol: 'SOL' },
 ];
 
 const Dashboard = () => {
@@ -24,12 +26,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <header className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-xl font-bold text-white">MT</span>
-            </div>
-            <h1 className="text-2xl font-bold text-white">Multi Trading</h1>
-          </div>
+          <MultiTradingLogo size="md" />
           <div className="flex items-center space-x-4">
             <span className="text-white">Olá, {user?.name}</span>
             <Button 
@@ -58,11 +55,7 @@ const Dashboard = () => {
             >
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${pair.color} flex items-center justify-center`}>
-                    <span className="text-white font-bold text-lg">
-                      {pair.symbol.split('/')[0].charAt(0)}
-                    </span>
-                  </div>
+                  <CryptoLogo symbol={pair.cryptoSymbol} size="lg" />
                   <div>
                     <h3 className="text-xl font-bold text-white">{pair.symbol}</h3>
                     <p className="text-gray-400">{pair.name}</p>
