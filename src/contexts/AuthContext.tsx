@@ -93,6 +93,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log('Tentativa de login para:', email);
+      
       // Buscar usuário por email
       const { data: userData, error } = await supabase
         .from('users')
@@ -100,12 +102,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('email', email)
         .maybeSingle();
 
-      if (error || !userData) {
+      console.log('Resultado da busca do usuário:', { userData, error });
+
+      if (error) {
+        console.error('Erro ao buscar usuário:', error);
+        return false;
+      }
+
+      if (!userData) {
+        console.log('Usuário não encontrado');
         return false;
       }
 
       // Verificar senha (comparação simples para demo)
       const isValidPassword = userData.password_hash === password;
+      console.log('Senha válida:', isValidPassword);
       
       if (isValidPassword) {
         const userInfo = {
@@ -131,19 +142,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      // Verificar se o usuário já existe
-      const { data: existingUser } = await supabase
+      console.log('Tentativa de registro para:', email);
+      
+      // Verificar se o usuário já existe usando maybeSingle
+      const { data: existingUser, error: searchError } = await supabase
         .from('users')
         .select('*')
         .eq('email', email)
         .maybeSingle();
 
+      console.log('Verificação de usuário existente:', { existingUser, searchError });
+
+      if (searchError) {
+        console.error('Erro ao verificar usuário existente:', searchError);
+        return false;
+      }
+
       if (existingUser) {
+        console.log('Usuário já existe');
         return false; // Usuário já existe
       }
 
       // Inserir novo usuário (senha em texto simples para demo)
-      const { data: newUser, error } = await supabase
+      const { data: newUser, error: insertError } = await supabase
         .from('users')
         .insert({
           name,
@@ -153,7 +174,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .select()
         .single();
 
-      if (error || !newUser) {
+      console.log('Resultado da inserção:', { newUser, insertError });
+
+      if (insertError) {
+        console.error('Erro ao inserir usuário:', insertError);
+        return false;
+      }
+
+      if (!newUser) {
+        console.log('Nenhum usuário retornado após inserção');
         return false;
       }
 
@@ -169,6 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Salvar no localStorage para persistência
       localStorage.setItem('multitrading_user', JSON.stringify(userInfo));
 
+      console.log('Registro realizado com sucesso');
       return true;
     } catch (error) {
       console.error('Erro no registro:', error);
