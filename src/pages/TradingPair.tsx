@@ -11,7 +11,7 @@ const TradingPair = () => {
   const { pair } = useParams<{ pair: string }>();
   const navigate = useNavigate();
   const [signal, setSignal] = useState<Signal>(null);
-  const [isWaiting, setIsWaiting] = useState(true);
+  const [isWaiting, setIsWaiting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const displayPair = pair?.replace('-', '/') || '';
@@ -57,13 +57,25 @@ const TradingPair = () => {
           {/* Status Card */}
           <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-8 text-center">
-              {isWaiting ? (
+              {!isWaiting && !signal ? (
+                <div className="space-y-4">
+                  <div className="w-16 h-16 mx-auto bg-gray-700 rounded-full flex items-center justify-center">
+                    <RefreshCw className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-white">
+                    Pronto para análise
+                  </h2>
+                  <p className="text-gray-300">
+                    Clique no botão abaixo para solicitar uma análise de câmbio
+                  </p>
+                </div>
+              ) : isWaiting ? (
                 <div className="space-y-4">
                   <div className="w-16 h-16 mx-auto bg-gray-700 rounded-full flex items-center justify-center">
                     <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                   <h2 className="text-2xl font-bold text-white">
-                    {isAnalyzing ? 'Analisando câmbio...' : 'Aguardando próxima análise de câmbio...'}
+                    Analisando câmbio...
                   </h2>
                 </div>
               ) : (
@@ -121,7 +133,7 @@ const TradingPair = () => {
                   <span className="font-medium">Par:</span> {displayPair}
                 </div>
                 <div>
-                  <span className="font-medium">Status:</span> {isWaiting ? 'Analisando' : 'Sinal Ativo'}
+                  <span className="font-medium">Status:</span> {isWaiting ? 'Analisando' : signal ? 'Sinal Ativo' : 'Aguardando'}
                 </div>
                 <div>
                   <span className="font-medium">Tempo de expiração:</span> 1 minuto
