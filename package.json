@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "serve": "ts-node server/index.ts",
+    "build:server": "tsc -p tsconfig.server.json",
+    "serve:build": "node dist-server/index.js",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -48,6 +51,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
+    "express": "^5.1.0",
     "framer-motion": "^12.18.1",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",
