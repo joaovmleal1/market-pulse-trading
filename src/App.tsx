@@ -1,40 +1,37 @@
-
+import { Provider } from "react-redux";
+import store from "./store"; // seu store Redux
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import SplashScreen from "./pages/SplashScreen";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import TradingPair from "./pages/TradingPair";
+import Broker from "./pages/Broker";
+import SettingsPage from "./pages/Settings";
+import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        Carregando...
+      </div>
+    );
+  }
+
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
 const AppRoutes = () => {
-  const [showSplash, setShowSplash] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (showSplash) {
-    return <SplashScreen />;
-  }
-
   return (
     <Routes>
       <Route path="/" element={<Home />} />
@@ -45,16 +42,25 @@ const AppRoutes = () => {
           <Dashboard />
         </ProtectedRoute>
       } />
-      <Route path="/trading/:pair" element={
+      <Route path="/broker/:id" element={
         <ProtectedRoute>
-          <TradingPair />
+          <Broker />
         </ProtectedRoute>
       } />
+      <Route path="/settings/:id" element={
+        <ProtectedRoute>
+          <SettingsPage />
+        </ProtectedRoute>
+      } />
+
+      {/* Rota de fallback para páginas não encontradas */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
 
 const App = () => (
+  <Provider store={store}>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -66,6 +72,7 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
+  </Provider>
 );
 
 export default App;
