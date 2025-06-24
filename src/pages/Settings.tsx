@@ -23,6 +23,10 @@ const settingsFields = [
   { label: 'Senha da Corretora', key: 'brokerage_password', type: 'secure' },
 ];
 
+const brokerageFieldConfig: Record<string, string[]> = {
+  '1': ['api_key'],
+};
+
 const containerVariants = {
   hidden: { opacity: 0, visibility: 'hidden' },
   visible: {
@@ -172,6 +176,7 @@ const SettingsPage = () => {
   };
 
   const isFormReady = settingsFields.every(field => formData.hasOwnProperty(field.key));
+  const allowedFields = brokerageFieldConfig[id || ''] || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
@@ -210,50 +215,55 @@ const SettingsPage = () => {
             initial="hidden"
             animate="visible"
           >
-            {settingsFields.map((field, index) => (
-              <motion.div
-                variants={itemVariants}
-                custom={index}
-                key={field.key}
-                className="w-72"
-              >
-                <Card className="bg-gray-800 border-gray-700 w-full rounded-2xl shadow-lg shadow-black/30 transition-transform duration-200 hover:scale-105">
-                  <CardContent className="p-6 text-center">
-                    {field.type === 'boolean' ? (
-                      <>
-                        <label className="text-white block mb-2">{field.label}</label>
-                        <div className="flex items-center justify-center space-x-2">
-                          <Switch
-                            checked={!!formData[field.key]}
-                            onCheckedChange={(checked) => handleChange(field.key, !!checked)}
-                          />
-                          <span className="text-white">
-                            {formData[field.key] ? 'Ativado' : 'Desativado'}
-                          </span>
-                        </div>
-                      </>
-                    ) : field.type === 'secure' ? (
-                      <SecureField
-                        label={field.label}
-                        name={field.key}
-                        value={formData[field.key] || ''}
-                        onChange={handleChange}
-                      />
-                    ) : (
-                      <>
-                        <label className="text-white block mb-2">{field.label}</label>
-                        <Input
-                          className="bg-gray-700 text-white border-gray-600 text-center"
-                          placeholder={`Digite o(a) ${field.label.toLowerCase()}`}
+            {settingsFields.map((field, index) => {
+              const isEnabled = allowedFields.includes(field.key);
+              return (
+                <motion.div
+                  variants={itemVariants}
+                  custom={index}
+                  key={field.key}
+                  className="w-72"
+                >
+                  <Card className={`bg-gray-800 border-gray-700 w-full rounded-2xl shadow-lg shadow-black/30 transition-transform duration-200 hover:scale-105 ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <CardContent className="p-6 text-center">
+                      {field.type === 'boolean' ? (
+                        <>
+                          <label className="text-white block mb-2">{field.label}</label>
+                          <div className="flex items-center justify-center space-x-2">
+                            <Switch
+                              checked={!!formData[field.key]}
+                              onCheckedChange={(checked) => handleChange(field.key, !!checked)}
+                              disabled={!isEnabled}
+                            />
+                            <span className="text-white">
+                              {formData[field.key] ? 'Ativado' : 'Desativado'}
+                            </span>
+                          </div>
+                        </>
+                      ) : field.type === 'secure' ? (
+                        <SecureField
+                          label={field.label}
+                          name={field.key}
                           value={formData[field.key] || ''}
-                          onChange={(e) => handleChange(field.key, e.target.value)}
+                          onChange={handleChange}
                         />
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                      ) : (
+                        <>
+                          <label className="text-white block mb-2">{field.label}</label>
+                          <Input
+                            className="bg-gray-700 text-white border-gray-600 text-center"
+                            placeholder={`Digite o(a) ${field.label.toLowerCase()}`}
+                            value={formData[field.key] || ''}
+                            onChange={(e) => handleChange(field.key, e.target.value)}
+                            disabled={!isEnabled}
+                          />
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </motion.div>
 
           <div className="flex flex-col items-center gap-4 mt-8 w-72">
