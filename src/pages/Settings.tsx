@@ -247,6 +247,7 @@ const SettingsPage = () => {
                           name={field.key}
                           value={formData[field.key] || ''}
                           onChange={handleChange}
+                          disabled={!isEnabled}
                         />
                       ) : (
                         <>
