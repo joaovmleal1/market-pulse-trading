@@ -14,9 +14,10 @@ interface SecureFieldProps {
   name: string;
   value: string;
   onChange: (key: string, value: string) => void;
+  disabled?: boolean; // ✅ nova prop
 }
 
-const SecureField = ({ label, name, value, onChange }: SecureFieldProps) => {
+const SecureField = ({ label, name, value, onChange, disabled = false }: SecureFieldProps) => {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -40,12 +41,14 @@ const SecureField = ({ label, name, value, onChange }: SecureFieldProps) => {
           className="bg-gray-700 text-white border-gray-600 pr-10"
           value={value}
           onChange={(e) => onChange(name, e.target.value)}
+          disabled={disabled} // ✅ campo desativado
         />
         <Button
           type="button"
           variant="ghost"
           className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white p-1"
           onClick={() => setVisible((v) => !v)}
+          disabled={disabled} // ✅ botão desativado
         >
           {visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </Button>
