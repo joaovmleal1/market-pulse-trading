@@ -18,9 +18,9 @@ const settingsFields = [
   { label: 'Conta Demo', key: 'is_demo', type: 'boolean' },
   { label: 'Gale 1', key: 'gale_one', type: 'boolean' },
   { label: 'Gale 2', key: 'gale_two', type: 'boolean' },
-  { label: 'API Key da Corretora', key: 'api_key', type: 'secure' },
-  { label: 'Usuário da Corretora', key: 'brokerage_username' },
-  { label: 'Senha da Corretora', key: 'brokerage_password', type: 'secure' },
+  { label: 'API Key da Corretora', key: 'api_key', type: 'secure', brokerageOnly: true },
+  { label: 'Usuário da Corretora', key: 'brokerage_username', brokerageOnly: true },
+  { label: 'Senha da Corretora', key: 'brokerage_password', type: 'secure', brokerageOnly: true },
 ];
 
 const brokerageFieldConfig: Record<string, string[]> = {
@@ -216,7 +216,8 @@ const SettingsPage = () => {
             animate="visible"
           >
             {settingsFields.map((field, index) => {
-              const isEnabled = allowedFields.includes(field.key);
+              const isBrokerField = field.brokerageOnly;
+              const isEnabled = !isBrokerField || allowedFields.includes(field.key);
               return (
                 <motion.div
                   variants={itemVariants}
