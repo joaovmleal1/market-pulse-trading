@@ -66,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!userData.is_active) {
         console.warn('Usuário inativo.');
+        setUser(userData);
         navigate('/signature') // força logout se inativo
         return;
       }
@@ -113,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string): Promise<{ success: boolean; message?: string }> => {
     try {
       const [first_name, ...rest] = name.trim().split(" ");
       const last_name = rest.join(" ");
@@ -139,7 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return await login(username, password);
     } catch (err) {
       console.error('Erro no registro:', err);
-      return false;
+      return { success: false, message: 'Erro ao registrar usuário' };
     }
   };
 
