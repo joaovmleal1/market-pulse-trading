@@ -4,6 +4,7 @@ import { login as loginAction, logout as logoutAction } from '../store/reducers/
 import { withTokenRetry } from '../utils/reqAuth'; // ✅ Caminho relativo correto
 import axios from 'axios';
 import store from '../store';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthUser {
   id: number;
@@ -11,6 +12,7 @@ interface AuthUser {
   email: string;
   last_login: string;
   is_superuser: boolean;
+  is_active: boolean;
 }
 
 interface AuthContextType {
@@ -37,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch();
   const { accessToken, refreshToken } = useSelector((state: any) => state.token);
+  const navigate = useNavigate();
 
   const api = axios.create({
     baseURL: 'https://api.multitradingob.com/user', // ✅ Atualize se necessário
@@ -62,8 +65,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (!userData.is_active) {
-        console.warn('Usuário inativo. Logout forçado.');
-        logout(); // força logout se inativo
+        console.warn('Usuário inativo.');
+        navigate('/signature') // força logout se inativo
         return;
       }
 

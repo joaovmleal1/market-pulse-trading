@@ -15,6 +15,7 @@ import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Admin from "./pages/Admin";
+import Signature from "./pages/Signature";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,11 @@ const AppRoutes = () => {
       <Route path="/admin" element={
         <ProtectedRoute>
           <Admin />
+        </ProtectedRoute>
+      } />
+      <Route path="/signature" element={
+        <ProtectedRoute>
+          <Signature />
         </ProtectedRoute>
       } />
 
