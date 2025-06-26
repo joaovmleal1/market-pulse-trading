@@ -16,7 +16,7 @@ interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
@@ -76,29 +76,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (
+    username: string,
+    password: string
+  ): Promise<{ success: boolean; message?: string }> => {
     try {
-      const res = await axios.post(`${api.defaults.baseURL}/login`, new URLSearchParams({
-        username,
-        password,
-      }), {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
+      const res = await axios.post(
+        `${api.defaults.baseURL}/login`,
+        new URLSearchParams({ username, password }),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
 
       const { access_token, refresh_token } = res.data;
 
-      dispatch(loginAction({
-        accessToken: access_token,
-        refreshToken: refresh_token,
-      }));
+      dispatch(
+        loginAction({
+          accessToken: access_token,
+          refreshToken: refresh_token,
+        })
+      );
 
       await fetchUser();
-      return true;
-    } catch (err) {
-      console.error('Erro no login:', err);
-      return false;
+      return { success: true };
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.detail || 'Erro inesperado no login. Tente novamente.';
+      console.error('Erro no login:', message);
+      return { success: false, message };
     }
   };
 

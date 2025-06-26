@@ -22,8 +22,9 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (success) {
+      const result = await login(email, password);
+
+      if (result.success) {
         toast({
           title: "Login realizado com sucesso!",
           description: "Bem-vindo ao Multi Trading",
@@ -32,13 +33,13 @@ const Login = () => {
       } else {
         toast({
           title: "Erro no login",
-          description: "Email ou senha incorretos",
+          description: result.message || "Email ou senha incorretos",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Erro no login",
+        title: "Erro inesperado",
         description: "Tente novamente mais tarde",
         variant: "destructive",
       });
@@ -46,6 +47,8 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
