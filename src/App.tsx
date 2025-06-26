@@ -14,6 +14,7 @@ import Broker from "./pages/Broker";
 import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,11 @@ const AppRoutes = () => {
       <Route path="/settings/:id" element={
         <ProtectedRoute>
           <SettingsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin" element={
+        <ProtectedRoute>
+          <Admin />
         </ProtectedRoute>
       } />
 

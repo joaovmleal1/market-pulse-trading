@@ -17,7 +17,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      {/* Fundo fixo e sem animação */}
+      {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <span onClick={() => navigate('/dashboard')} className="cursor-pointer">
@@ -25,6 +25,24 @@ const Dashboard = () => {
           </span>
           <div className="flex items-center space-x-4">
             <span className="text-white">Olá, {user?.complete_name}</span>
+
+            {/* Botão do Painel Admin (condicional) */}
+            {user?.is_superuser && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Button
+                  variant="ghost"
+                  className="text-sm text-white bg-gray-700 hover:bg-gray-600 border border-gray-600"
+                  onClick={() => navigate('/admin')}
+                >
+                  Painel Admin
+                </Button>
+              </motion.div>
+            )}
+
             <Button
               variant="outline"
               onClick={logout}
@@ -36,6 +54,7 @@ const Dashboard = () => {
         </div>
       </header>
 
+      {/* Main */}
       <motion.main
         className="max-w-6xl mx-auto p-6"
         initial={{ opacity: 0, visibility: 'hidden', y: 10 }}

@@ -60,6 +60,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         return res.data;
       });
+
+      if (!userData.is_active) {
+        console.warn('Usuário inativo. Logout forçado.');
+        logout(); // força logout se inativo
+        return;
+      }
+
       setUser(userData);
     } catch (err) {
       console.error('Erro ao buscar usuário logado:', err);
@@ -140,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 async function refreshToken(currentToken: string): Promise<string> {
   try {
-    const response = await fetch('http://127.0.0.1:8000/user/refresh', {
+    const response = await fetch('https://api.multitradingob.com/user/refresh', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${currentToken}`,

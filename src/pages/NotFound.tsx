@@ -1,9 +1,11 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
 
 const NotFound = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.error(
@@ -24,7 +26,7 @@ const NotFound = () => {
         <h1 className="text-6xl font-extrabold mb-4 text-white">404</h1>
         <p className="text-2xl text-gray-300 mb-6">Oops! Página não encontrada</p>
         <a
-          href="/"
+          onClick={() =>navigate(-1)}
           className="text-green-400 hover:text-green-300 underline text-lg font-medium transition-colors duration-300"
         >
           Voltar para o Início
