@@ -31,15 +31,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  // Se não estiver autenticado, redireciona para login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  // Usuário logado mas inativo
-  if (user && !user.is_active && location.pathname !== '/signature') {
+  // Se estiver autenticado, mas inativo, redireciona para assinatura
+  if (isAuthenticated && user && !user.is_active && location.pathname !== '/signature') {
     return <Navigate to="/signature" replace />;
   }
 
+  // Se tudo certo, renderiza normalmente
   return <>{children}</>;
 };
 
