@@ -67,7 +67,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!userData.is_active) {
         console.warn('Usuário inativo.');
         setUser(userData);
-        navigate('/signature') // força logout se inativo
         return;
       }
 
