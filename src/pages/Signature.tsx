@@ -80,9 +80,12 @@ const Signature = () => {
 
               <Button
                 className="mt-6 w-full bg-gradient-to-r from-green-500 to-blue-500 text-white"
-                onClick={() =>
-                  window.location.href = 'https://pay.kirvano.com/3ed1d972-7047-421a-809f-be816c09fd19'
-                }
+                onClick={() => {
+                  if (user) {
+                    const url = `https://pay.kirvano.com/3ed1d972-7047-421a-809f-be816c09fd19?user_id=${user.id}&email=${encodeURIComponent(user.email)}`;
+                    window.location.href = url;
+                  }
+                }}
                 disabled={!user}
               >
                 Assinar agora
