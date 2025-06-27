@@ -70,17 +70,22 @@ const Signature = () => {
                 <li>Suporte prioritário e área exclusiva para membros</li>
               </ul>
 
-              <div className="mt-6">
-                <span className="block text-sm text-gray-400 mb-1">Valor da assinatura:</span>
-                <span className="text-3xl font-bold text-green-400">R$ --,--</span>
-                <span className="block text-sm text-gray-500">* Valor em definição junto à Kirvano</span>
+              <div className="mt-6 space-y-1">
+                <span className="block text-sm text-gray-400">Planos disponíveis:</span>
+                <div className="text-lg text-white">
+                  <span className="block">🔹 Semanal — <strong>R$ 39,90</strong></span>
+                  <span className="block">🔹 Mensal — <strong>R$ 200,00</strong></span>
+                </div>
               </div>
 
               <Button
-                disabled
-                className="mt-6 w-full bg-gradient-to-r from-green-500 to-blue-500 text-white cursor-not-allowed"
+                className="mt-6 w-full bg-gradient-to-r from-green-500 to-blue-500 text-white"
+                onClick={() =>
+                  window.location.href = 'https://pay.kirvano.com/3ed1d972-7047-421a-809f-be816c09fd19'
+                }
+                disabled={!user}
               >
-                Assinar agora (em breve)
+                Assinar agora
               </Button>
             </div>
           </>
