@@ -8,10 +8,6 @@ import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SidebarMenu from '@/components/ui/SidebarMenu';
 
-const corretoras = [
-  { id: 1, name: 'Xofre', image: XofreLogo },
-];
-
 const DashHistory = () => {
   const { id } = useParams<{ id: string }>();
   const { accessToken } = useSelector((state: any) => state.token);
@@ -22,7 +18,7 @@ const DashHistory = () => {
 
   const fetchTrades = async () => {
     try {
-      const res = await fetch(`https://api.multitradingob.com/trade-order-info/trade_order_info/today/${id}`, {
+      const res = await fetch(`https://api.multitradingob.com/trade-order-info/trade_order_info/today/1`, {
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       });
       if (!res.ok) throw new Error('Erro ao buscar operações');
@@ -47,11 +43,6 @@ const DashHistory = () => {
     }, 15000);
     return () => clearInterval(interval);
   }, [accessToken, id]);
-
-  const corretora = corretoras.find((c) => c.id.toString() === id);
-  if (!corretora) {
-    return <div className="text-white text-center mt-20">Corretora não encontrada.</div>;
-  }
 
   const paginatedTrades = trades
     .slice()
