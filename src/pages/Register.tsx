@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,8 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const { toast } = useToast();
@@ -97,27 +99,85 @@ const Register = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {[
-                { id: 'name', label: 'Nome', type: 'text', value: name, setter: setName },
-                { id: 'email', label: 'Email', type: 'email', value: email, setter: setEmail },
-                { id: 'password', label: 'Senha', type: 'password', value: password, setter: setPassword },
-                { id: 'confirmPassword', label: 'Confirmar Senha', type: 'password', value: confirmPassword, setter: setConfirmPassword },
-              ].map(({ id, label, type, value, setter }) => (
-                <motion.div key={id} layout className="space-y-2">
-                  <Label htmlFor={id} className="text-white">{label}</Label>
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-white">Nome</Label>
+                <motion.input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nome"
+                  required
+                  className="w-full rounded-md px-4 py-2 bg-[#1E1E1E] border border-[#24C3B5]/20 text-white placeholder-[#A9B1B8] outline-none focus:ring-2 focus:ring-[#24C3B5]"
+                  whileFocus={{ scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white">Email</Label>
+                <motion.input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                  required
+                  className="w-full rounded-md px-4 py-2 bg-[#1E1E1E] border border-[#24C3B5]/20 text-white placeholder-[#A9B1B8] outline-none focus:ring-2 focus:ring-[#24C3B5]"
+                  whileFocus={{ scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-white">Senha</Label>
+                <div className="relative">
                   <motion.input
-                    id={id}
-                    type={type}
-                    value={value}
-                    onChange={(e) => setter(e.target.value)}
-                    placeholder={label}
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Senha"
                     required
                     className="w-full rounded-md px-4 py-2 bg-[#1E1E1E] border border-[#24C3B5]/20 text-white placeholder-[#A9B1B8] outline-none focus:ring-2 focus:ring-[#24C3B5]"
                     whileFocus={{ scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   />
-                </motion.div>
-              ))}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#A9B1B8] hover:text-white"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-white">Confirmar Senha</Label>
+                <div className="relative">
+                  <motion.input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirmar Senha"
+                    required
+                    className="w-full rounded-md px-4 py-2 bg-[#1E1E1E] border border-[#24C3B5]/20 text-white placeholder-[#A9B1B8] outline-none focus:ring-2 focus:ring-[#24C3B5]"
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#A9B1B8] hover:text-white"
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
 
               <motion.button
                 type="submit"
