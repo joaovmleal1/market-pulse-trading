@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import MultiTradingLogo from '@/components/MultiTradingLogo';
 import Xofre from '../assets/imgs/xofre.png';
 import { motion } from 'framer-motion';
+import { User, LogOut, Clock, BarChart3 } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -12,62 +13,50 @@ const Dashboard = () => {
 
   const tradingBrokers = [
     { brokerage_id: 1, name: 'Xofre', route: 'xofre', img: Xofre },
-    // Adicione mais corretoras se necessário
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 p-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <span onClick={() => navigate('/dashboard')} className="cursor-pointer">
-            <MultiTradingLogo size="md" />
-          </span>
-          <div className="flex items-center space-x-4">
-            <span className="text-white">Olá, {user?.complete_name}</span>
+    <div className="min-h-screen flex bg-[#1E1E1E] text-white">
+      {/* Sidebar */}
+      <aside className="w-64 bg-[#2C2F33] p-6 flex flex-col justify-between border-r border-[#24C3B5]/30">
+        <div>
+          <div className="mb-10">
+            <MultiTradingLogo size="sm" />
+          </div>
+          <nav className="space-y-4">
+            <button onClick={() => navigate('/dashboard')} className="flex items-center gap-3 text-white hover:text-[#24C3B5]">
+              <BarChart3 className="w-5 h-5" /> Minhas Corretoras
+            </button>
+            <button onClick={() => navigate('/history')} className="flex items-center gap-3 text-white hover:text-[#24C3B5]">
+              <Clock className="w-5 h-5" /> Histórico
+            </button>
+            <button onClick={() => navigate('/profile')} className="flex items-center gap-3 text-white hover:text-[#24C3B5]">
+              <User className="w-5 h-5" /> Perfil
+            </button>
+          </nav>
+        </div>
+        <button onClick={logout} className="flex items-center gap-3 text-gray-400 hover:text-red-400">
+          <LogOut className="w-5 h-5" /> Sair
+        </button>
+      </aside>
 
-            {/* Botão do Painel Admin (condicional) */}
-            {user?.is_superuser && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <Button
-                  variant="ghost"
-                  className="text-sm text-white bg-gray-700 hover:bg-gray-600 border border-gray-600"
-                  onClick={() => navigate('/admin')}
-                >
-                  Painel Admin
-                </Button>
-              </motion.div>
-            )}
-
-            <Button
-              variant="outline"
-              onClick={logout}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
-            >
-              Sair
-            </Button>
+      {/* Main Content */}
+      <div className="flex-1 p-6">
+        {/* Top Profile Info */}
+        <div className="flex justify-end mb-6">
+          <div className="bg-[#2C2F33] px-4 py-2 rounded-md border border-[#24C3B5]/20">
+            Olá, <span className="text-[#24C3B5] font-semibold">{user?.complete_name}</span>
           </div>
         </div>
-      </header>
 
-      {/* Main */}
-      <motion.main
-        className="max-w-6xl mx-auto p-6"
-        initial={{ opacity: 0, visibility: 'hidden', y: 10 }}
-        animate={{ opacity: 1, visibility: 'visible', y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+        {/* Brokers Section */}
         <motion.div
           className="mb-8"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <h2 className="text-3xl font-bold text-white mb-2">Corretoras Disponíveis</h2>
+          <h2 className="text-3xl font-bold text-white mb-2">Minhas Corretoras</h2>
           <p className="text-gray-400">Escolha uma corretora para começar a operar</p>
         </motion.div>
 
@@ -102,7 +91,7 @@ const Dashboard = () => {
             </motion.div>
           ))}
         </div>
-      </motion.main>
+      </div>
     </div>
   );
 };
