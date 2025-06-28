@@ -49,16 +49,16 @@ const Home = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-[#2C2F33]/50 border-b border-[#17CFC0] backdrop-blur-sm"
+        className="bg-[#2C2F33]/50 border-b border-[#24C3B5] backdrop-blur-sm"
       >
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <MultiTradingLogo size="md" />
             <div className="flex items-center space-x-4">
-              <Button variant="outline" asChild className="border-[#17CFC0] text-white hover:bg-[#17CFC0]/20">
+              <Button variant="outline" asChild className="border-[#24C3B5] text-white hover:bg-[#24C3B5]/20">
                 <Link to="/login">Entrar</Link>
               </Button>
-              <Button asChild className="bg-[#17CFC0] hover:bg-[#1FE0D0] text-white">
+              <Button asChild className="bg-[#24C3B5] hover:bg-[#3ED6C8] text-white">
                 <Link to="/register">Cadastrar</Link>
               </Button>
             </div>
@@ -75,16 +75,16 @@ const Home = () => {
       >
         <div className="max-w-6xl mx-auto text-center">
           <motion.h1 layout className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            O Futuro do <span className="text-[#17CFC0]">Trading Cripto</span>
+            O Futuro do <span className="text-[#24C3B5]">Trading Cripto</span>
           </motion.h1>
           <motion.p layout className="text-xl text-[#A9B1B8] mb-8 max-w-3xl mx-auto">
             Plataforma completa para análise e trading de criptomoedas. Tome decisões inteligentes com dados em tempo real e ferramentas profissionais.
           </motion.p>
           <motion.div layout className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild className="bg-[#17CFC0] hover:bg-[#1FE0D0] text-lg px-8 py-3">
+            <Button size="lg" asChild className="bg-[#24C3B5] hover:bg-[#3ED6C8] text-lg px-8 py-3">
               <Link to="/register">Começar Agora</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="border-[#17CFC0] text-white hover:bg-[#17CFC0]/20 text-lg px-8 py-3">
+            <Button size="lg" variant="outline" asChild className="border-[#24C3B5] text-white hover:bg-[#24C3B5]/20 text-lg px-8 py-3">
               <Link to="/login">Já tenho conta</Link>
             </Button>
           </motion.div>
@@ -143,10 +143,10 @@ const Home = () => {
                 transition={{ delay: index * 0.1, duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <Card className="bg-[#1E1E1E] border-[#17CFC0]/20 hover:border-[#17CFC0]/40 transition-all duration-300 hover:scale-105">
+                <Card className="bg-[#1E1E1E] border-[#24C3B5]/20 hover:border-[#24C3B5]/40 transition-all duration-300 hover:scale-105">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4 mb-4">
-                      <div className="p-3 bg-[#17CFC0] rounded-lg">
+                      <div className="p-3 bg-[#24C3B5] rounded-lg">
                         <feature.icon className="w-6 h-6 text-white" />
                       </div>
                       <h3 className="text-xl font-bold text-white">{feature.title}</h3>
@@ -171,8 +171,8 @@ const Home = () => {
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             {[
-              { value: '10K+', label: 'Traders Ativos', color: 'text-[#17CFC0]' },
-              { value: '$2.5B', label: 'Volume Negociado', color: 'text-[#1FE0D0]' },
+              { value: '10K+', label: 'Traders Ativos', color: 'text-[#24C3B5]' },
+              { value: '$2.5B', label: 'Volume Negociado', color: 'text-[#3ED6C8]' },
               { value: '99.9%', label: 'Uptime', color: 'text-[#A9B1B8]' },
             ].map(({ value, label, color }, index) => (
               <motion.div key={index} layout>
@@ -190,7 +190,7 @@ const Home = () => {
         whileInView={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
-        className="py-20 px-6 bg-gradient-to-r from-[#17CFC0] to-[#1FE0D0]"
+        className="py-20 px-6 bg-gradient-to-r from-[#24C3B5] to-[#3ED6C8]"
       >
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-4">
@@ -211,7 +211,7 @@ const Home = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         viewport={{ once: true }}
-        className="bg-[#1E1E1E] border-t border-[#17CFC0]/30 py-12 px-6"
+        className="bg-[#1E1E1E] border-t border-[#24C3B5]/30 py-12 px-6"
       >
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
