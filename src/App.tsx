@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Admin from "./pages/Admin";
 import Signature from "./pages/Signature";
+import DashHistory from "./pages/DashHistory";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,11 @@ const AppRoutes = () => {
       <Route path="/signature" element={
         <ProtectedRoute>
           <Signature />
+        </ProtectedRoute>
+      } />
+      <Route path="/history" element={
+        <ProtectedRoute>
+          <DashHistory />
         </ProtectedRoute>
       } />
 
