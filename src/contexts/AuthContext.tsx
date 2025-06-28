@@ -13,6 +13,7 @@ interface AuthUser {
   last_login: string;
   is_superuser: boolean;
   is_active: boolean;
+  activated_at: Date
 }
 
 interface AuthContextType {
@@ -64,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return res.data;
       });
 
-      if (!userData.is_active && !userData.is_superuser) {
+      if (!userData.is_active) {
         console.warn('Usuário inativo.');
         setUser(userData);
         return;

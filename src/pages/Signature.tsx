@@ -73,6 +73,7 @@ const Signature = () => {
               <div className="mt-6 space-y-1">
                 <span className="block text-sm text-gray-400">Planos disponíveis:</span>
                 <div className="text-lg text-white">
+                  <span className="block">🔹 Diário — <strong>R$ 19,90</strong></span>
                   <span className="block">🔹 Semanal — <strong>R$ 39,90</strong></span>
                   <span className="block">🔹 Mensal — <strong>R$ 200,00</strong></span>
                 </div>
