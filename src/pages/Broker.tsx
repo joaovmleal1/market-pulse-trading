@@ -350,12 +350,18 @@ const Broker = () => {
               </motion.div>
 
               {trades.length > itemsPerPage && (
-                <div className="flex justify-center mt-6 gap-2 text-black">
-                  <Button variant="outline" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
+                <div className="flex justify-center mt-6 gap-2">
+                  <Button
+                    variant="outline"
+                    className="bg-transparent !text-white !opacity-100"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                  >
                     Anterior
                   </Button>
                   <Button
                     variant="outline"
+                    className="bg-transparent !text-white !opacity-100"
                     disabled={currentPage * itemsPerPage >= trades.length}
                     onClick={() => setCurrentPage((p) => p + 1)}
                   >
