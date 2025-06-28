@@ -43,22 +43,22 @@ const cryptos = ['BTC', 'ETH', 'XRP', 'ADA', 'SOL'];
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="min-h-screen bg-[#1E1E1E]">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-gray-800/50 border-b border-gray-700 backdrop-blur-sm"
+        className="bg-[#2C2F33]/50 border-b border-[#17CFC0] backdrop-blur-sm"
       >
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <MultiTradingLogo size="md" />
             <div className="flex items-center space-x-4">
-              <Button variant="outline" asChild className="border-gray-600 text-gray-300 hover:bg-gray-700">
+              <Button variant="outline" asChild className="border-[#17CFC0] text-white hover:bg-[#17CFC0]/20">
                 <Link to="/login">Entrar</Link>
               </Button>
-              <Button asChild className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
+              <Button asChild className="bg-[#17CFC0] hover:bg-[#1FE0D0] text-white">
                 <Link to="/register">Cadastrar</Link>
               </Button>
             </div>
@@ -75,16 +75,16 @@ const Home = () => {
       >
         <div className="max-w-6xl mx-auto text-center">
           <motion.h1 layout className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            O Futuro do <span className="bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">Trading Cripto</span>
+            O Futuro do <span className="text-[#17CFC0]">Trading Cripto</span>
           </motion.h1>
-          <motion.p layout className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+          <motion.p layout className="text-xl text-[#A9B1B8] mb-8 max-w-3xl mx-auto">
             Plataforma completa para análise e trading de criptomoedas. Tome decisões inteligentes com dados em tempo real e ferramentas profissionais.
           </motion.p>
           <motion.div layout className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-lg px-8 py-3">
+            <Button size="lg" asChild className="bg-[#17CFC0] hover:bg-[#1FE0D0] text-lg px-8 py-3">
               <Link to="/register">Começar Agora</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="border-gray-600 text-gray-300 hover:bg-gray-700 text-lg px-8 py-3">
+            <Button size="lg" variant="outline" asChild className="border-[#17CFC0] text-white hover:bg-[#17CFC0]/20 text-lg px-8 py-3">
               <Link to="/login">Já tenho conta</Link>
             </Button>
           </motion.div>
@@ -122,14 +122,14 @@ const Home = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="py-20 px-6 bg-gray-800/30"
+        className="py-20 px-6 bg-[#2C2F33]"
       >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">
               Por que escolher o Multi Trading?
             </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            <p className="text-xl text-[#A9B1B8] max-w-2xl mx-auto">
               Desenvolvido para traders que buscam precisão, velocidade e segurança em suas operações.
             </p>
           </div>
@@ -143,15 +143,15 @@ const Home = () => {
                 transition={{ delay: index * 0.1, duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <Card className="bg-gray-800 border-gray-700 hover:border-gray-600 transition-all duration-300 hover:scale-105">
+                <Card className="bg-[#1E1E1E] border-[#17CFC0]/20 hover:border-[#17CFC0]/40 transition-all duration-300 hover:scale-105">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4 mb-4">
-                      <div className="p-3 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg">
+                      <div className="p-3 bg-[#17CFC0] rounded-lg">
                         <feature.icon className="w-6 h-6 text-white" />
                       </div>
                       <h3 className="text-xl font-bold text-white">{feature.title}</h3>
                     </div>
-                    <p className="text-gray-400">{feature.description}</p>
+                    <p className="text-[#A9B1B8]">{feature.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -171,13 +171,13 @@ const Home = () => {
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             {[
-              { value: '10K+', label: 'Traders Ativos', color: 'text-green-400' },
-              { value: '$2.5B', label: 'Volume Negociado', color: 'text-blue-400' },
-              { value: '99.9%', label: 'Uptime', color: 'text-purple-400' },
+              { value: '10K+', label: 'Traders Ativos', color: 'text-[#17CFC0]' },
+              { value: '$2.5B', label: 'Volume Negociado', color: 'text-[#1FE0D0]' },
+              { value: '99.9%', label: 'Uptime', color: 'text-[#A9B1B8]' },
             ].map(({ value, label, color }, index) => (
               <motion.div key={index} layout>
                 <div className={`text-4xl font-bold ${color} mb-2`}>{value}</div>
-                <div className="text-gray-400">{label}</div>
+                <div className="text-[#A9B1B8]">{label}</div>
               </motion.div>
             ))}
           </div>
@@ -190,16 +190,16 @@ const Home = () => {
         whileInView={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
-        className="py-20 px-6 bg-gradient-to-r from-green-600 to-blue-600"
+        className="py-20 px-6 bg-gradient-to-r from-[#17CFC0] to-[#1FE0D0]"
       >
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-4">
             Pronto para começar a operar?
           </h2>
-          <p className="text-xl text-green-100 mb-8">
+          <p className="text-xl text-white/90 mb-8">
             Junte-se a milhares de traders que já confiam no Multi Trading para suas operações.
           </p>
-          <Button size="lg" asChild className="bg-white text-gray-900 hover:bg-gray-100 text-lg px-8 py-3">
+          <Button size="lg" asChild className="bg-white text-[#1E1E1E] hover:bg-gray-100 text-lg px-8 py-3">
             <Link to="/register">Criar Conta Gratuita</Link>
           </Button>
         </div>
@@ -211,12 +211,12 @@ const Home = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         viewport={{ once: true }}
-        className="bg-gray-900 border-t border-gray-700 py-12 px-6"
+        className="bg-[#1E1E1E] border-t border-[#17CFC0]/30 py-12 px-6"
       >
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <MultiTradingLogo size="sm" />
-            <div className="text-gray-400 mt-4 md:mt-0">
+            <div className="text-[#A9B1B8] mt-4 md:mt-0">
               © 2024 Multi Trading. Todos os direitos reservados.
             </div>
           </div>
