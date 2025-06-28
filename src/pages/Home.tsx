@@ -55,7 +55,7 @@ const Home = () => {
           <div className="flex justify-between items-center">
             <MultiTradingLogo size="md" />
             <div className="flex items-center space-x-4">
-              <Button variant="outline" asChild className="border-[#24C3B5] text-white hover:bg-[#24C3B5]/20">
+              <Button variant="outline" asChild className="border-[#24C3B5] text-[#24C3B5] hover:bg-[#24C3B5]/10">
                 <Link to="/login">Entrar</Link>
               </Button>
               <Button asChild className="bg-[#24C3B5] hover:bg-[#3ED6C8] text-white">
@@ -81,10 +81,10 @@ const Home = () => {
             Plataforma completa para análise e trading de criptomoedas. Tome decisões inteligentes com dados em tempo real e ferramentas profissionais.
           </motion.p>
           <motion.div layout className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild className="bg-[#24C3B5] hover:bg-[#3ED6C8] text-lg px-8 py-3">
+            <Button size="lg" asChild className="bg-[#24C3B5] hover:bg-[#3ED6C8] text-lg px-8 py-3 text-white">
               <Link to="/register">Começar Agora</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="border-[#24C3B5] text-white hover:bg-[#24C3B5]/20 text-lg px-8 py-3">
+            <Button size="lg" variant="outline" asChild className="border-[#24C3B5] text-[#24C3B5] hover:bg-[#24C3B5]/10 text-lg px-8 py-3">
               <Link to="/login">Já tenho conta</Link>
             </Button>
           </motion.div>
