@@ -1,3 +1,4 @@
+import logo from '../assets/imgs/logo.png';
 
 interface MultiTradingLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -21,27 +22,9 @@ const MultiTradingLogo = ({ size = 'md', showText = true }: MultiTradingLogoProp
 
   return (
     <div className="flex items-center space-x-3">
-      <div className={`${sizeClasses[size]} bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl relative overflow-hidden`}>
-        {/* Background pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
-        
-        {/* Main logo - Upward trending arrow only */}
-        <div className="relative z-10 flex items-center justify-center w-full h-full">
-          <svg viewBox="0 0 24 24" className="w-2/3 h-2/3" fill="none">
-            {/* Trending arrow */}
-            <path 
-              d="M7 17L17 7M17 7H11M17 7V13" 
-              stroke="white" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </svg>
-        </div>
-
-        {/* Subtle inner glow */}
-        <div className="absolute inset-1 bg-gradient-to-br from-white/5 to-transparent rounded-xl"></div>
+      <div className={`${sizeClasses[size]} bg-transparent rounded-2xl flex items-center justify-center shadow-xl relative overflow-hidden`}>
+        {/* Logo image */}
+        <img src={logo} alt="Logo MultiTrading" className="w-full h-full object-contain" />
       </div>
       
       {showText && (

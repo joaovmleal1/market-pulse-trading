@@ -79,18 +79,33 @@ const Signature = () => {
                 </div>
               </div>
 
-              <Button
-                className="mt-6 w-full bg-gradient-to-r from-green-500 to-blue-500 text-white"
-                onClick={() => {
-                  if (user) {
-                    const url = `https://pay.kirvano.com/3ed1d972-7047-421a-809f-be816c09fd19?user_id=${user.id}&email=${encodeURIComponent(user.email)}`;
-                    window.location.href = url;
-                  }
-                }}
-                disabled={!user}
-              >
-                Assinar agora
-              </Button>
+              <div className="mt-6 space-y-4">
+                <Button
+                  className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white"
+                  onClick={() => {
+                    if (user) {
+                      const url = `https://pay.kirvano.com/3ed1d972-7047-421a-809f-be816c09fd19?user_id=${user.id}&email=${encodeURIComponent(user.email)}`;
+                      window.location.href = url;
+                    }
+                  }}
+                  disabled={!user}
+                >
+                  Assinar plano Semanal/Mensal
+                </Button>
+
+                <Button
+                  className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white"
+                  onClick={() => {
+                    if (user) {
+                      const url = `https://pay.kirvano.com/c9d1c2f5-a627-4902-9400-47f0454c0777?user_id=${user.id}&email=${encodeURIComponent(user.email)}`;
+                      window.location.href = url;
+                    }
+                  }}
+                  disabled={!user}
+                >
+                  Assinar plano Diário
+                </Button>
+              </div>
             </div>
           </>
         )}
