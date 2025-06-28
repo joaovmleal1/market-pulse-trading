@@ -69,19 +69,19 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#1E1E1E] flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className="w-full max-w-md"
       >
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-[#2C2F33] border-[#24C3B5]/30">
           <CardHeader className="text-center">
             <div className="flex justify-between items-center mb-2">
               <Button
                 variant="ghost"
-                className="text-gray-400 hover:text-white"
+                className="text-[#A9B1B8] hover:text-white"
                 onClick={() => navigate('/')}
               >
                 ← Voltar ao Início
@@ -91,7 +91,7 @@ const Register = () => {
               <MultiTradingLogo size="lg" showText={false} />
             </div>
             <CardTitle className="text-2xl text-white">Criar Conta</CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-[#A9B1B8]">
               Junte-se ao Multi Trading
             </CardDescription>
           </CardHeader>
@@ -112,7 +112,7 @@ const Register = () => {
                     onChange={(e) => setter(e.target.value)}
                     placeholder={label}
                     required
-                    className="w-full rounded-md px-4 py-2 bg-gray-700 border border-gray-600 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-md px-4 py-2 bg-[#1E1E1E] border border-[#24C3B5]/20 text-white placeholder-[#A9B1B8] outline-none focus:ring-2 focus:ring-[#24C3B5]"
                     whileFocus={{ scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   />
@@ -121,7 +121,7 @@ const Register = () => {
 
               <motion.button
                 type="submit"
-                className="w-full mt-2 rounded-md px-4 py-2 font-medium text-white bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
+                className="w-full mt-2 rounded-md px-4 py-2 font-medium text-white bg-[#24C3B5] hover:bg-[#3ED6C8]"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 disabled={loading}
@@ -136,9 +136,9 @@ const Register = () => {
               transition={{ delay: 0.4 }}
               className="mt-6 text-center"
             >
-              <p className="text-gray-400">
+              <p className="text-[#A9B1B8]">
                 Já tem uma conta?{' '}
-                <Link to="/login" className="text-green-400 hover:text-green-300 font-medium">
+                <Link to="/login" className="text-[#24C3B5] hover:text-[#3ED6C8] font-medium">
                   Entrar
                 </Link>
               </p>
