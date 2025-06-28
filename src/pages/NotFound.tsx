@@ -1,7 +1,6 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from 'react-router-dom';
 
 const NotFound = () => {
   const location = useLocation();
@@ -20,17 +19,19 @@ const NotFound = () => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+      className="min-h-screen flex items-center justify-center bg-[#1E1E1E] px-6"
     >
-      <div className="text-center px-6">
-        <h1 className="text-6xl font-extrabold mb-4 text-white">404</h1>
-        <p className="text-2xl text-gray-300 mb-6">Oops! Página não encontrada</p>
-        <a
-          onClick={() =>navigate(-1)}
-          className="text-green-400 hover:text-green-300 underline text-lg font-medium transition-colors duration-300"
+      <div className="text-center">
+        <h1 className="text-6xl md:text-7xl font-extrabold mb-4 text-[#24C3B5]">404</h1>
+        <p className="text-2xl text-[#A9B1B8] mb-6">
+          Oops! A página que você está procurando não foi encontrada.
+        </p>
+        <button
+          onClick={() => navigate('/')}
+          className="text-white bg-[#24C3B5] hover:bg-[#3ED6C8] px-6 py-3 rounded-md text-lg font-medium transition-colors duration-300"
         >
           Voltar para o Início
-        </a>
+        </button>
       </div>
     </motion.div>
   );
