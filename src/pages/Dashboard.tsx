@@ -16,32 +16,30 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen flex bg-[#1E1E1E] text-white">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#2C2F33] p-6 flex flex-col justify-between border-r border-[#24C3B5]/30">
-        <div>
-          <div className="mb-10">
-            <MultiTradingLogo size="sm" />
-          </div>
-          <nav className="space-y-4">
-            <button onClick={() => navigate('/dashboard')} className="flex items-center gap-3 text-white hover:text-[#24C3B5]">
-              <BarChart3 className="w-5 h-5" /> Minhas Corretoras
-            </button>
-            <button onClick={() => navigate('/history')} className="flex items-center gap-3 text-white hover:text-[#24C3B5]">
-              <Clock className="w-5 h-5" /> Histórico
-            </button>
-            <button onClick={() => navigate('/profile')} className="flex items-center gap-3 text-white hover:text-[#24C3B5]">
-              <User className="w-5 h-5" /> Perfil
-            </button>
-          </nav>
+    <div className="min-h-screen bg-[#1E1E1E] text-white">
+      {/* Floating Sidebar */}
+      <aside className="fixed top-4 left-4 w-56 bg-[#2C2F33] p-6 rounded-xl shadow-lg border border-[#24C3B5]/30 z-50">
+        <div className="mb-8">
+          <MultiTradingLogo size="sm" />
         </div>
-        <button onClick={logout} className="flex items-center gap-3 text-gray-400 hover:text-red-400">
-          <LogOut className="w-5 h-5" /> Sair
-        </button>
+        <nav className="space-y-4">
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-3 text-white hover:text-[#24C3B5]">
+            <BarChart3 className="w-5 h-5" /> Minhas Corretoras
+          </button>
+          <button onClick={() => navigate('/history')} className="flex items-center gap-3 text-white hover:text-[#24C3B5]">
+            <Clock className="w-5 h-5" /> Histórico
+          </button>
+          <button onClick={() => navigate('/profile')} className="flex items-center gap-3 text-white hover:text-[#24C3B5]">
+            <User className="w-5 h-5" /> Perfil
+          </button>
+          <button onClick={logout} className="flex items-center gap-3 text-gray-400 hover:text-red-400">
+            <LogOut className="w-5 h-5" /> Sair
+          </button>
+        </nav>
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="pl-72 p-6">
         {/* Top Profile Info */}
         <div className="flex justify-end mb-6">
           <div className="bg-[#2C2F33] px-4 py-2 rounded-md border border-[#24C3B5]/20">
