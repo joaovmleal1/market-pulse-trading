@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,51 +8,42 @@ import { motion } from 'framer-motion';
 import SidebarMenu from '@/components/ui/SidebarMenu';
 
 const DashHistory = () => {
+  const { id } = useParams<{ id: string }>();
   const { accessToken } = useSelector((state: any) => state.token);
 
   const [trades, setTrades] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataInicial, setDataInicial] = useState('');
   const [dataFinal, setDataFinal] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [erro, setErro] = useState('');
   const itemsPerPage = 12;
 
   const fetchTrades = async () => {
-    setLoading(true);
-    setErro('');
     try {
       const res = await fetch(`https://api.multitradingob.com/trade-order-info/all`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       });
       if (!res.ok) throw new Error('Erro ao buscar operações');
       const data = await res.json();
       setTrades(data || []);
-    } catch (err) {
-      setErro('Erro ao carregar os dados. Tente novamente.');
+    } catch {
       setTrades([]);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (accessToken) {
+    if (accessToken && id) {
       fetchTrades();
     }
-  }, [accessToken]);
+  }, [accessToken, id]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (accessToken) {
+      if (accessToken && id) {
         fetchTrades();
       }
     }, 15000);
     return () => clearInterval(interval);
-  }, [accessToken]);
+  }, [accessToken, id]);
 
   const filteredTrades = trades.filter((trade) => {
     const tradeDate = new Date(trade.date_time);
@@ -106,7 +98,6 @@ const DashHistory = () => {
             <h2 className="text-2xl font-bold mb-1">Histórico de Operações</h2>
             <p className="text-sm text-gray-400 mb-4">Total: {filteredTrades.length}</p>
 
-            {/* Filtros */}
             <div className="flex flex-wrap items-end gap-4 mb-6">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Data inicial:</label>
@@ -128,17 +119,8 @@ const DashHistory = () => {
               </div>
             </div>
 
-            {/* Estados */}
-            {loading ? (
-                <div className="flex justify-center items-center min-h-[50vh]">
-                  <p className="text-gray-400 text-center">Carregando operações...</p>
-                </div>
-            ) : erro ? (
-                <div className="flex justify-center items-center min-h-[50vh]">
-                  <p className="text-red-500 text-center">{erro}</p>
-                </div>
-            ) : filteredTrades.length === 0 ? (
-                <div className="flex items-center justify-center min-h-[50vh] text-gray-400 text-center">
+            {filteredTrades.length === 0 ? (
+                <div className="flex items-center justify-center min-h-[70vh] text-gray-400 text-center">
                   <p>Nenhuma operação registrada no período selecionado.</p>
                 </div>
             ) : (
@@ -167,7 +149,7 @@ const DashHistory = () => {
                               )} rounded-2xl shadow-md shadow-black/40 transition-transform duration-200 hover:scale-[1.02]`}
                           >
                             <CardContent className="p-5">
-                              <h4 className="text-xl font-bold mb-2">{trade.symbol}</h4>
+                              <h4 className="text-xl font-bold mb-2 text-cyan-300">{trade.symbol}</h4>
                               <div className="space-y-1 text-sm text-gray-300">
                                 <p><span className="text-gray-400">Direção:</span> {trade.order_type}</p>
                                 <p><span className="text-gray-400">Entrada:</span> $ {trade.quantity}</p>
