@@ -11,11 +11,13 @@ const UserProfile = () => {
         complete_name: '',
         email: '',
         phone_number: '',
+        old_password: '',
         password: '',
     });
 
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
+    const [error, setError] = useState('');
 
     const fetchUser = async () => {
         try {
@@ -27,6 +29,7 @@ const UserProfile = () => {
                 complete_name: data.complete_name || '',
                 email: data.email || '',
                 phone_number: data.phone_number || '',
+                old_password: '',
                 password: '',
             });
         } catch (err) {
@@ -40,8 +43,16 @@ const UserProfile = () => {
     };
 
     const handleSubmit = async () => {
-        setLoading(true);
         setSuccess('');
+        setError('');
+
+        // Validação de senha
+        if ((form.old_password && !form.password) || (!form.old_password && form.password)) {
+            setError('Para alterar a senha, preencha os dois campos de senha.');
+            return;
+        }
+
+        setLoading(true);
         try {
             const res = await fetch('https://api.multitradingob.com/user/me', {
                 method: 'PUT',
@@ -54,9 +65,10 @@ const UserProfile = () => {
 
             if (!res.ok) throw new Error('Erro ao atualizar perfil');
             setSuccess('Perfil atualizado com sucesso!');
+            setForm((prev) => ({ ...prev, old_password: '', password: '' }));
         } catch (err) {
             console.error(err);
-            setSuccess('Erro ao atualizar perfil.');
+            setError('Erro ao atualizar perfil.');
         } finally {
             setLoading(false);
         }
@@ -80,7 +92,7 @@ const UserProfile = () => {
                                 name="complete_name"
                                 value={form.complete_name}
                                 onChange={handleChange}
-                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2 transition duration-200"
+                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
                             />
                         </div>
 
@@ -91,7 +103,7 @@ const UserProfile = () => {
                                 type="email"
                                 value={form.email}
                                 onChange={handleChange}
-                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2 transition duration-200"
+                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
                             />
                         </div>
 
@@ -101,7 +113,19 @@ const UserProfile = () => {
                                 name="phone_number"
                                 value={form.phone_number}
                                 onChange={handleChange}
-                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2 transition duration-200"
+                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-2 text-sm text-gray-400">Senha atual</label>
+                            <Input
+                                name="old_password"
+                                type="password"
+                                value={form.old_password}
+                                onChange={handleChange}
+                                placeholder="Obrigatória se for trocar a senha"
+                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
                             />
                         </div>
 
@@ -112,8 +136,8 @@ const UserProfile = () => {
                                 type="password"
                                 value={form.password}
                                 onChange={handleChange}
-                                placeholder="Deixe em branco se não quiser alterar"
-                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2 transition duration-200"
+                                placeholder="Obrigatória se for trocar a senha"
+                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
                             />
                         </div>
                     </div>
@@ -127,11 +151,8 @@ const UserProfile = () => {
                             {loading ? 'Salvando...' : 'Salvar alterações'}
                         </Button>
 
-                        {success && (
-                            <p className="mt-4 text-sm text-cyan-400">
-                                {success}
-                            </p>
-                        )}
+                        {success && <p className="mt-4 text-sm text-cyan-400">{success}</p>}
+                        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
                     </div>
                 </div>
             </main>
