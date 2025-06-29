@@ -17,7 +17,6 @@ const UserProfile = () => {
 
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
-    const [error, setError] = useState('');
 
     const fetchUser = async () => {
         try {
@@ -25,13 +24,12 @@ const UserProfile = () => {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             const data = await res.json();
-            setForm({
+            setForm((prev) => ({
+                ...prev,
                 complete_name: data.complete_name || '',
                 email: data.email || '',
                 phone_number: data.phone_number || '',
-                old_password: '',
-                password: '',
-            });
+            }));
         } catch (err) {
             console.error('Erro ao buscar usuário:', err);
         }
@@ -44,11 +42,9 @@ const UserProfile = () => {
 
     const handleSubmit = async () => {
         setSuccess('');
-        setError('');
 
-        // Validação de senha
-        if ((form.old_password && !form.password) || (!form.old_password && form.password)) {
-            setError('Para alterar a senha, preencha os dois campos de senha.');
+        if ((form.password && !form.old_password) || (!form.password && form.old_password)) {
+            setSuccess('Preencha os dois campos de senha para alterar sua senha.');
             return;
         }
 
@@ -65,10 +61,10 @@ const UserProfile = () => {
 
             if (!res.ok) throw new Error('Erro ao atualizar perfil');
             setSuccess('Perfil atualizado com sucesso!');
-            setForm((prev) => ({ ...prev, old_password: '', password: '' }));
+            setForm((prev) => ({ ...prev, password: '', old_password: '' }));
         } catch (err) {
             console.error(err);
-            setError('Erro ao atualizar perfil.');
+            setSuccess('Erro ao atualizar perfil.');
         } finally {
             setLoading(false);
         }
@@ -82,78 +78,71 @@ const UserProfile = () => {
         <div className="min-h-screen bg-[#1E1E1E] text-white">
             <SidebarMenu />
             <main className="pl-72 pr-8 py-10 max-w-4xl mx-auto">
-                <h2 className="text-3xl font-bold mb-8 text-white">Editar Perfil</h2>
+                <h2 className="text-3xl font-bold mb-6">Editar Perfil</h2>
 
-                <div className="space-y-6 bg-[#2C2F33] p-8 rounded-xl shadow-lg border border-[#24C3B5]/20">
-                    <div className="grid sm:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block mb-2 text-sm text-gray-400">Nome completo</label>
-                            <Input
-                                name="complete_name"
-                                value={form.complete_name}
-                                onChange={handleChange}
-                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
-                            />
-                        </div>
+                <div className="space-y-6 bg-[#2C2F33] p-6 rounded-xl border border-[#24C3B5]/20 shadow-md">
+                    <div>
+                        <label className="text-sm text-gray-400">Nome completo</label>
+                        <Input
+                            name="complete_name"
+                            value={form.complete_name}
+                            onChange={handleChange}
+                            className="bg-[#1E1E1E] text-white border border-gray-600 mt-1"
+                        />
+                    </div>
 
-                        <div>
-                            <label className="block mb-2 text-sm text-gray-400">Email</label>
-                            <Input
-                                name="email"
-                                type="email"
-                                value={form.email}
-                                onChange={handleChange}
-                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
-                            />
-                        </div>
+                    <div>
+                        <label className="text-sm text-gray-400">Email</label>
+                        <Input
+                            name="email"
+                            type="email"
+                            value={form.email}
+                            onChange={handleChange}
+                            className="bg-[#1E1E1E] text-white border border-gray-600 mt-1"
+                        />
+                    </div>
 
-                        <div>
-                            <label className="block mb-2 text-sm text-gray-400">Telefone</label>
-                            <Input
-                                name="phone_number"
-                                value={form.phone_number}
-                                onChange={handleChange}
-                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
-                            />
-                        </div>
+                    <div>
+                        <label className="text-sm text-gray-400">Telefone</label>
+                        <Input
+                            name="phone_number"
+                            value={form.phone_number}
+                            onChange={handleChange}
+                            className="bg-[#1E1E1E] text-white border border-gray-600 mt-1"
+                        />
+                    </div>
 
+                    <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block mb-2 text-sm text-gray-400">Senha atual</label>
+                            <label className="text-sm text-gray-400">Senha atual</label>
                             <Input
                                 name="old_password"
                                 type="password"
                                 value={form.old_password}
                                 onChange={handleChange}
-                                placeholder="Obrigatória se for trocar a senha"
-                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
+                                placeholder="Obrigatório para trocar a senha"
+                                className="bg-[#1E1E1E] text-white border border-gray-600 mt-1"
                             />
                         </div>
 
                         <div>
-                            <label className="block mb-2 text-sm text-gray-400">Nova senha</label>
+                            <label className="text-sm text-gray-400">Nova senha</label>
                             <Input
                                 name="password"
                                 type="password"
                                 value={form.password}
                                 onChange={handleChange}
-                                placeholder="Obrigatória se for trocar a senha"
-                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2"
+                                placeholder="Deixe em branco para manter a senha"
+                                className="bg-[#1E1E1E] text-white border border-gray-600 mt-1"
                             />
                         </div>
                     </div>
 
-                    <div className="pt-4">
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={loading}
-                            className="bg-[#24C3B5] hover:bg-[#1DA89D] text-white px-6 py-2 rounded-md transition duration-200"
-                        >
-                            {loading ? 'Salvando...' : 'Salvar alterações'}
-                        </Button>
+                    <Button onClick={handleSubmit} disabled={loading} className="mt-2 bg-[#24C3B5] hover:bg-[#1ca79c]">
+                        {loading ? 'Salvando...' : 'Salvar alterações'}
+                    </Button>
 
-                        {success && <p className="mt-4 text-sm text-cyan-400">{success}</p>}
-                        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
-                    </div>
+                    {success && <p className="text-sm mt-2 text-cyan-400">{success}</p>}
                 </div>
             </main>
         </div>
