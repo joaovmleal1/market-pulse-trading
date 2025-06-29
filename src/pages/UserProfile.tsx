@@ -70,57 +70,69 @@ const UserProfile = () => {
         <div className="min-h-screen bg-[#1E1E1E] text-white">
             <SidebarMenu />
             <main className="pl-72 pr-8 py-10 max-w-4xl mx-auto">
-                <h2 className="text-3xl font-bold mb-6">Editar Perfil</h2>
+                <h2 className="text-3xl font-bold mb-8 text-white">Editar Perfil</h2>
 
-                <div className="space-y-4">
-                    <div>
-                        <label className="text-sm text-gray-400">Nome completo</label>
-                        <Input
-                            name="complete_name"
-                            value={form.complete_name}
-                            onChange={handleChange}
-                            className="bg-[#2C2F33] text-white border border-gray-600"
-                        />
+                <div className="space-y-6 bg-[#2C2F33] p-8 rounded-xl shadow-lg border border-[#24C3B5]/20">
+                    <div className="grid sm:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block mb-2 text-sm text-gray-400">Nome completo</label>
+                            <Input
+                                name="complete_name"
+                                value={form.complete_name}
+                                onChange={handleChange}
+                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2 transition duration-200"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-2 text-sm text-gray-400">Email</label>
+                            <Input
+                                name="email"
+                                type="email"
+                                value={form.email}
+                                onChange={handleChange}
+                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2 transition duration-200"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-2 text-sm text-gray-400">Telefone</label>
+                            <Input
+                                name="phone_number"
+                                value={form.phone_number}
+                                onChange={handleChange}
+                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2 transition duration-200"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-2 text-sm text-gray-400">Nova senha</label>
+                            <Input
+                                name="password"
+                                type="password"
+                                value={form.password}
+                                onChange={handleChange}
+                                placeholder="Deixe em branco se não quiser alterar"
+                                className="bg-[#1E1E1E] border border-[#3B3B3B] focus:border-[#24C3B5] text-white rounded-md px-4 py-2 transition duration-200"
+                            />
+                        </div>
                     </div>
 
-                    <div>
-                        <label className="text-sm text-gray-400">Email</label>
-                        <Input
-                            name="email"
-                            type="email"
-                            value={form.email}
-                            onChange={handleChange}
-                            className="bg-[#2C2F33] text-white border border-gray-600"
-                        />
+                    <div className="pt-4">
+                        <Button
+                            onClick={handleSubmit}
+                            disabled={loading}
+                            className="bg-[#24C3B5] hover:bg-[#1DA89D] text-white px-6 py-2 rounded-md transition duration-200"
+                        >
+                            {loading ? 'Salvando...' : 'Salvar alterações'}
+                        </Button>
+
+                        {success && (
+                            <p className="mt-4 text-sm text-cyan-400">
+                                {success}
+                            </p>
+                        )}
                     </div>
-
-                    <div>
-                        <label className="text-sm text-gray-400">Telefone</label>
-                        <Input
-                            name="phone_number"
-                            value={form.phone_number}
-                            onChange={handleChange}
-                            className="bg-[#2C2F33] text-white border border-gray-600"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="text-sm text-gray-400">Nova senha</label>
-                        <Input
-                            name="password"
-                            type="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            placeholder="Deixe em branco se não quiser alterar"
-                            className="bg-[#2C2F33] text-white border border-gray-600"
-                        />
-                    </div>
-
-                    <Button onClick={handleSubmit} disabled={loading}>
-                        {loading ? 'Salvando...' : 'Salvar alterações'}
-                    </Button>
-
-                    {success && <p className="text-sm mt-2 text-cyan-400">{success}</p>}
                 </div>
             </main>
         </div>
