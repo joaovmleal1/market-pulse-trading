@@ -1,4 +1,3 @@
-// src/pages/Admin.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -31,7 +30,7 @@ const Admin = () => {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const res = await fetch('https://api.multitradingob.com/user/users', {
+            const res = await fetch('https://api.multitradingob.com/user', {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
@@ -45,14 +44,24 @@ const Admin = () => {
         }
     };
 
-    const handleUserAction = async (userId: number, action: 'activate' | 'deactivate') => {
+    const handleUserAction = async (
+        userId: number,
+        action: 'activate' | 'deactivate',
+        days?: number
+    ) => {
         try {
-            await fetch(`https://api.multitradingob.com/user/${action}/${userId}`, {
+            const url =
+                action === 'activate'
+                    ? `https://api.multitradingob.com/user/activate/${userId}/${days}`
+                    : `https://api.multitradingob.com/user/deactivate/${userId}`;
+
+            await fetch(url, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
+
             fetchUsers();
         } catch (err) {
             console.error(`Erro ao ${action} usuário:`, err);
@@ -76,12 +85,11 @@ const Admin = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-            {/* Header */}
             <header className="bg-gray-800 border-b border-gray-700 p-4">
                 <div className="max-w-6xl mx-auto flex justify-between items-center">
-                    <span onClick={() => navigate('/dashboard')} className="cursor-pointer">
-                        <MultiTradingLogo size="md" />
-                    </span>
+          <span onClick={() => navigate('/dashboard')} className="cursor-pointer">
+            <MultiTradingLogo size="md" />
+          </span>
                     <div className="flex items-center space-x-4">
                         <span className="text-white">Olá, {user?.complete_name}</span>
                         <Button
@@ -108,21 +116,20 @@ const Admin = () => {
                 transition={{ duration: 0.6 }}
             >
                 <h1 className="text-4xl font-bold text-white mb-4">Painel Administrativo</h1>
-                {/* Abas (submenu) */}
+
                 <div className="flex space-x-4 mb-6 border-b border-gray-700">
                     <button
                         onClick={() => setActiveTab('users')}
-                        className={`py-2 px-4 text-sm font-medium ${activeTab === 'users'
+                        className={`py-2 px-4 text-sm font-medium ${
+                            activeTab === 'users'
                                 ? 'border-b-2 border-blue-500 text-white'
                                 : 'text-gray-400 hover:text-white'
-                            }`}
+                        }`}
                     >
                         Usuários
                     </button>
-                    {/* Futuras abas podem ser adicionadas aqui */}
                 </div>
 
-                {/* Filtros e Busca */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
                     <div className="flex gap-2">
                         <Button
@@ -156,7 +163,6 @@ const Admin = () => {
                     />
                 </div>
 
-                {/* Lista de Usuários */}
                 <div className="bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-4">
                     <h2 className="text-2xl font-bold text-white mb-4">Lista de Usuários</h2>
 
@@ -179,8 +185,8 @@ const Admin = () => {
                                             <p className="text-sm">
                                                 Último login:{' '}
                                                 <span className="text-gray-300">
-                                                    {u.last_login ? new Date(u.last_login).toLocaleString() : 'Nunca'}
-                                                </span>
+                          {u.last_login ? new Date(u.last_login).toLocaleString() : 'Nunca'}
+                        </span>
                                             </p>
                                             <p className="text-sm">
                                                 Superuser: {u.is_superuser ? 'Sim' : 'Não'} | Ativo:{' '}
@@ -188,19 +194,33 @@ const Admin = () => {
                                             </p>
                                             <p className="text-sm text-gray-400">
                                                 Ativado em:{' '}
-                                                {u.activated_at
-                                                    ? new Date(u.activated_at).toLocaleString()
-                                                    : 'Não ativado'}
+                                                {u.activated_at ? new Date(u.activated_at).toLocaleString() : 'Não ativado'}
                                             </p>
                                         </div>
-                                        <div className="mt-4 md:mt-0 flex gap-2">
+                                        <div className="mt-4 md:mt-0 flex flex-wrap gap-2">
                                             <Button
                                                 variant="default"
-                                                onClick={() => handleUserAction(u.id, 'activate')}
+                                                onClick={() => handleUserAction(u.id, 'activate', 1)}
                                                 disabled={u.is_active}
                                                 className="bg-green-600 hover:bg-green-700"
                                             >
-                                                Ativar
+                                                Ativar 1d
+                                            </Button>
+                                            <Button
+                                                variant="default"
+                                                onClick={() => handleUserAction(u.id, 'activate', 7)}
+                                                disabled={u.is_active}
+                                                className="bg-green-600 hover:bg-green-700"
+                                            >
+                                                Ativar 7d
+                                            </Button>
+                                            <Button
+                                                variant="default"
+                                                onClick={() => handleUserAction(u.id, 'activate', 30)}
+                                                disabled={u.is_active}
+                                                className="bg-green-600 hover:bg-green-700"
+                                            >
+                                                Ativar 30d
                                             </Button>
                                             <Button
                                                 variant="destructive"
