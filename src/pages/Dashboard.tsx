@@ -121,16 +121,22 @@ const Dashboard = () => {
                       <CardContent className="relative p-6">
                         <div className="flex flex-col items-center">
                           <img
+                              loading="lazy"
                               src={b.brokerage_icon}
                               alt={b.brokerage_name}
                               className="w-14 h-14 object-contain mb-4"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/assets/imgs/default.png';
+                              }}
                           />
                           <h3 className="text-xl font-bold text-white mb-3">{b.brokerage_name}</h3>
 
                           <div className="text-sm text-gray-300 space-y-1 text-center">
                             <p>
                               <span className="text-gray-400">Status:</span>{' '}
-                              <span className="text-white">{getStatusLabel(info.bot?.bot_status)}</span>
+                              <span className="text-white">
+                            {getStatusLabel(info.bot?.bot_status)}
+                          </span>
                             </p>
                             <p>
                               <span className="text-gray-400">Lucro:</span>{' '}
