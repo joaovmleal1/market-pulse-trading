@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import MultiTradingLogo from '@/components/MultiTradingLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
+import SidebarMenu from '@/components/ui/SidebarMenu';
 
 interface User {
     id: number;
@@ -18,11 +17,9 @@ interface User {
 }
 
 const Admin = () => {
-    const navigate = useNavigate();
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState<'users'>('users');
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
     const { accessToken } = useSelector((state: any) => state.token);
@@ -44,27 +41,31 @@ const Admin = () => {
         }
     };
 
-    const handleUserAction = async (
-        userId: number,
-        action: 'activate' | 'deactivate',
-        days?: number
-    ) => {
+    const activateUser = async (userId: number, days: number) => {
         try {
-            const url =
-                action === 'activate'
-                    ? `https://api.multitradingob.com/user/activate/${userId}/${days}`
-                    : `https://api.multitradingob.com/user/deactivate/${userId}`;
-
-            await fetch(url, {
+            await fetch(`https://api.multitradingob.com/user/activate/${userId}/${days}`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-
             fetchUsers();
         } catch (err) {
-            console.error(`Erro ao ${action} usuário:`, err);
+            console.error(`Erro ao ativar usuário:`, err);
+        }
+    };
+
+    const deactivateUser = async (userId: number) => {
+        try {
+            await fetch(`https://api.multitradingob.com/user/deactivate/${userId}`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            fetchUsers();
+        } catch (err) {
+            console.error(`Erro ao desativar usuário:`, err);
         }
     };
 
@@ -84,51 +85,10 @@ const Admin = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-            <header className="bg-gray-800 border-b border-gray-700 p-4">
-                <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <span onClick={() => navigate('/dashboard')} className="cursor-pointer">
-            <MultiTradingLogo size="md" />
-          </span>
-                    <div className="flex items-center space-x-4">
-                        <span className="text-white">Olá, {user?.complete_name}</span>
-                        <Button
-                            onClick={() => navigate('/admin')}
-                            className="bg-blue-700 hover:bg-blue-800 text-white"
-                        >
-                            Painel Admin
-                        </Button>
-                        <Button
-                            variant="outline"
-                            onClick={logout}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                        >
-                            Sair
-                        </Button>
-                    </div>
-                </div>
-            </header>
-
-            <motion.main
-                className="max-w-6xl mx-auto p-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6 }}
-            >
-                <h1 className="text-4xl font-bold text-white mb-4">Painel Administrativo</h1>
-
-                <div className="flex space-x-4 mb-6 border-b border-gray-700">
-                    <button
-                        onClick={() => setActiveTab('users')}
-                        className={`py-2 px-4 text-sm font-medium ${
-                            activeTab === 'users'
-                                ? 'border-b-2 border-blue-500 text-white'
-                                : 'text-gray-400 hover:text-white'
-                        }`}
-                    >
-                        Usuários
-                    </button>
-                </div>
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+            <SidebarMenu />
+            <main className="pl-72 max-w-6xl mx-auto p-6">
+                <h1 className="text-4xl font-bold mb-4">Painel Administrativo</h1>
 
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
                     <div className="flex gap-2">
@@ -163,9 +123,11 @@ const Admin = () => {
                     />
                 </div>
 
-                <div className="bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-4">
-                    <h2 className="text-2xl font-bold text-white mb-4">Lista de Usuários</h2>
-
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                >
                     {loading ? (
                         <p className="text-gray-400">Carregando usuários...</p>
                     ) : filteredUsers.length === 0 ? (
@@ -175,7 +137,7 @@ const Admin = () => {
                             {filteredUsers.map((u) => (
                                 <Card
                                     key={u.id}
-                                    className="bg-gray-800 border-gray-700 text-white p-4 flex flex-col md:flex-row md:items-center md:justify-between"
+                                    className="bg-gray-800 border border-gray-700 p-4 flex flex-col md:flex-row md:items-center md:justify-between"
                                 >
                                     <CardContent className="w-full space-y-2 md:space-y-0 md:flex md:justify-between md:items-center">
                                         <div>
@@ -197,46 +159,45 @@ const Admin = () => {
                                                 {u.activated_at ? new Date(u.activated_at).toLocaleString() : 'Não ativado'}
                                             </p>
                                         </div>
-                                        <div className="mt-4 md:mt-0 flex flex-wrap gap-2">
-                                            <Button
-                                                variant="default"
-                                                onClick={() => handleUserAction(u.id, 'activate', 1)}
-                                                disabled={u.is_active}
-                                                className="bg-green-600 hover:bg-green-700"
-                                            >
-                                                Ativar 1d
-                                            </Button>
-                                            <Button
-                                                variant="default"
-                                                onClick={() => handleUserAction(u.id, 'activate', 7)}
-                                                disabled={u.is_active}
-                                                className="bg-green-600 hover:bg-green-700"
-                                            >
-                                                Ativar 7d
-                                            </Button>
-                                            <Button
-                                                variant="default"
-                                                onClick={() => handleUserAction(u.id, 'activate', 30)}
-                                                disabled={u.is_active}
-                                                className="bg-green-600 hover:bg-green-700"
-                                            >
-                                                Ativar 30d
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                onClick={() => handleUserAction(u.id, 'deactivate')}
-                                                disabled={!u.is_active}
-                                            >
-                                                Desativar
-                                            </Button>
+                                        <div className="mt-4 md:mt-0 flex flex-col md:flex-row gap-2">
+                                            {!u.is_active && (
+                                                <>
+                                                    <Button
+                                                        className="bg-green-600 hover:bg-green-700"
+                                                        onClick={() => activateUser(u.id, 1)}
+                                                    >
+                                                        Ativar 1 dia
+                                                    </Button>
+                                                    <Button
+                                                        className="bg-green-600 hover:bg-green-700"
+                                                        onClick={() => activateUser(u.id, 7)}
+                                                    >
+                                                        Ativar 7 dias
+                                                    </Button>
+                                                    <Button
+                                                        className="bg-green-600 hover:bg-green-700"
+                                                        onClick={() => activateUser(u.id, 30)}
+                                                    >
+                                                        Ativar 30 dias
+                                                    </Button>
+                                                </>
+                                            )}
+                                            {u.is_active && (
+                                                <Button
+                                                    variant="destructive"
+                                                    onClick={() => deactivateUser(u.id)}
+                                                >
+                                                    Desativar
+                                                </Button>
+                                            )}
                                         </div>
                                     </CardContent>
                                 </Card>
                             ))}
                         </div>
                     )}
-                </div>
-            </motion.main>
+                </motion.div>
+            </main>
         </div>
     );
 };
