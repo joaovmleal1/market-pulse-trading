@@ -154,7 +154,10 @@ const DashHistory = () => {
                 />
               </div>
               <div className="pt-1">
-                <Button onClick={limparDatas} variant="ghost" className="text-sm text-cyan-400">
+                <Button
+                    onClick={limparDatas}
+                    className="text-sm bg-transparent border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-white transition"
+                >
                   Limpar datas
                 </Button>
               </div>
