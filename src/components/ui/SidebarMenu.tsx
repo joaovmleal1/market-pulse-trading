@@ -1,5 +1,5 @@
 import MultiTradingLogo from '@/components/MultiTradingLogo';
-import { User, LogOut, Clock, BarChart3 } from 'lucide-react';
+import { User, LogOut, Clock, BarChart3, Shield } from 'lucide-react'; // adicionando ícone de admin
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -42,6 +42,18 @@ const SidebarMenu = () => {
                 >
                     <User className="w-5 h-5" /> Perfil
                 </button>
+
+                {/* Exibe o botão de administração apenas se for superuser */}
+                {user?.is_superuser && (
+                    <button
+                        onClick={() => navigate('/admin')}
+                        className={`flex items-center gap-3 ${
+                            isActive('/admin') ? 'text-[#24C3B5]' : 'text-white'
+                        } hover:text-[#24C3B5]`}
+                    >
+                        <Shield className="w-5 h-5" /> Administração
+                    </button>
+                )}
 
                 <button
                     onClick={logout}
