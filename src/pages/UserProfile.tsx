@@ -20,7 +20,7 @@ const UserProfile = () => {
 
     const fetchUser = async () => {
         try {
-            const res = await fetch('https://api.multitradingob.com/me', {
+            const res = await fetch('https://api.multitradingob.com/user/me', {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             const data = await res.json();
