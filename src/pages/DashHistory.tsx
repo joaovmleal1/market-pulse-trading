@@ -12,10 +12,9 @@ const DashHistory = () => {
   const { accessToken } = useSelector((state: any) => state.token);
 
   const [trades, setTrades] = useState<any[]>([]);
-  const [filteredTrades, setFilteredTrades] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [dataInicial, setDataInicial] = useState('');
+  const [dataFinal, setDataFinal] = useState('');
   const itemsPerPage = 12;
 
   const fetchTrades = async () => {
@@ -25,31 +24,11 @@ const DashHistory = () => {
       });
       if (!res.ok) throw new Error('Erro ao buscar operações');
       const data = await res.json();
+      console.log(data);
       setTrades(data || []);
-      setFilteredTrades(data || []);
     } catch {
       setTrades([]);
-      setFilteredTrades([]);
     }
-  };
-
-  const filterByDate = () => {
-    if (!startDate || !endDate) {
-      setFilteredTrades(trades);
-      return;
-    }
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-
-    const filtered = trades.filter((trade) => {
-      const tradeDate = new Date(trade.date_time);
-      return tradeDate >= start && tradeDate <= end;
-    });
-
-    setFilteredTrades(filtered);
-    setCurrentPage(1);
   };
 
   useEffect(() => {
@@ -66,6 +45,16 @@ const DashHistory = () => {
     }, 15000);
     return () => clearInterval(interval);
   }, [accessToken, id]);
+
+  const filteredTrades = trades.filter((trade) => {
+    const tradeDate = new Date(trade.date_time);
+    const start = dataInicial ? new Date(dataInicial) : null;
+    const end = dataFinal ? new Date(dataFinal) : null;
+
+    if (start && tradeDate < start) return false;
+    if (end && tradeDate > new Date(end.getTime() + 24 * 60 * 60 * 1000)) return false;
+    return true;
+  });
 
   const paginatedTrades = filteredTrades
       .slice()
@@ -108,36 +97,33 @@ const DashHistory = () => {
         <main className="pl-72 max-w-6xl mx-auto p-6">
           <div className="mb-4">
             <h2 className="text-2xl font-bold mb-1">Histórico de Operações</h2>
-
-            <div className="flex flex-wrap gap-4 items-center text-sm text-gray-200 mb-4">
-              <div>
-                <label className="mr-2">De:</label>
-                <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="bg-gray-800 border border-gray-600 rounded px-2 py-1"
-                />
-              </div>
-              <div>
-                <label className="mr-2">Até:</label>
-                <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="bg-gray-800 border border-gray-600 rounded px-2 py-1"
-                />
-              </div>
-              <Button onClick={filterByDate} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded">
-                Filtrar
-              </Button>
-            </div>
-
             <p className="text-sm text-gray-400 mb-4">Total: {filteredTrades.length}</p>
+
+            {/* Filtros */}
+            <div className="flex flex-wrap items-end gap-4 mb-6">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Data inicial:</label>
+                <input
+                    type="date"
+                    value={dataInicial}
+                    onChange={(e) => setDataInicial(e.target.value)}
+                    className="bg-gray-800 border border-gray-600 rounded px-3 py-1 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Data final:</label>
+                <input
+                    type="date"
+                    value={dataFinal}
+                    onChange={(e) => setDataFinal(e.target.value)}
+                    className="bg-gray-800 border border-gray-600 rounded px-3 py-1 text-white"
+                />
+              </div>
+            </div>
 
             {filteredTrades.length === 0 ? (
                 <div className="flex items-center justify-center min-h-[70vh] text-gray-400 text-center">
-                  <p>Nenhuma operação registrada até o momento.</p>
+                  <p>Nenhuma operação registrada no período selecionado.</p>
                 </div>
             ) : (
                 <>
