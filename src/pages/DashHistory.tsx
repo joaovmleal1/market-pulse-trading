@@ -1,4 +1,3 @@
-// ...imports
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,10 +6,26 @@ import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SidebarMenu from '@/components/ui/SidebarMenu';
 
+type Trade = {
+  symbol: string;
+  order_type: string;
+  quantity: number;
+  price: number;
+  status: string;
+  date_time: string;
+  brokerage_id: number;
+};
+
+type Brokerage = {
+  id: number;
+  brokerage_name: string;
+};
+
 const DashHistory = () => {
   const { accessToken } = useSelector((state: any) => state.token);
 
-  const [trades, setTrades] = useState<any[]>([]);
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [brokerNames, setBrokerNames] = useState<Record<number, string>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [dataInicial, setDataInicial] = useState('');
   const [dataFinal, setDataFinal] = useState('');
@@ -21,7 +36,6 @@ const DashHistory = () => {
       const res = await fetch(`https://api.multitradingob.com/trade-order-info/all`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
         },
       });
       if (!res.ok) throw new Error('Erro ao buscar operações');
@@ -29,6 +43,20 @@ const DashHistory = () => {
       setTrades(data || []);
     } catch {
       setTrades([]);
+    }
+  };
+
+  const fetchBrokerName = async (id: number) => {
+    if (brokerNames[id]) return; // já buscado
+    try {
+      const res = await fetch(`https://api.multitradingob.com/brokerages/${id}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) throw new Error();
+      const data: Brokerage = await res.json();
+      setBrokerNames((prev) => ({ ...prev, [id]: data.brokerage_name }));
+    } catch {
+      setBrokerNames((prev) => ({ ...prev, [id]: 'Desconhecida' }));
     }
   };
 
@@ -42,6 +70,11 @@ const DashHistory = () => {
     }, 15000);
     return () => clearInterval(interval);
   }, [accessToken]);
+
+  useEffect(() => {
+    const ids = new Set(trades.map((t) => t.brokerage_id));
+    ids.forEach((id) => fetchBrokerName(id));
+  }, [trades]);
 
   const filteredTrades = trades.filter((trade) => {
     const tradeDate = new Date(trade.date_time);
@@ -162,12 +195,27 @@ const DashHistory = () => {
                             <CardContent className="p-5">
                               <h4 className="text-xl font-bold mb-2 text-cyan-300">{trade.symbol}</h4>
                               <div className="space-y-1 text-sm text-gray-300">
-                                <p><span className="text-gray-400">Corretora:</span> {trade.brokerage_name ?? '—'}</p>
-                                <p><span className="text-gray-400">Direção:</span> {trade.order_type}</p>
-                                <p><span className="text-gray-400">Entrada:</span> $ {trade.quantity}</p>
-                                <p><span className="text-gray-400">Cotação:</span> $ {trade.price}</p>
-                                <p><span className="text-gray-400">Status:</span> {getStatusIcon(trade.status)} {trade.status}</p>
-                                <p><span className="text-gray-400">Data:</span> {new Date(trade.date_time).toLocaleString()}</p>
+                                <p>
+                                  <span className="text-gray-400">Corretora:</span>{' '}
+                                  {brokerNames[trade.brokerage_id] || '...'}
+                                </p>
+                                <p>
+                                  <span className="text-gray-400">Direção:</span> {trade.order_type}
+                                </p>
+                                <p>
+                                  <span className="text-gray-400">Entrada:</span> $ {trade.quantity}
+                                </p>
+                                <p>
+                                  <span className="text-gray-400">Cotação:</span> $ {trade.price}
+                                </p>
+                                <p>
+                                  <span className="text-gray-400">Status:</span>{' '}
+                                  {getStatusIcon(trade.status)} {trade.status}
+                                </p>
+                                <p>
+                                  <span className="text-gray-400">Data:</span>{' '}
+                                  {new Date(trade.date_time).toLocaleString()}
+                                </p>
                               </div>
                             </CardContent>
                           </Card>
