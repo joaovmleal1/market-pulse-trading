@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import InputMask from 'react-input-mask';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import SidebarMenu from '@/components/ui/SidebarMenu';
+import { Eye, EyeOff } from 'lucide-react';
 
 const UserProfile = () => {
     const { accessToken } = useSelector((state: any) => state.token);
@@ -17,10 +19,12 @@ const UserProfile = () => {
 
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showOldPassword, setShowOldPassword] = useState(false);
 
     const fetchUser = async () => {
         try {
-            const res = await fetch('https://api.multitradingob.com/user/me', {
+            const res = await fetch('https://api.multitradingob.com/me', {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             const data = await res.json();
@@ -104,37 +108,58 @@ const UserProfile = () => {
 
                     <div>
                         <label className="text-sm text-gray-400">Telefone</label>
-                        <Input
-                            name="phone_number"
+                        <InputMask
+                            mask="(99) 99999-9999"
                             value={form.phone_number}
-                            onChange={handleChange}
-                            className="bg-[#1E1E1E] text-white border border-gray-600 mt-1"
-                        />
+                            onChange={(e) => setForm((prev) => ({ ...prev, phone_number: e.target.value }))}
+                        >
+                            {(inputProps: any) => (
+                                <Input
+                                    {...inputProps}
+                                    name="phone_number"
+                                    className="bg-[#1E1E1E] text-white border border-gray-600 mt-1"
+                                />
+                            )}
+                        </InputMask>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
-                        <div>
+                        <div className="relative">
                             <label className="text-sm text-gray-400">Senha atual</label>
                             <Input
                                 name="old_password"
-                                type="password"
+                                type={showOldPassword ? 'text' : 'password'}
                                 value={form.old_password}
                                 onChange={handleChange}
-                                placeholder="Obrigatório para trocar a senha"
-                                className="bg-[#1E1E1E] text-white border border-gray-600 mt-1"
+                                placeholder="Obrigatória para alterar senha"
+                                className="bg-[#1E1E1E] text-white border border-gray-600 mt-1 pr-10"
                             />
+                            <button
+                                type="button"
+                                className="absolute top-9 right-3 text-gray-400"
+                                onClick={() => setShowOldPassword((prev) => !prev)}
+                            >
+                                {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
 
-                        <div>
+                        <div className="relative">
                             <label className="text-sm text-gray-400">Nova senha</label>
                             <Input
                                 name="password"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 value={form.password}
                                 onChange={handleChange}
                                 placeholder="Deixe em branco para manter a senha"
-                                className="bg-[#1E1E1E] text-white border border-gray-600 mt-1"
+                                className="bg-[#1E1E1E] text-white border border-gray-600 mt-1 pr-10"
                             />
+                            <button
+                                type="button"
+                                className="absolute top-9 right-3 text-gray-400"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                     </div>
 
