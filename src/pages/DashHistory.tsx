@@ -1,4 +1,3 @@
-import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,43 +7,51 @@ import { motion } from 'framer-motion';
 import SidebarMenu from '@/components/ui/SidebarMenu';
 
 const DashHistory = () => {
-  const { id } = useParams<{ id: string }>();
   const { accessToken } = useSelector((state: any) => state.token);
 
   const [trades, setTrades] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataInicial, setDataInicial] = useState('');
   const [dataFinal, setDataFinal] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState('');
   const itemsPerPage = 12;
 
   const fetchTrades = async () => {
+    setLoading(true);
+    setErro('');
     try {
       const res = await fetch(`https://api.multitradingob.com/trade-order-info/all`, {
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
       });
       if (!res.ok) throw new Error('Erro ao buscar operações');
       const data = await res.json();
-      console.log(data);
       setTrades(data || []);
-    } catch {
+    } catch (err) {
+      setErro('Erro ao carregar os dados. Tente novamente.');
       setTrades([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (accessToken && id) {
+    if (accessToken) {
       fetchTrades();
     }
-  }, [accessToken, id]);
+  }, [accessToken]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (accessToken && id) {
+      if (accessToken) {
         fetchTrades();
       }
     }, 15000);
     return () => clearInterval(interval);
-  }, [accessToken, id]);
+  }, [accessToken]);
 
   const filteredTrades = trades.filter((trade) => {
     const tradeDate = new Date(trade.date_time);
@@ -121,8 +128,17 @@ const DashHistory = () => {
               </div>
             </div>
 
-            {filteredTrades.length === 0 ? (
-                <div className="flex items-center justify-center min-h-[70vh] text-gray-400 text-center">
+            {/* Estados */}
+            {loading ? (
+                <div className="flex justify-center items-center min-h-[50vh]">
+                  <p className="text-gray-400 text-center">Carregando operações...</p>
+                </div>
+            ) : erro ? (
+                <div className="flex justify-center items-center min-h-[50vh]">
+                  <p className="text-red-500 text-center">{erro}</p>
+                </div>
+            ) : filteredTrades.length === 0 ? (
+                <div className="flex items-center justify-center min-h-[50vh] text-gray-400 text-center">
                   <p>Nenhuma operação registrada no período selecionado.</p>
                 </div>
             ) : (
