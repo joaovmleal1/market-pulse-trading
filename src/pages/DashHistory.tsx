@@ -1,4 +1,3 @@
-import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +7,6 @@ import { motion } from 'framer-motion';
 import SidebarMenu from '@/components/ui/SidebarMenu';
 
 const DashHistory = () => {
-  const { id } = useParams<{ id: string }>();
   const { accessToken } = useSelector((state: any) => state.token);
 
   const [trades, setTrades] = useState<any[]>([]);
@@ -20,7 +18,10 @@ const DashHistory = () => {
   const fetchTrades = async () => {
     try {
       const res = await fetch(`https://api.multitradingob.com/trade-order-info/all`, {
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
       });
       if (!res.ok) throw new Error('Erro ao buscar operações');
       const data = await res.json();
@@ -31,19 +32,19 @@ const DashHistory = () => {
   };
 
   useEffect(() => {
-    if (accessToken && id) {
+    if (accessToken) {
       fetchTrades();
     }
-  }, [accessToken, id]);
+  }, [accessToken]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (accessToken && id) {
+      if (accessToken) {
         fetchTrades();
       }
     }, 15000);
     return () => clearInterval(interval);
-  }, [accessToken, id]);
+  }, [accessToken]);
 
   const filteredTrades = trades.filter((trade) => {
     const tradeDate = new Date(trade.date_time);
@@ -141,7 +142,10 @@ const DashHistory = () => {
                     {paginatedTrades.map((trade, idx) => (
                         <motion.div
                             key={idx}
-                            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                            variants={{
+                              hidden: { opacity: 0, y: 20 },
+                              visible: { opacity: 1, y: 0 },
+                            }}
                         >
                           <Card
                               className={`bg-[#2C2F33] border-2 ${getStatusBorder(
