@@ -1,3 +1,4 @@
+// ...imports
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,16 +33,12 @@ const DashHistory = () => {
   };
 
   useEffect(() => {
-    if (accessToken) {
-      fetchTrades();
-    }
+    if (accessToken) fetchTrades();
   }, [accessToken]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (accessToken) {
-        fetchTrades();
-      }
+      if (accessToken) fetchTrades();
     }, 15000);
     return () => clearInterval(interval);
   }, [accessToken]);
@@ -91,6 +88,11 @@ const DashHistory = () => {
     }
   };
 
+  const limparDatas = () => {
+    setDataInicial('');
+    setDataFinal('');
+  };
+
   return (
       <div className="min-h-screen bg-[#1E1E1E] text-white">
         <SidebarMenu />
@@ -117,6 +119,11 @@ const DashHistory = () => {
                     onChange={(e) => setDataFinal(e.target.value)}
                     className="bg-gray-800 border border-gray-600 rounded px-3 py-1 text-white"
                 />
+              </div>
+              <div className="pt-1">
+                <Button onClick={limparDatas} variant="ghost" className="text-sm text-cyan-400">
+                  Limpar datas
+                </Button>
               </div>
             </div>
 
@@ -155,6 +162,7 @@ const DashHistory = () => {
                             <CardContent className="p-5">
                               <h4 className="text-xl font-bold mb-2 text-cyan-300">{trade.symbol}</h4>
                               <div className="space-y-1 text-sm text-gray-300">
+                                <p><span className="text-gray-400">Corretora:</span> {trade.brokerage_name ?? '—'}</p>
                                 <p><span className="text-gray-400">Direção:</span> {trade.order_type}</p>
                                 <p><span className="text-gray-400">Entrada:</span> $ {trade.quantity}</p>
                                 <p><span className="text-gray-400">Cotação:</span> $ {trade.price}</p>
