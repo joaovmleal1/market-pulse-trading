@@ -18,7 +18,7 @@ const DashHistory = () => {
 
   const fetchTrades = async () => {
     try {
-      const res = await fetch(`https://api.multitradingob.com/trade-order-info/trade_order_info/today/1`, {
+      const res = await fetch(`https://api.multitradingob.com/trade-order-info/trade_order_info/all}`, {
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       });
       if (!res.ok) throw new Error('Erro ao buscar operações');
