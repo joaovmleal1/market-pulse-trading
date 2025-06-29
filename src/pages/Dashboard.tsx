@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import SidebarMenu from '@/components/ui/SidebarMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
+import {useSelector} from "react-redux";
 
 type Brokerage = {
   id: number;
@@ -30,7 +31,8 @@ type Trade = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, accessToken } = useAuth();
+  const { user } = useAuth();
+  const { accessToken } = useSelector((state: any) => state.token);
 
   const [brokers, setBrokers] = useState<Brokerage[]>([]);
   const [data, setData] = useState<Record<number, {
