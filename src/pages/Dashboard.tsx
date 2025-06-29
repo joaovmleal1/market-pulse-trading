@@ -74,7 +74,7 @@ const Dashboard = () => {
                   <Card className="bg-gray-800 border border-[#24C3B5]/20 hover:border-[#24C3B5]/40 transition-all duration-300 text-center">
                     <div className="flex justify-center mt-6">
                       <img
-                          src={broker.brokerage_icon}
+                          src={`https://api.multitradingob.com${broker.brokerage_icon}`}
                           alt={broker.brokerage_name}
                           className="w-16 h-16 object-cover rounded-full"
                       />
