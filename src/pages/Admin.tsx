@@ -85,31 +85,40 @@ const Admin = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+        <div className="min-h-screen bg-[#1E1E1E] text-white">
             <SidebarMenu />
             <main className="pl-72 max-w-6xl mx-auto p-6">
                 <h1 className="text-4xl font-bold mb-4">Painel Administrativo</h1>
 
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-                    <div className="flex gap-2">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                    <div className="flex gap-2 flex-wrap">
                         <Button
                             onClick={() => setStatusFilter('all')}
-                            variant={statusFilter === 'all' ? 'default' : 'outline'}
-                            className="text-sm"
+                            className={`text-sm ${
+                                statusFilter === 'all'
+                                    ? 'bg-[#24C3B5] text-black'
+                                    : 'bg-[#2C2F33] text-white border border-[#24C3B5]/30 hover:bg-[#24C3B5]/20'
+                            }`}
                         >
                             Todos
                         </Button>
                         <Button
                             onClick={() => setStatusFilter('active')}
-                            variant={statusFilter === 'active' ? 'default' : 'outline'}
-                            className="text-sm"
+                            className={`text-sm ${
+                                statusFilter === 'active'
+                                    ? 'bg-[#24C3B5] text-black'
+                                    : 'bg-[#2C2F33] text-white border border-[#24C3B5]/30 hover:bg-[#24C3B5]/20'
+                            }`}
                         >
                             Ativos
                         </Button>
                         <Button
                             onClick={() => setStatusFilter('inactive')}
-                            variant={statusFilter === 'inactive' ? 'default' : 'outline'}
-                            className="text-sm"
+                            className={`text-sm ${
+                                statusFilter === 'inactive'
+                                    ? 'bg-[#24C3B5] text-black'
+                                    : 'bg-[#2C2F33] text-white border border-[#24C3B5]/30 hover:bg-[#24C3B5]/20'
+                            }`}
                         >
                             Inativos
                         </Button>
@@ -119,7 +128,7 @@ const Admin = () => {
                         placeholder="Buscar por nome..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full md:w-64 px-3 py-2 rounded-md bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring focus:border-blue-500"
+                        className="w-full md:w-64 px-3 py-2 rounded-md bg-[#2C2F33] text-white placeholder-gray-400 border border-[#24C3B5]/20 focus:outline-none focus:ring focus:border-[#24C3B5]"
                     />
                 </div>
 
@@ -137,11 +146,11 @@ const Admin = () => {
                             {filteredUsers.map((u) => (
                                 <Card
                                     key={u.id}
-                                    className="bg-gray-800 border border-gray-700 p-4 flex flex-col md:flex-row md:items-center md:justify-between"
+                                    className="bg-[#2C2F33] border border-[#24C3B5]/20 text-white p-4"
                                 >
-                                    <CardContent className="w-full space-y-2 md:space-y-0 md:flex md:justify-between md:items-center">
+                                    <CardContent className="w-full flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                                         <div>
-                                            <p className="font-bold text-lg">{u.complete_name}</p>
+                                            <p className="font-bold text-lg text-white">{u.complete_name}</p>
                                             <p className="text-sm text-gray-400">Id: {u.id}</p>
                                             <p className="text-sm text-gray-400">{u.email}</p>
                                             <p className="text-sm">
@@ -150,16 +159,16 @@ const Admin = () => {
                           {u.last_login ? new Date(u.last_login).toLocaleString() : 'Nunca'}
                         </span>
                                             </p>
-                                            <p className="text-sm">
-                                                Superuser: {u.is_superuser ? 'Sim' : 'Não'} | Ativo:{' '}
-                                                {u.is_active ? 'Sim' : 'Não'}
+                                            <p className="text-sm text-gray-400">
+                                                Superuser: {u.is_superuser ? 'Sim' : 'Não'} | Ativo: {u.is_active ? 'Sim' : 'Não'}
                                             </p>
                                             <p className="text-sm text-gray-400">
                                                 Ativado em:{' '}
                                                 {u.activated_at ? new Date(u.activated_at).toLocaleString() : 'Não ativado'}
                                             </p>
                                         </div>
-                                        <div className="mt-4 md:mt-0 flex flex-col md:flex-row gap-2">
+
+                                        <div className="flex flex-wrap gap-2">
                                             {!u.is_active && (
                                                 <>
                                                     <Button
