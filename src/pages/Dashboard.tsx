@@ -51,26 +51,39 @@ const Dashboard = () => {
   useEffect(() => {
     if (!accessToken || brokers.length === 0) return;
 
-    brokers.forEach((b) => {
-      fetch(`https://api.multitradingob.com/bot-options/${b.id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-          .then((res) => res.json())
-          .then((bot) => setData((prev) => ({ ...prev, [b.id]: { ...prev[b.id], bot } })))
-          .catch(console.error);
+    const fetchAll = async () => {
+      const updates: Record<number, { bot?: BotOptions; lastTrade?: Trade }> = {};
 
-      fetch(`https://api.multitradingob.com/trade-order-info/today/${b.id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-          .then((res) => res.json())
-          .then((trades: Trade[]) => {
-            const last = trades.sort(
-                (a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime()
-            )[0];
-            setData((prev) => ({ ...prev, [b.id]: { ...prev[b.id], lastTrade: last } }));
+      await Promise.all(
+          brokers.map(async (b) => {
+            try {
+              const [botRes, tradeRes] = await Promise.all([
+                fetch(`https://api.multitradingob.com/bot-options/${b.id}`, {
+                  headers: { Authorization: `Bearer ${accessToken}` },
+                }).then((res) => res.json()),
+                fetch(`https://api.multitradingob.com/trade-order-info/today/${b.id}`, {
+                  headers: { Authorization: `Bearer ${accessToken}` },
+                }).then((res) => res.json()),
+              ]);
+
+              const lastTrade = Array.isArray(tradeRes)
+                  ? tradeRes.sort((a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime())[0]
+                  : undefined;
+
+              updates[b.id] = {
+                bot: botRes,
+                lastTrade,
+              };
+            } catch (err) {
+              console.error(`Erro ao buscar dados da corretora ${b.id}`, err);
+            }
           })
-          .catch(console.error);
-    });
+      );
+
+      setData(updates);
+    };
+
+    fetchAll();
   }, [accessToken, brokers]);
 
   const getStatusLabel = (status: number | undefined) => {
@@ -121,33 +134,27 @@ const Dashboard = () => {
                       <CardContent className="relative p-6">
                         <div className="flex flex-col items-center">
                           <img
-                              loading="lazy"
-                              src={b.brokerage_icon}
+                              src={`/assets/imgs/${b.brokerage_icon}`}
                               alt={b.brokerage_name}
                               className="w-14 h-14 object-contain mb-4"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/assets/imgs/default.png';
-                              }}
                           />
                           <h3 className="text-xl font-bold text-white mb-3">{b.brokerage_name}</h3>
 
                           <div className="text-sm text-gray-300 space-y-1 text-center">
                             <p>
                               <span className="text-gray-400">Status:</span>{' '}
-                              <span className="text-white">
-                            {getStatusLabel(info.bot?.bot_status)}
-                          </span>
+                              <span className="text-white">{getStatusLabel(info.bot?.bot_status)}</span>
                             </p>
                             <p>
                               <span className="text-gray-400">Lucro:</span>{' '}
                               <span className="text-green-400">
-                            R$ {info.bot?.win_value.toFixed(2) ?? '0.00'}
+                            R$ {info.bot?.win_value?.toFixed(2) ?? '0.00'}
                           </span>
                             </p>
                             <p>
                               <span className="text-gray-400">Perdas:</span>{' '}
                               <span className="text-red-400">
-                            R$ {info.bot?.loss_value.toFixed(2) ?? '0.00'}
+                            R$ {info.bot?.loss_value?.toFixed(2) ?? '0.00'}
                           </span>
                             </p>
                             {info.lastTrade && (
