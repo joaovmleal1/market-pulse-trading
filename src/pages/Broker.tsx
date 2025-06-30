@@ -45,8 +45,8 @@ const Broker = () => {
       });
       const data = await res.json();
       setBrokerInfo({
-        name: data?.name,
-        icon: data?.icon, // espera-se algo como "xofre.png"
+        name: data?.brokerage_name,
+        icon: data?.brokerage_icon, // espera-se algo como "xofre.png"
       });
     } catch {
       setBrokerInfo({});
