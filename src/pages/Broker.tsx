@@ -90,17 +90,18 @@ export const Broker = () => {
             <h1 className="text-2xl font-semibold text-white">{brokerInfo.name}</h1>
           </div>
 
-          <Card className="bg-[#151515] border border-[#2C2F33] mb-10 shadow-md">
+          {/* Card das Wallets */}
+          <Card className="bg-[#151515] border border-[#2C2F33] shadow-md mb-10">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex gap-2">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex space-x-3">
                   <button
                       onClick={() => setSelectedWallet('REAL')}
                       className={cn(
-                          'px-4 py-2 text-sm rounded-md transition font-semibold',
+                          'px-4 py-2 text-sm rounded-md font-semibold transition',
                           selectedWallet === 'REAL'
                               ? 'bg-green-500 text-black'
-                              : 'bg-gray-800 text-white hover:bg-gray-700'
+                              : 'bg-[#1f1f1f] text-white hover:bg-[#2c2c2c]'
                       )}
                   >
                     Conta Real
@@ -108,10 +109,10 @@ export const Broker = () => {
                   <button
                       onClick={() => setSelectedWallet('DEMO')}
                       className={cn(
-                          'px-4 py-2 text-sm rounded-md transition font-semibold',
+                          'px-4 py-2 text-sm rounded-md font-semibold transition',
                           selectedWallet === 'DEMO'
                               ? 'bg-yellow-400 text-black'
-                              : 'bg-gray-800 text-white hover:bg-gray-700'
+                              : 'bg-[#1f1f1f] text-white hover:bg-[#2c2c2c]'
                       )}
                   >
                     Conta Demo
@@ -120,10 +121,10 @@ export const Broker = () => {
               </div>
 
               <div className="text-center">
-                <p className="text-sm font-medium text-gray-200 mb-1">Saldo Atual</p>
+                <p className="text-base text-gray-300 font-medium mb-2">Saldo Atual</p>
                 <p
                     className={cn(
-                        'text-3xl font-bold',
+                        'text-4xl font-bold tracking-wide',
                         selectedWallet === 'REAL' ? 'text-green-400' : 'text-yellow-400'
                     )}
                 >
