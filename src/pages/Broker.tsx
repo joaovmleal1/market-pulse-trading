@@ -138,5 +138,3 @@ const Broker = () => {
       </div>
   );
 };
-
-export default Broker;
