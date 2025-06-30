@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import BrokerSidebarMenu from '@/components/ui/BrokerSidebarMenu';
 import { cn } from '@/lib/utils';
 
-const Broker = () => {
+export const Broker = () => {
   const { id } = useParams<{ id: string }>();
   const { accessToken } = useSelector((state: any) => state.token);
 
@@ -73,9 +73,7 @@ const Broker = () => {
   };
 
   const imageSrc = getImagePath(brokerInfo.icon);
-
-  const saldo =
-      selectedWallet === 'REAL' ? wallets.REAL ?? 0 : wallets.DEMO ?? 0;
+  const saldo = selectedWallet === 'REAL' ? wallets.REAL ?? 0 : wallets.DEMO ?? 0;
 
   return (
       <div className="min-h-screen bg-[#0d0d0d] text-white">
@@ -92,7 +90,7 @@ const Broker = () => {
             <h1 className="text-2xl font-semibold text-white">{brokerInfo.name}</h1>
           </div>
 
-          <Card className="bg-[#1A1A1A] border border-[#2C2F33] mb-10 shadow-lg">
+          <Card className="bg-[#151515] border border-[#2C2F33] mb-10 shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex gap-2">
@@ -122,7 +120,7 @@ const Broker = () => {
               </div>
 
               <div className="text-center">
-                <p className="text-md font-medium text-gray-300 mb-1">Saldo Atual</p>
+                <p className="text-sm font-medium text-gray-200 mb-1">Saldo Atual</p>
                 <p
                     className={cn(
                         'text-3xl font-bold',
