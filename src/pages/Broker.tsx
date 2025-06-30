@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
 import BrokerSidebarMenu from '@/components/ui/BrokerSidebarMenu';
+import { Button } from '@/components/ui/button';
+import { Repeat } from 'lucide-react';
 
 const Broker = () => {
   const { id } = useParams<{ id: string }>();
@@ -10,6 +12,7 @@ const Broker = () => {
 
   const [wallets, setWallets] = useState<{ REAL?: number; DEMO?: number }>({});
   const [brokerInfo, setBrokerInfo] = useState<{ name?: string; icon?: string }>({});
+  const [currentWallet, setCurrentWallet] = useState<'REAL' | 'DEMO'>('DEMO');
 
   const fetchWallets = async () => {
     if (!id) return;
@@ -46,7 +49,7 @@ const Broker = () => {
       const data = await res.json();
       setBrokerInfo({
         name: data?.brokerage_name,
-        icon: data?.brokerage_icon, // espera-se algo como "xofre.png"
+        icon: data?.brokerage_icon,
       });
     } catch {
       setBrokerInfo({});
@@ -60,19 +63,22 @@ const Broker = () => {
     }
   }, [accessToken]);
 
-  // Importa todas as imagens da pasta
   const imageMap = import.meta.glob('@/assets/imgs/*', {
     eager: true,
     import: 'default',
   }) as Record<string, string>;
 
-  // Função para buscar imagem por nome vindo da API
   const getImagePath = (filename: string) => {
     const entry = Object.entries(imageMap).find(([key]) => key.endsWith(filename));
     return entry ? entry[1] : '';
   };
 
   const imageSrc = getImagePath(brokerInfo.icon);
+
+  const toggleWallet = () => {
+    setCurrentWallet(prev => (prev === 'REAL' ? 'DEMO' : 'REAL'));
+  };
+
   return (
       <div className="min-h-screen bg-[#0d0d0d] text-white">
         <BrokerSidebarMenu />
@@ -89,22 +95,30 @@ const Broker = () => {
             <h1 className="text-3xl font-bold">{brokerInfo.name ?? 'Corretora'}</h1>
           </div>
 
-          {/* Card de Wallets */}
+          {/* Card de Wallet Ativa com Botão de Alternar */}
           <Card className="bg-[#151515] border border-[#1e1e1e] mb-8 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm text-gray-400">Saldo Conta Real</p>
-                  <p className="text-2xl font-bold text-green-400">
-                    {wallets.REAL !== undefined ? `R$ ${wallets.REAL.toFixed(2)}` : 'Indisponível'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Saldo Conta Demo</p>
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {wallets.DEMO !== undefined ? `R$ ${wallets.DEMO.toFixed(2)}` : 'Indisponível'}
-                  </p>
-                </div>
+            <CardContent className="flex justify-between items-center p-6">
+              <div>
+                <p className="text-sm text-gray-400 mb-1">Bem-vindo(a),</p>
+                <p className="text-3xl font-bold text-orange-400">
+                  {wallets[currentWallet] !== undefined
+                      ? `R$ ${wallets[currentWallet]?.toFixed(2)}`
+                      : 'Indisponível'}
+                </p>
+                <p className="text-sm text-gray-400 mt-1 flex items-center gap-1">
+                  <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
+                  Conta {currentWallet.toLowerCase()}
+                </p>
+              </div>
+              <div className="flex flex-col items-end">
+                <p className="text-xs text-gray-500 mb-2">ID:</p>
+                <Button
+                    onClick={toggleWallet}
+                    className="text-green-400 border border-green-500 bg-transparent hover:bg-green-600 hover:text-white"
+                >
+                  <Repeat className="w-4 h-4 mr-2" />
+                  Trocar para {currentWallet === 'REAL' ? 'Demo' : 'Real'}
+                </Button>
               </div>
             </CardContent>
           </Card>
