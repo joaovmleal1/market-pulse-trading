@@ -3,8 +3,6 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
 import BrokerSidebarMenu from '@/components/ui/BrokerSidebarMenu';
-import { Button } from '@/components/ui/button';
-import { Repeat } from 'lucide-react';
 
 const Broker = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,7 +10,6 @@ const Broker = () => {
 
   const [wallets, setWallets] = useState<{ REAL?: number; DEMO?: number }>({});
   const [brokerInfo, setBrokerInfo] = useState<{ name?: string; icon?: string }>({});
-  const [currentWallet, setCurrentWallet] = useState<'REAL' | 'DEMO'>('DEMO');
 
   const fetchWallets = async () => {
     if (!id) return;
@@ -75,15 +72,10 @@ const Broker = () => {
 
   const imageSrc = getImagePath(brokerInfo.icon);
 
-  const toggleWallet = () => {
-    setCurrentWallet(prev => (prev === 'REAL' ? 'DEMO' : 'REAL'));
-  };
-
   return (
       <div className="min-h-screen bg-[#0d0d0d] text-white">
         <BrokerSidebarMenu />
         <main className="pl-72 pr-6 py-8 max-w-6xl mx-auto">
-          {/* Nome e Logo da Corretora */}
           <div className="flex flex-col items-center justify-center mb-8">
             {brokerInfo.icon && (
                 <img
@@ -95,30 +87,22 @@ const Broker = () => {
             <h1 className="text-3xl font-bold">{brokerInfo.name ?? 'Corretora'}</h1>
           </div>
 
-          {/* Card de Wallet Ativa com Botão de Alternar */}
           <Card className="bg-[#151515] border border-[#1e1e1e] mb-8 shadow-md">
-            <CardContent className="flex justify-between items-center p-6">
-              <div>
-                <p className="text-sm text-gray-400 mb-1">Bem-vindo(a),</p>
-                <p className="text-3xl font-bold text-orange-400">
-                  {wallets[currentWallet] !== undefined
-                      ? `R$ ${wallets[currentWallet]?.toFixed(2)}`
-                      : 'Indisponível'}
-                </p>
-                <p className="text-sm text-gray-400 mt-1 flex items-center gap-1">
-                  <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
-                  Conta {currentWallet.toLowerCase()}
-                </p>
-              </div>
-              <div className="flex flex-col items-end">
-                <p className="text-xs text-gray-500 mb-2">ID:</p>
-                <Button
-                    onClick={toggleWallet}
-                    className="text-green-400 border border-green-500 bg-transparent hover:bg-green-600 hover:text-white"
-                >
-                  <Repeat className="w-4 h-4 mr-2" />
-                  Trocar para {currentWallet === 'REAL' ? 'Demo' : 'Real'}
-                </Button>
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Saldo Atual</h2>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-gray-400">Conta Real</p>
+                  <p className="text-2xl font-bold text-green-400">
+                    {wallets.REAL !== undefined ? `R$ ${wallets.REAL.toFixed(2)}` : 'Indisponível'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Conta Demo</p>
+                  <p className="text-2xl font-bold text-orange-400">
+                    {wallets.DEMO !== undefined ? `R$ ${wallets.DEMO.toFixed(2)}` : 'Indisponível'}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
