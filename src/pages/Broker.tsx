@@ -10,6 +10,7 @@ const Broker = () => {
 
   const [wallets, setWallets] = useState<{ REAL?: number; DEMO?: number }>({});
   const [brokerInfo, setBrokerInfo] = useState<{ name?: string; icon?: string }>({});
+  const [currentAccount, setCurrentAccount] = useState<'REAL' | 'DEMO'>('DEMO');
 
   const fetchWallets = async () => {
     if (!id) return;
@@ -71,6 +72,13 @@ const Broker = () => {
   };
 
   const imageSrc = getImagePath(brokerInfo.icon);
+  const currentBalance = wallets[currentAccount];
+  const nextAccount = currentAccount === 'REAL' ? 'DEMO' : 'REAL';
+
+  const buttonStyle =
+      nextAccount === 'REAL'
+          ? 'bg-green-600 hover:bg-green-700'
+          : 'bg-orange-500 hover:bg-orange-600';
 
   return (
       <div className="min-h-screen bg-[#0d0d0d] text-white">
@@ -81,29 +89,30 @@ const Broker = () => {
                 <img
                     src={imageSrc}
                     alt={brokerInfo.name}
-                    className="w-14 h-14 object-contain mb-4"
+                    className="w-14 h-14 object-contain mb-2"
                 />
             )}
             <h1 className="text-3xl font-bold">{brokerInfo.name ?? 'Corretora'}</h1>
           </div>
 
           <Card className="bg-[#151515] border border-[#1e1e1e] mb-8 shadow-md">
-            <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Saldo Atual</h2>
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm text-gray-400">Conta Real</p>
-                  <p className="text-2xl font-bold text-green-400">
-                    {wallets.REAL !== undefined ? `R$ ${wallets.REAL.toFixed(2)}` : 'Indisponível'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Conta Demo</p>
-                  <p className="text-2xl font-bold text-orange-400">
-                    {wallets.DEMO !== undefined ? `R$ ${wallets.DEMO.toFixed(2)}` : 'Indisponível'}
-                  </p>
-                </div>
+            <CardContent className="p-6 flex items-center justify-between">
+              <div>
+                <p className="text-gray-300 text-sm mb-1">Saldo Atual</p>
+                <p
+                    className={`text-3xl font-bold ${
+                        currentAccount === 'REAL' ? 'text-green-400' : 'text-orange-400'
+                    }`}
+                >
+                  {currentBalance !== undefined ? `R$ ${currentBalance.toFixed(2)}` : 'Indisponível'}
+                </p>
               </div>
+              <button
+                  onClick={() => setCurrentAccount(nextAccount)}
+                  className={`${buttonStyle} text-white text-sm px-4 py-2 rounded-md transition`}
+              >
+                Trocar para {nextAccount === 'REAL' ? 'Conta Real' : 'Conta Demo'}
+              </button>
             </CardContent>
           </Card>
         </main>
