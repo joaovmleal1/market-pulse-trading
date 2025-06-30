@@ -10,7 +10,7 @@ const Broker = () => {
 
   const [wallets, setWallets] = useState<{ REAL?: number; DEMO?: number }>({});
   const [brokerInfo, setBrokerInfo] = useState<{ name?: string; icon?: string }>({});
-  const [currentAccount, setCurrentAccount] = useState<'REAL' | 'DEMO'>('DEMO');
+  const [selectedWallet, setSelectedWallet] = useState<'REAL' | 'DEMO'>('REAL');
 
   const fetchWallets = async () => {
     if (!id) return;
@@ -72,47 +72,54 @@ const Broker = () => {
   };
 
   const imageSrc = getImagePath(brokerInfo.icon);
-  const currentBalance = wallets[currentAccount];
-  const nextAccount = currentAccount === 'REAL' ? 'DEMO' : 'REAL';
 
-  const buttonStyle =
-      nextAccount === 'REAL'
-          ? 'bg-green-600 hover:bg-green-700'
-          : 'bg-orange-500 hover:bg-orange-600';
+  const isDemo = selectedWallet === 'DEMO';
+  const balance = isDemo ? wallets.DEMO : wallets.REAL;
+  const balanceColor = isDemo ? 'text-yellow-400' : 'text-green-400';
+  const buttonClasses = (type: 'REAL' | 'DEMO') =>
+      `px-4 py-2 rounded-md font-semibold transition-all ${
+          selectedWallet === type
+              ? 'bg-[#24C3B5] text-black'
+              : 'bg-[#1E1E1E] text-white hover:bg-[#2A2A2A]'
+      }`;
 
   return (
-      <div className="min-h-screen bg-[#0d0d0d] text-white">
+      <div className="min-h-screen bg-gradient-to-br from-[#111] via-[#0d0d0d] to-black text-white">
         <BrokerSidebarMenu />
         <main className="pl-72 pr-6 py-8 max-w-6xl mx-auto">
-          <div className="flex flex-col items-center justify-center mb-8">
+          {/* Nome e Logo da Corretora */}
+          <div className="flex flex-col items-center justify-center mb-10">
             {brokerInfo.icon && (
                 <img
                     src={imageSrc}
                     alt={brokerInfo.name}
-                    className="w-14 h-14 object-contain mb-2"
+                    className="w-14 h-14 object-contain mb-3"
                 />
             )}
-            <h1 className="text-3xl font-bold">{brokerInfo.name ?? 'Corretora'}</h1>
+            <h1 className="text-3xl font-bold text-white">{brokerInfo.name ?? 'Corretora'}</h1>
           </div>
 
-          <Card className="bg-[#151515] border border-[#1e1e1e] mb-8 shadow-md">
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-gray-300 text-sm mb-1">Saldo Atual</p>
-                <p
-                    className={`text-3xl font-bold ${
-                        currentAccount === 'REAL' ? 'text-green-400' : 'text-orange-400'
-                    }`}
-                >
-                  {currentBalance !== undefined ? `R$ ${currentBalance.toFixed(2)}` : 'Indisponível'}
+          {/* Wallet Card com Toggle */}
+          <Card className="bg-[#1A1A1A] border border-[#2C2F33] shadow-md mb-6">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex gap-3">
+                  <button onClick={() => setSelectedWallet('REAL')} className={buttonClasses('REAL')}>
+                    Conta Real
+                  </button>
+                  <button onClick={() => setSelectedWallet('DEMO')} className={buttonClasses('DEMO')}>
+                    Conta Demo
+                  </button>
+                </div>
+                <span className="text-sm text-gray-300">Alternar visualização de saldo</span>
+              </div>
+
+              <div className="text-center">
+                <p className="text-gray-400 text-sm">Saldo Atual</p>
+                <p className={`text-3xl font-bold ${balanceColor}`}>
+                  {balance !== undefined ? `R$ ${balance.toFixed(2)}` : 'Indisponível'}
                 </p>
               </div>
-              <button
-                  onClick={() => setCurrentAccount(nextAccount)}
-                  className={`${buttonStyle} text-white text-sm px-4 py-2 rounded-md transition`}
-              >
-                Trocar para {nextAccount === 'REAL' ? 'Conta Real' : 'Conta Demo'}
-              </button>
             </CardContent>
           </Card>
         </main>
