@@ -75,6 +75,10 @@ export const Broker = () => {
   const imageSrc = getImagePath(brokerInfo.icon);
   const saldo = selectedWallet === 'REAL' ? wallets.REAL ?? 0 : wallets.DEMO ?? 0;
 
+  const handleToggleWallet = () => {
+    setSelectedWallet((prev) => (prev === 'REAL' ? 'DEMO' : 'REAL'));
+  };
+
   return (
       <div className="min-h-screen bg-[#0d0d0d] text-white">
         <BrokerSidebarMenu />
@@ -90,44 +94,39 @@ export const Broker = () => {
             <h1 className="text-2xl font-semibold text-white">{brokerInfo.name}</h1>
           </div>
 
-          {/* Card das Wallets */}
+          {/* Card das Wallets com botão único para alternar */}
           <Card className="bg-[#151515] border border-[#2C2F33] shadow-md mb-10">
             <CardContent className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <div className="flex space-x-3">
-                  <button
-                      onClick={() => setSelectedWallet('REAL')}
-                      className={cn(
-                          'px-4 py-2 text-sm rounded-md font-semibold transition',
-                          selectedWallet === 'REAL'
-                              ? 'bg-green-500 text-black'
-                              : 'bg-[#1f1f1f] text-white hover:bg-[#2c2c2c]'
-                      )}
-                  >
-                    Conta Real
-                  </button>
-                  <button
-                      onClick={() => setSelectedWallet('DEMO')}
-                      className={cn(
-                          'px-4 py-2 text-sm rounded-md font-semibold transition',
-                          selectedWallet === 'DEMO'
-                              ? 'bg-yellow-400 text-black'
-                              : 'bg-[#1f1f1f] text-white hover:bg-[#2c2c2c]'
-                      )}
-                  >
-                    Conta Demo
-                  </button>
-                </div>
+                <p className="text-base text-gray-300 font-medium">
+                  Visualizando:{" "}
+                  <span className={cn(
+                      'font-bold',
+                      selectedWallet === 'REAL' ? 'text-green-400' : 'text-yellow-400'
+                  )}>
+                  Conta {selectedWallet === 'REAL' ? 'Real' : 'Demo'}
+                </span>
+                </p>
+
+                <button
+                    onClick={handleToggleWallet}
+                    className={cn(
+                        'px-4 py-2 text-sm rounded-md font-semibold transition duration-150',
+                        selectedWallet === 'REAL'
+                            ? 'bg-yellow-400 text-black hover:bg-yellow-300'
+                            : 'bg-green-500 text-black hover:bg-green-400'
+                    )}
+                >
+                  {selectedWallet === 'REAL' ? 'Ver Conta Demo' : 'Ver Conta Real'}
+                </button>
               </div>
 
               <div className="text-center">
-                <p className="text-base text-gray-300 font-medium mb-2">Saldo Atual</p>
-                <p
-                    className={cn(
-                        'text-4xl font-bold tracking-wide',
-                        selectedWallet === 'REAL' ? 'text-green-400' : 'text-yellow-400'
-                    )}
-                >
+                <p className="text-sm font-medium text-gray-200 mb-1">Saldo Atual</p>
+                <p className={cn(
+                    'text-4xl font-bold tracking-wide',
+                    selectedWallet === 'REAL' ? 'text-green-400' : 'text-yellow-400'
+                )}>
                   R$ {saldo.toFixed(2)}
                 </p>
               </div>
