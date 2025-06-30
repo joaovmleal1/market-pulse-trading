@@ -54,11 +54,11 @@ const Broker = () => {
   };
 
   useEffect(() => {
-    if (accessToken && id) {
+    if (accessToken) {
       fetchWallets();
       fetchBrokerInfo();
     }
-  }, [accessToken, id]);
+  }, [accessToken]);
 
   return (
       <div className="min-h-screen bg-[#0d0d0d] text-white">
