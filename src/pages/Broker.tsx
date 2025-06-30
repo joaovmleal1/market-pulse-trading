@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
 import BrokerSidebarMenu from '@/components/ui/BrokerSidebarMenu';
+import { cn } from '@/lib/utils';
 
 const Broker = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +16,7 @@ const Broker = () => {
   const fetchWallets = async () => {
     if (!id) return;
     try {
-      const res = await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
+      const res = await fetch(`https://api.multitradingob.com/user-brokerages/user_brokerages/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
@@ -73,22 +74,14 @@ const Broker = () => {
 
   const imageSrc = getImagePath(brokerInfo.icon);
 
-  const isDemo = selectedWallet === 'DEMO';
-  const balance = isDemo ? wallets.DEMO : wallets.REAL;
-  const balanceColor = isDemo ? 'text-yellow-400' : 'text-green-400';
-  const buttonClasses = (type: 'REAL' | 'DEMO') =>
-      `px-4 py-2 rounded-md font-semibold transition-all ${
-          selectedWallet === type
-              ? 'bg-[#24C3B5] text-black'
-              : 'bg-[#1E1E1E] text-white hover:bg-[#2A2A2A]'
-      }`;
+  const saldo =
+      selectedWallet === 'REAL' ? wallets.REAL ?? 0 : wallets.DEMO ?? 0;
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-[#111] via-[#0d0d0d] to-black text-white">
+      <div className="min-h-screen bg-[#0d0d0d] text-white">
         <BrokerSidebarMenu />
         <main className="pl-72 pr-6 py-8 max-w-6xl mx-auto">
-          {/* Nome e Logo da Corretora */}
-          <div className="flex flex-col items-center justify-center mb-10">
+          <div className="flex flex-col items-center justify-center mb-8">
             {brokerInfo.icon && (
                 <img
                     src={imageSrc}
@@ -96,28 +89,47 @@ const Broker = () => {
                     className="w-14 h-14 object-contain mb-3"
                 />
             )}
-            <h1 className="text-3xl font-bold text-white">{brokerInfo.name ?? 'Corretora'}</h1>
+            <h1 className="text-2xl font-semibold text-white">{brokerInfo.name}</h1>
           </div>
 
-          {/* Wallet Card com Toggle */}
-          <Card className="bg-[#1A1A1A] border border-[#2C2F33] shadow-md mb-6">
+          <Card className="bg-[#1A1A1A] border border-[#2C2F33] mb-10 shadow-lg">
             <CardContent className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex gap-3">
-                  <button onClick={() => setSelectedWallet('REAL')} className={buttonClasses('REAL')}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex gap-2">
+                  <button
+                      onClick={() => setSelectedWallet('REAL')}
+                      className={cn(
+                          'px-4 py-2 text-sm rounded-md transition font-semibold',
+                          selectedWallet === 'REAL'
+                              ? 'bg-green-500 text-black'
+                              : 'bg-gray-800 text-white hover:bg-gray-700'
+                      )}
+                  >
                     Conta Real
                   </button>
-                  <button onClick={() => setSelectedWallet('DEMO')} className={buttonClasses('DEMO')}>
+                  <button
+                      onClick={() => setSelectedWallet('DEMO')}
+                      className={cn(
+                          'px-4 py-2 text-sm rounded-md transition font-semibold',
+                          selectedWallet === 'DEMO'
+                              ? 'bg-yellow-400 text-black'
+                              : 'bg-gray-800 text-white hover:bg-gray-700'
+                      )}
+                  >
                     Conta Demo
                   </button>
                 </div>
-                <span className="text-sm text-gray-300">Alternar visualização de saldo</span>
               </div>
 
               <div className="text-center">
-                <p className="text-gray-400 text-sm">Saldo Atual</p>
-                <p className={`text-3xl font-bold ${balanceColor}`}>
-                  {balance !== undefined ? `R$ ${balance.toFixed(2)}` : 'Indisponível'}
+                <p className="text-md font-medium text-gray-300 mb-1">Saldo Atual</p>
+                <p
+                    className={cn(
+                        'text-3xl font-bold',
+                        selectedWallet === 'REAL' ? 'text-green-400' : 'text-yellow-400'
+                    )}
+                >
+                  R$ {saldo.toFixed(2)}
                 </p>
               </div>
             </CardContent>
