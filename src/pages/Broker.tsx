@@ -60,6 +60,19 @@ const Broker = () => {
     }
   }, [accessToken]);
 
+  // Importa todas as imagens da pasta
+  const imageMap = import.meta.glob('@/assets/imgs/*', {
+    eager: true,
+    import: 'default',
+  }) as Record<string, string>;
+
+  // Função para buscar imagem por nome vindo da API
+  const getImagePath = (filename: string) => {
+    const entry = Object.entries(imageMap).find(([key]) => key.endsWith(filename));
+    return entry ? entry[1] : '';
+  };
+
+  const imageSrc = getImagePath(brokerInfo.icon);
   return (
       <div className="min-h-screen bg-[#0d0d0d] text-white">
         <BrokerSidebarMenu />
@@ -68,9 +81,9 @@ const Broker = () => {
           <div className="flex flex-col items-center justify-center mb-8">
             {brokerInfo.icon && (
                 <img
-                    src={`/assets/imgs/${brokerInfo.icon}`}
+                    src={imageSrc}
                     alt={brokerInfo.name}
-                    className="w-20 h-20 object-contain mb-2"
+                    className="w-14 h-14 object-contain mb-4"
                 />
             )}
             <h1 className="text-3xl font-bold">{brokerInfo.name ?? 'Corretora'}</h1>
