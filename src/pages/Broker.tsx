@@ -16,7 +16,7 @@ export const Broker = () => {
   const fetchWallets = async () => {
     if (!id) return;
     try {
-      const res = await fetch(`https://api.multitradingob.com/user_brokerages/${id}`, {
+      const res = await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
