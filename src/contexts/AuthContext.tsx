@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { login as loginAction, logout as logoutAction } from '../store/reducers/token';
 import { withTokenRetry } from '../utils/reqAuth';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 interface AuthUser {
     id: number;
@@ -37,59 +36,46 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [hasBooted, setHasBooted] = useState(false);
     const dispatch = useDispatch();
-    const { accessToken, refreshToken } = useSelector((state: any) => state.token);
-    const navigate = useNavigate();
+    const { accessToken } = useSelector((state: any) => state.token);
 
     const api = axios.create({
         baseURL: 'https://api.multitradingob.com/user',
     });
 
-    // Etapa 1: carregar token do localStorage no Redux
     useEffect(() => {
-        const localToken = localStorage.getItem('tokenState');
-        if (localToken) {
-            const parsed = JSON.parse(localToken);
-            dispatch(loginAction(parsed));
-        }
-        setHasBooted(true);
-    }, []);
+        const restoreSession = async () => {
+            const localToken = localStorage.getItem('tokenState');
 
-    // Etapa 2: quando Redux tiver token, buscar o usuário
-    useEffect(() => {
-        if (hasBooted && accessToken && !user) {
-            fetchUser();
-        } else if (hasBooted && !accessToken) {
-            setIsLoading(false);
-        }
-    }, [hasBooted, accessToken]);
+            if (localToken) {
+                const parsed = JSON.parse(localToken);
+                dispatch(loginAction(parsed));
+                try {
+                    const userData = await withTokenRetry(async (token) => {
+                        const res = await axios.get(`${api.defaults.baseURL}/me`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        });
+                        return res.data;
+                    });
 
-    const fetchUser = async () => {
-        try {
-            const userData = await withTokenRetry(async (token) => {
-                const res = await axios.get(`${api.defaults.baseURL}/me`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                return res.data;
-            });
+                    if (!userData.is_active) {
+                        console.warn('Usuário inativo.');
+                    }
 
-            if (!userData.is_active) {
-                console.warn('Usuário inativo.');
-                setUser(userData);
-                return;
+                    setUser(userData);
+                } catch (err) {
+                    console.error('Erro ao restaurar sessão:', err);
+                    logout();
+                }
             }
 
-            setUser(userData);
-        } catch (err) {
-            console.error('Erro ao buscar usuário logado:', err);
-            logout();
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            setIsLoading(false); // só finaliza após tentar restaurar sessão
+        };
+
+        restoreSession();
+    }, []);
 
     const login = async (
         username: string,
@@ -112,13 +98,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             dispatch(loginAction({ accessToken: access_token, refreshToken: refresh_token }));
 
             if (rememberMe) {
-                localStorage.setItem(
-                    'tokenState',
-                    JSON.stringify({ accessToken: access_token, refreshToken: refresh_token })
-                );
+                localStorage.setItem('tokenState', JSON.stringify({
+                    accessToken: access_token,
+                    refreshToken: refresh_token,
+                }));
             }
 
-            await fetchUser();
+            await fetchUser(access_token);
             return { success: true };
         } catch (err: any) {
             const message = err?.response?.data?.detail || 'Erro inesperado no login. Tente novamente.';
@@ -127,9 +113,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const register = async (name: string, email: string, password: string): Promise<{ success: boolean; message?: string }> => {
+    const fetchUser = async (token: string) => {
+        const userData = await withTokenRetry(async () => {
+            const res = await axios.get(`${api.defaults.baseURL}/me`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return res.data;
+        });
+
+        setUser(userData);
+    };
+
+    const register = async (
+        name: string,
+        email: string,
+        password: string
+    ): Promise<{ success: boolean; message?: string }> => {
         try {
-            const username = email;
             const basicUser = import.meta.env.VITE_BASIC_AUTH_USER;
             const basicPass = import.meta.env.VITE_BASIC_AUTH_PASS;
             const credentials = btoa(`${basicUser}:${basicPass}`);
@@ -150,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
             );
 
-            return await login(username, password);
+            return await login(email, password);
         } catch (err) {
             console.error('Erro no registro:', err);
             return { success: false, message: 'Erro ao registrar usuário' };
@@ -164,9 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider
-            value={{ user, isAuthenticated: !!user, login, register, logout, isLoading }}
-        >
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, register, logout, isLoading }}>
             {children}
         </AuthContext.Provider>
     );
