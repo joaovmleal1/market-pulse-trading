@@ -6,6 +6,7 @@ import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SidebarMenu from '@/components/ui/SidebarMenu';
 import { useParams } from 'react-router-dom';
+import BrokerSidebarMenu from "@/components/ui/BrokerSidebarMenu.tsx";
 
 type Trade = {
   symbol: string;
@@ -131,7 +132,7 @@ const BrokerHistory = () => {
 
   return (
       <div className="min-h-screen bg-[#1E1E1E] text-white">
-        <SidebarMenu />
+        <BrokerSidebarMenu />
         <main className="pl-72 max-w-6xl mx-auto p-6">
           <div className="mb-4">
             <h2 className="text-2xl font-bold mb-1">Histórico de Operações</h2>
