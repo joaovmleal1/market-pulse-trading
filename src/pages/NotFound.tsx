@@ -27,10 +27,10 @@ const NotFound = () => {
           Oops! A página que você está procurando não foi encontrada.
         </p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(-1)}
           className="text-white bg-[#24C3B5] hover:bg-[#3ED6C8] px-6 py-3 rounded-md text-lg font-medium transition-colors duration-300"
         >
-          Voltar para o Início
+          Voltar
         </button>
       </div>
     </motion.div>
