@@ -21,7 +21,6 @@ const Register = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Redireciona automaticamente se o usuário já estiver logado
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       navigate('/dashboard');
@@ -33,18 +32,18 @@ const Register = () => {
 
     if (password !== confirmPassword) {
       toast({
-        title: "Erro no cadastro",
-        description: "As senhas não coincidem",
-        variant: "destructive",
+        title: 'Erro no cadastro',
+        description: 'As senhas não coincidem',
+        variant: 'destructive',
       });
       return;
     }
 
     if (password.length < 6) {
       toast({
-        title: "Erro no cadastro",
-        description: "A senha deve ter pelo menos 6 caracteres",
-        variant: "destructive",
+        title: 'Erro no cadastro',
+        description: 'A senha deve ter pelo menos 6 caracteres',
+        variant: 'destructive',
       });
       return;
     }
@@ -55,51 +54,71 @@ const Register = () => {
       const result = await register(name, email, password);
       if (result.success) {
         toast({
-          title: "Conta criada com sucesso!",
-          description: "Bem-vindo ao Multi Trading",
+          title: 'Conta criada com sucesso!',
+          description: 'Bem-vindo ao Multi Trading',
         });
         navigate('/dashboard');
       } else {
         toast({
-          title: "Erro no cadastro",
-          description: result.message || "Este email já está em uso",
-          variant: "destructive",
+          title: 'Erro no cadastro',
+          description: result.message || 'Este email já está em uso',
+          variant: 'destructive',
         });
       }
-    } catch (error) {
+    } catch {
       toast({
-        title: "Erro no cadastro",
-        description: "Tente novamente mais tarde",
-        variant: "destructive",
+        title: 'Erro no cadastro',
+        description: 'Tente novamente mais tarde',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
   };
 
+  if (isLoading) {
+    return (
+        <div className="min-h-screen bg-[#1E1E1E] flex items-center justify-center">
+          <motion.div
+              className="w-12 h-12 border-4 border-t-[#24C3B5] border-[#2C2F33] rounded-full animate-spin"
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3 }}
+          />
+        </div>
+    );
+  }
+
   return (
-      <div className="min-h-screen bg-[#1E1E1E] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#1E1E1E] via-[#20232A] to-[#1E1E1E] flex items-center justify-center p-4">
         <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="w-full max-w-md"
+            className="w-full max-w-sm sm:max-w-md"
         >
-          <Card className="bg-[#2C2F33] border-[#24C3B5]/30">
+          <Card className="bg-[#2C2F33] border-[#24C3B5]/30 shadow-lg">
             <CardHeader className="text-center">
               <div className="flex justify-between items-center mb-2">
-                <Button
-                    variant="ghost"
-                    className="text-[#A9B1B8] hover:text-white"
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
                     onClick={() => navigate('/')}
+                    className="text-[#A9B1B8] hover:text-white text-sm flex items-center gap-1"
                 >
                   ← Voltar ao Início
-                </Button>
+                </motion.button>
               </div>
               <div className="flex justify-center mb-4">
                 <MultiTradingLogo size="lg" showText={false} />
               </div>
-              <CardTitle className="text-2xl text-white">Criar Conta</CardTitle>
+              <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-2xl text-white font-bold"
+              >
+                Criar Conta
+              </motion.h2>
               <CardDescription className="text-[#A9B1B8]">
                 Junte-se ao Multi Trading
               </CardDescription>
@@ -116,7 +135,7 @@ const Register = () => {
                       placeholder="Nome"
                       required
                       className="w-full rounded-md px-4 py-2 bg-[#1E1E1E] border border-[#24C3B5]/20 text-white placeholder-[#A9B1B8] outline-none focus:ring-2 focus:ring-[#24C3B5]"
-                      whileFocus={{ scale: 1.02 }}
+                      whileFocus={{ scale: 1.02, boxShadow: '0 0 0 3px rgba(36,195,181,0.3)' }}
                       transition={{ type: 'spring', stiffness: 300 }}
                   />
                 </div>
@@ -131,7 +150,7 @@ const Register = () => {
                       placeholder="Email"
                       required
                       className="w-full rounded-md px-4 py-2 bg-[#1E1E1E] border border-[#24C3B5]/20 text-white placeholder-[#A9B1B8] outline-none focus:ring-2 focus:ring-[#24C3B5]"
-                      whileFocus={{ scale: 1.02 }}
+                      whileFocus={{ scale: 1.02, boxShadow: '0 0 0 3px rgba(36,195,181,0.3)' }}
                       transition={{ type: 'spring', stiffness: 300 }}
                   />
                 </div>
@@ -147,7 +166,7 @@ const Register = () => {
                         placeholder="Senha"
                         required
                         className="w-full rounded-md px-4 py-2 bg-[#1E1E1E] border border-[#24C3B5]/20 text-white placeholder-[#A9B1B8] outline-none focus:ring-2 focus:ring-[#24C3B5]"
-                        whileFocus={{ scale: 1.02 }}
+                        whileFocus={{ scale: 1.02, boxShadow: '0 0 0 3px rgba(36,195,181,0.3)' }}
                         transition={{ type: 'spring', stiffness: 300 }}
                     />
                     <button
@@ -172,7 +191,7 @@ const Register = () => {
                         placeholder="Confirmar Senha"
                         required
                         className="w-full rounded-md px-4 py-2 bg-[#1E1E1E] border border-[#24C3B5]/20 text-white placeholder-[#A9B1B8] outline-none focus:ring-2 focus:ring-[#24C3B5]"
-                        whileFocus={{ scale: 1.02 }}
+                        whileFocus={{ scale: 1.02, boxShadow: '0 0 0 3px rgba(36,195,181,0.3)' }}
                         transition={{ type: 'spring', stiffness: 300 }}
                     />
                     <button
@@ -188,12 +207,43 @@ const Register = () => {
 
                 <motion.button
                     type="submit"
-                    className="w-full mt-2 rounded-md px-4 py-2 font-medium text-white bg-[#24C3B5] hover:bg-[#3ED6C8]"
+                    className="w-full mt-2 rounded-md px-4 py-2 font-medium text-white bg-gradient-to-r from-[#24C3B5] to-[#3ED6C8] hover:from-[#3ED6C8] hover:to-[#24C3B5]"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={loading}
                 >
-                  {loading ? 'Criando conta...' : 'Criar Conta'}
+                  {loading ? (
+                      <motion.div
+                          className="flex items-center justify-center gap-2"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                      >
+                        <svg
+                            className="animate-spin h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                          <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                          ></circle>
+                          <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v4l3-3-3-3v4a10 10 0 100 20v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+                          ></path>
+                        </svg>
+                        Criando conta...
+                      </motion.div>
+                  ) : (
+                      'Criar Conta'
+                  )}
                 </motion.button>
               </form>
 
