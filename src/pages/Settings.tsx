@@ -57,27 +57,66 @@ const SettingsPage = () => {
 
   useEffect(() => {
     const fetchBotOptions = async () => {
+      if (!id || !user?.id) return;
+
       try {
-        const response = await fetch('https://api.multitradingob.com/bot-options/bot-options', {
+        const res = await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
         });
-        const data = await response.json();
-        setFormData((prev: any) => ({
-          ...prev,
-          stop_loss: data.stop_loss,
-          stop_win: data.stop_win,
-          entry_price: data.entry_price,
-          is_demo: data.is_demo,
-          gale_one: data.gale_one,
-          gale_two: data.gale_two,
-        }));
+
+        if (res.status === 404) {
+          // Criar bot_options caso não exista
+          const createRes = await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              bot_status: 0,
+              stop_loss: 0,
+              stop_win: 0,
+              entry_price: 0,
+              user_id: user.id,
+              is_demo: false,
+              win_value: 0,
+              loss_value: 0,
+              gale_one: true,
+              gale_two: true,
+              brokerage_id: Number(id),
+            }),
+          });
+
+          const created = await createRes.json();
+          setFormData((prev: any) => ({
+            ...prev,
+            stop_loss: created.stop_loss,
+            stop_win: created.stop_win,
+            entry_price: created.entry_price,
+            is_demo: created.is_demo,
+            gale_one: created.gale_one,
+            gale_two: created.gale_two,
+          }));
+        } else {
+          const data = await res.json();
+          setFormData((prev: any) => ({
+            ...prev,
+            stop_loss: data.stop_loss,
+            stop_win: data.stop_win,
+            entry_price: data.entry_price,
+            is_demo: data.is_demo,
+            gale_one: data.gale_one,
+            gale_two: data.gale_two,
+          }));
+        }
       } catch (error) {
-        console.error('Erro ao buscar configurações do bot:', error);
+        console.error('Erro ao buscar/criar bot_options:', error);
       }
     };
+
 
     const fetchOrCreateBrokerageConfig = async () => {
       try {
@@ -133,7 +172,7 @@ const SettingsPage = () => {
     try {
       setIsSaving(true);
 
-      await fetch('https://api.multitradingob.com/bot-options/bot-options', {
+      await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -148,7 +187,9 @@ const SettingsPage = () => {
           is_demo: formData.is_demo,
           gale_one: formData.gale_one,
           gale_two: formData.gale_two,
-          api_key: formData.api_key,
+          win_value: 0,
+          loss_value: 0,
+          brokerage_id: Number(id),
         }),
       });
 

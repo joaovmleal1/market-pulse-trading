@@ -18,6 +18,7 @@ import Admin from "./pages/Admin";
 import Signature from "./pages/Signature";
 import DashHistory from "./pages/DashHistory";
 import UserProfile from "@/pages/UserProfile.tsx";
+import BrokerHistory from "@/pages/BrokerHistory.tsx";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,11 @@ const AppRoutes = () => {
             <Route path="/profile" element={
                 <ProtectedRoute>
                     <UserProfile/>
+                </ProtectedRoute>
+            }/>
+            <Route path="/broker/:id/history" element={
+                <ProtectedRoute>
+                    <BrokerHistory/>
                 </ProtectedRoute>
             }/>
 
