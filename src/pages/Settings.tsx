@@ -122,7 +122,7 @@ const SettingsPage = () => {
       if (!id || !user?.id) return;
 
       try {
-        const res = await fetch(`https://api.multitradingob.com/user_brokerages/${id}`, {
+        const res = await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ const SettingsPage = () => {
 
         let data;
         if (res.status === 404) {
-          const createRes = await fetch(`https://api.multitradingob.com/user/user_brokerages`, {
+          const createRes = await fetch(`https://api.multitradingob.com/user_brokerages`, {
             method: 'POST',
             headers: {
               Authorization: `Bearer ${accessToken}`,
