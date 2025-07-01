@@ -17,6 +17,7 @@ export const Broker = () => {
     const [roiValue, setRoiValue] = useState<number>(0);
     const [roiPercent, setRoiPercent] = useState<number>(0);
     const [recentOrders, setRecentOrders] = useState<any[]>([]);
+    const [userId, setUserId] = useState<number | null>(null);
 
     const fetchWallets = async () => {
         if (!id) return;
@@ -69,6 +70,7 @@ export const Broker = () => {
             const data = await res.json();
             setBotStatus(data?.bot_status ?? 0);
             setIsDemo(data?.is_demo ?? true);
+            setUserId(data?.user_id ?? null);
         } catch {
             setBotStatus(0);
             setIsDemo(true);
@@ -97,6 +99,21 @@ export const Broker = () => {
             setRecentOrders([]);
             setRoiValue(0);
             setRoiPercent(0);
+        }
+    };
+
+    const toggleBot = async () => {
+        if (!userId || !id) return;
+        const action = botStatus === 1 ? 'stop' : 'start';
+        const url = `https://bot.multitradingob.com/${action}/${userId}/${id}`;
+
+        try {
+            const res = await fetch(url);
+            if (res.ok) {
+                setBotStatus((prev) => (prev === 1 ? 0 : 1));
+            }
+        } catch (err) {
+            console.error('Erro ao alternar o bot:', err);
         }
     };
 
@@ -178,14 +195,27 @@ export const Broker = () => {
                                     botStatus === 1 ? 'bg-green-600' : 'bg-red-600'
                                 } text-white`}
                             >
-        {botStatus === 1 ? 'Ativo' : 'Parado'}
-      </span>
+      {botStatus === 1 ? 'Ativo' : 'Parado'}
+    </span>
                         </h2>
+
                         <p className="text-sm text-gray-400 mb-2">Tipo de conta:</p>
-                        <span className="text-orange-400 text-sm mb-2">{isDemo ? 'Conta demo' : 'Conta real'}</span>
+                        <span className="text-orange-400 text-sm mb-4">{isDemo ? 'Conta demo' : 'Conta real'}</span>
+
                         {brokerInfo.icon && (
-                            <img src={imageSrc} alt="Logo corretora" className="w-24 h-auto mt-4"/>
+                            <img src={imageSrc} alt="Logo corretora" className="w-24 h-auto mb-4"/>
                         )}
+
+                        <button
+                            onClick={toggleBot}
+                            className={`mt-2 w-full py-2 rounded-md text-sm font-semibold transition ${
+                                botStatus === 1
+                                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                                    : 'bg-green-600 hover:bg-green-700 text-white'
+                            }`}
+                        >
+                            {botStatus === 1 ? 'Parar bot' : 'Ativar bot'}
+                        </button>
                     </Card>
 
                     {/* CARD 2 - ROI */}
