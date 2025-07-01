@@ -87,14 +87,24 @@ export const Broker = () => {
       <div className="min-h-screen bg-[#1E2124] text-white">
         <BrokerSidebarMenu />
         <main className="pl-72 pr-6 py-8">
-          <div className="w-full mb-8">
-            <Card className="bg-[#16191C] border border-[#24C3B5]/20 shadow-sm w-full">
+          <div className="flex flex-col items-center justify-center mb-6">
+            {brokerInfo.icon && (
+                <img
+                    src={imageSrc}
+                    alt={brokerInfo.name}
+                    className="w-14 h-14 object-contain mb-3"
+                />
+            )}
+            <h1 className="text-2xl font-semibold text-white mb-4">{brokerInfo.name}</h1>
+
+            {/* Card movido para logo abaixo do nome */}
+            <Card className="bg-[#16191C] border border-[#24C3B5]/20 shadow-sm w-full max-w-5xl">
               <CardContent className="flex items-center justify-between p-6">
                 <div className="flex flex-col">
                   <span className="text-sm text-gray-400 mb-1">Seu saldo disponível</span>
-                  <span className={`text-3xl font-bold ${saldoColor}`}>
-                  R$ {saldo.toFixed(2)}
-                </span>
+                  <span className={`text-3xl font-bold ${isReal ? 'text-green-400' : 'text-orange-400'}`}>
+                R$ {saldo.toFixed(2)}
+              </span>
                   <span className="text-sm text-gray-400 mt-1">{contaLabel}</span>
                 </div>
                 <button
@@ -105,17 +115,6 @@ export const Broker = () => {
                 </button>
               </CardContent>
             </Card>
-          </div>
-
-          <div className="flex flex-col items-center justify-center mb-8">
-            {brokerInfo.icon && (
-                <img
-                    src={imageSrc}
-                    alt={brokerInfo.name}
-                    className="w-14 h-14 object-contain mb-3"
-                />
-            )}
-            <h1 className="text-2xl font-semibold text-white">{brokerInfo.name}</h1>
           </div>
         </main>
       </div>
