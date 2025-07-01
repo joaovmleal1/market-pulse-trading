@@ -121,7 +121,7 @@ const SettingsPage = () => {
       if (!id || !user?.id) return;
 
       try {
-        const res = await fetch(`https://api.multitradingob.com/user-brokerages/user_brokerages/${id}`, {
+        const res = await fetch(`https://api.multitradingob.com/user_brokerages/${id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ const SettingsPage = () => {
 
         let data;
         if (res.status === 404) {
-          const createRes = await fetch(`https://api.multitradingob.com/user-brokerages/user_brokerages`, {
+          const createRes = await fetch(`https://api.multitradingob.com/user/user_brokerages`, {
             method: 'POST',
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -225,41 +225,7 @@ const SettingsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 p-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <span onClick={() => navigate('/dashboard')} className="cursor-pointer">
-            <MultiTradingLogo size="md" />
-          </span>
-          <div className="flex items-center space-x-4">
-            <span className="text-white">Olá, {user?.complete_name}</span>
-
-            {/* Botão do Painel Admin (condicional) */}
-            {user?.is_superuser && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <Button
-                  variant="ghost"
-                  className="text-sm text-white bg-gray-700 hover:bg-gray-600 border border-gray-600"
-                  onClick={() => navigate('/admin')}
-                >
-                  Painel Admin
-                </Button>
-              </motion.div>
-            )}
-
-            <Button
-              variant="outline"
-              onClick={logout}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
-            >
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
+      <BrokerSidebarMenu />
 
       {isLoading || !isFormReady ? (
         <main className="flex-grow flex items-center justify-center text-white text-lg p-6">
