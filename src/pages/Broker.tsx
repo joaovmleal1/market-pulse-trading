@@ -79,10 +79,34 @@ export const Broker = () => {
     setSelectedWallet((prev) => (prev === 'REAL' ? 'DEMO' : 'REAL'));
   };
 
+  const isReal = selectedWallet === 'REAL';
+  const saldoColor = isReal ? 'text-green-400' : 'text-orange-400';
+  const contaLabel = isReal ? 'Conta real' : 'Conta demo';
+
   return (
       <div className="min-h-screen bg-[#1E2124] text-white">
         <BrokerSidebarMenu />
-        <main className="pl-72 pr-6 py-8 max-w-6xl mx-auto">
+        <main className="pl-72 pr-6 py-8">
+          <div className="w-full mb-8">
+            <Card className="bg-[#16191C] border border-[#24C3B5]/20 shadow-sm w-full">
+              <CardContent className="flex items-center justify-between p-6">
+                <div className="flex flex-col">
+                  <span className="text-sm text-gray-400 mb-1">Seu saldo disponível</span>
+                  <span className={`text-3xl font-bold ${saldoColor}`}>
+                  R$ {saldo.toFixed(2)}
+                </span>
+                  <span className="text-sm text-gray-400 mt-1">{contaLabel}</span>
+                </div>
+                <button
+                    onClick={handleToggleWallet}
+                    className="px-4 py-2 rounded-lg bg-[#1F332B] text-green-400 hover:bg-[#24C3B5]/10 transition border border-[#24C3B5]/40"
+                >
+                  Trocar para {isReal ? 'Demo' : 'Real'}
+                </button>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="flex flex-col items-center justify-center mb-8">
             {brokerInfo.icon && (
                 <img

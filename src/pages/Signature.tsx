@@ -8,14 +8,6 @@ const Signature = () => {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1E1E1E] text-white">
-        <p>Carregando...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#1E1E1E] text-white flex items-center justify-center p-6">
       <motion.div

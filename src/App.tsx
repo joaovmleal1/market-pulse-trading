@@ -25,14 +25,6 @@ const ProtectedRoute = ({children}: { children: React.ReactNode }) => {
     const {isAuthenticated, isLoading, user} = useAuth();
     const location = useLocation();
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-black text-white">
-                Carregando...
-            </div>
-        );
-    }
-
     // Se não estiver autenticado, redireciona para login
     if (!isAuthenticated) {
         return <Navigate to="/login" replace state={{from: location}}/>;
