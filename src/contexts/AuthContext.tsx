@@ -101,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
     const login = async (
         username: string,
         password: string,
-        rememberMe = false
+        rememberMe = true
     ): Promise<{ success: boolean; message?: string }> => {
         try {
             const res = await axios.post(
@@ -123,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
                 })
             );
 
+            // Always save tokens to localStorage unless rememberMe is explicitly false
             if (rememberMe) {
                 localStorage.setItem('tokenState', JSON.stringify({
                     accessToken: access_token,
