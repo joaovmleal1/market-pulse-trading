@@ -94,16 +94,17 @@ export const Broker = () => {
             let lucro = 0;
 
             data.forEach((op: any) => {
-                if (op.status?.includes('WON')) {
+                const status = op.status?.toUpperCase();
+                if (status?.includes('WON')) {
                     wins++;
                     lucro += op.price;
-                } else if (op.status?.includes('LOST')) {
+                } else if (status?.includes('LOST')) {
                     losses++;
                     lucro -= op.price;
                 }
             });
 
-            setDailyStats({wins, losses, lucro});
+            setDailyStats({ wins, losses, lucro });
 
             const total = data.reduce((acc: number, op: any) => acc + op.price, 0);
             setRoiValue(lucro);
@@ -129,16 +130,17 @@ export const Broker = () => {
             let lucro = 0;
 
             data.forEach((op: any) => {
-                if (op.status === 'WIN') {
+                const status = op.status?.toUpperCase();
+                if (status?.includes('WON')) {
                     wins++;
                     lucro += op.price;
-                } else if (op.status === 'LOSS') {
+                } else if (status?.includes('LOST')) {
                     losses++;
                     lucro -= op.price;
                 }
             });
 
-            setTotalStats({wins, losses, lucro});
+            setTotalStats({ wins, losses, lucro });
 
             const total = data.reduce((acc: number, op: any) => acc + op.price, 0);
             setRoiTotalPercent(total ? (lucro / total) * 100 : 0);
