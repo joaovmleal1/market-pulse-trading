@@ -17,13 +17,14 @@ const Login = () => {
   const { login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const result = await login(email, password);
+      const result = await login(email, password, rememberMe);
       if (result.success) {
         toast({
           title: "Login realizado com sucesso!",
@@ -115,6 +116,19 @@ const Login = () => {
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
+              </div>
+
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                    id="rememberMe"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="accent-[#24C3B5] w-4 h-4"
+                />
+                <Label htmlFor="rememberMe" className="text-[#A9B1B8] text-sm">
+                  Manter-me conectado
+                </Label>
               </div>
 
               <motion.button
