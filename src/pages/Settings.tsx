@@ -68,7 +68,7 @@ const SettingsPage = () => {
         });
 
         if (res.status === 404) {
-          // Criar bot_options caso não exista
+          // Criar bot_options
           const createRes = await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
             method: 'POST',
             headers: {
@@ -117,8 +117,9 @@ const SettingsPage = () => {
       }
     };
 
-
     const fetchOrCreateBrokerageConfig = async () => {
+      if (!id || !user?.id) return;
+
       try {
         const res = await fetch(`https://api.multitradingob.com/user-brokerages/user_brokerages/${id}`, {
           headers: {
@@ -162,7 +163,7 @@ const SettingsPage = () => {
       fetchBotOptions();
       fetchOrCreateBrokerageConfig();
     }
-  }, [accessToken, id]);
+  }, [accessToken, id, user?.id]);
 
   const handleChange = (key: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [key]: value }));
@@ -172,6 +173,7 @@ const SettingsPage = () => {
     try {
       setIsSaving(true);
 
+      // Atualizar bot_options
       await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
         method: 'PUT',
         headers: {
@@ -179,7 +181,7 @@ const SettingsPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          bot_status: false,
+          bot_status: 0,
           user_id: user?.id || 0,
           stop_loss: Number(formData.stop_loss),
           stop_win: Number(formData.stop_win),
@@ -193,7 +195,8 @@ const SettingsPage = () => {
         }),
       });
 
-      await fetch(`https://api.multitradingob.com/user_brokerages/${id}`, {
+      // Atualizar user_brokerages
+      await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${accessToken}`,
