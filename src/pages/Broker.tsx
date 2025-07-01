@@ -18,6 +18,9 @@ export const Broker = () => {
     const [roiPercent, setRoiPercent] = useState<number>(0);
     const [recentOrders, setRecentOrders] = useState<any[]>([]);
     const [userId, setUserId] = useState<number | null>(null);
+    const [dailyStats, setDailyStats] = useState({wins: 0, losses: 0, lucro: 0});
+    const [totalStats, setTotalStats] = useState({wins: 0, losses: 0, lucro: 0});
+    const [roiTotalPercent, setRoiTotalPercent] = useState<number>(0);
 
     const fetchWallets = async () => {
         if (!id) return;
@@ -86,21 +89,65 @@ export const Broker = () => {
             const data = await res.json();
             setRecentOrders(data);
 
+            let wins = 0;
+            let losses = 0;
             let lucro = 0;
-            for (const op of data) {
-                if (op.status === 'WIN') lucro += op.price;
-                if (op.status === 'LOSS') lucro -= op.price;
-            }
+
+            data.forEach((op: any) => {
+                if (op.status === 'WIN') {
+                    wins++;
+                    lucro += op.price;
+                } else if (op.status === 'LOSS') {
+                    losses++;
+                    lucro -= op.price;
+                }
+            });
+
+            setDailyStats({wins, losses, lucro});
 
             const total = data.reduce((acc: number, op: any) => acc + op.price, 0);
             setRoiValue(lucro);
             setRoiPercent(total ? (lucro / total) * 100 : 0);
         } catch {
             setRecentOrders([]);
+            setDailyStats({wins: 0, losses: 0, lucro: 0});
             setRoiValue(0);
             setRoiPercent(0);
         }
     };
+
+    const fetchAllTrades = async () => {
+        if (!id) return;
+        try {
+            const res = await fetch(`https://api.multitradingob.com/trade-order-info/all/${id}`, {
+                headers: {Authorization: `Bearer ${accessToken}`},
+            });
+            const data = await res.json();
+
+            let wins = 0;
+            let losses = 0;
+            let lucro = 0;
+
+            data.forEach((op: any) => {
+                if (op.status === 'WIN') {
+                    wins++;
+                    lucro += op.price;
+                } else if (op.status === 'LOSS') {
+                    losses++;
+                    lucro -= op.price;
+                }
+            });
+
+            setTotalStats({wins, losses, lucro});
+
+            const total = data.reduce((acc: number, op: any) => acc + op.price, 0);
+            setRoiTotalPercent(total ? (lucro / total) * 100 : 0);
+        } catch {
+            setTotalStats({wins: 0, losses: 0, lucro: 0});
+            setRoiTotalPercent(0);
+        }
+    };
+
 
     const toggleBot = async () => {
         if (!userId || !id) return;
@@ -124,8 +171,15 @@ export const Broker = () => {
             fetchBrokerInfo();
             fetchBotOptions();
             fetchTradeOrders();
+            fetchAllTrades();
         }
     }, [accessToken]);
+
+    const getWinrate = (stats: { wins: number; losses: number }) => {
+        const total = stats.wins + stats.losses;
+        return total === 0 ? 0 : Math.round((stats.wins / total) * 100);
+    };
+
 
     const imageMap = import.meta.glob('@/assets/imgs/*', {
         eager: true,
@@ -257,6 +311,119 @@ export const Broker = () => {
                         </div>
                     </Card>
                 </div>
+                {/* Estatísticas e performance diárias */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                    {/* Estatísticas de Trading */}
+                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
+                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📊 Estatísticas de Trading</h2>
+                        <div className="mb-2">
+                            <p className="text-xl font-bold text-white">{getWinrate(dailyStats)}%</p>
+                            <div className="w-full bg-[#2C2F33] h-3 rounded mt-2">
+                                <div
+                                    className="bg-green-400 h-3 rounded"
+                                    style={{width: `${getWinrate(dailyStats)}%`}}
+                                />
+                            </div>
+                        </div>
+                        <div className="mt-4 text-sm space-y-1">
+                            <p className="text-green-400">Vitórias: {dailyStats.wins}</p>
+                            <p className="text-red-400">Derrotas: {dailyStats.losses}</p>
+                            <p className="text-gray-300">Total: {dailyStats.wins + dailyStats.losses}</p>
+                            <p className={`font-semibold ${dailyStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                Lucro: R$ {dailyStats.lucro.toFixed(2)}
+                            </p>
+                        </div>
+                    </Card>
+
+                    {/* Performance diária */}
+                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
+                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📈 Performance</h2>
+                        <p className="text-sm text-green-400 mb-1">
+                            Vitórias ({getWinrate(dailyStats)}%)
+                        </p>
+                        <div className="w-full bg-[#2C2F33] h-3 rounded mb-4">
+                            <div
+                                className="bg-green-400 h-3 rounded"
+                                style={{width: `${getWinrate(dailyStats)}%`}}
+                            />
+                        </div>
+                        <p className="text-sm text-red-400 mb-1">
+                            Derrotas ({100 - getWinrate(dailyStats)}%)
+                        </p>
+                        <div className="w-full bg-[#2C2F33] h-3 rounded mb-2">
+                            <div
+                                className="bg-red-400 h-3 rounded"
+                                style={{width: `${100 - getWinrate(dailyStats)}%`}}
+                            />
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            {dailyStats.wins + dailyStats.losses} Total Operações
+                        </p>
+                    </Card>
+                </div>
+
+                {/* Estatísticas totais */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    {/* Estatísticas totais */}
+                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
+                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📊 Estatísticas Totais</h2>
+                        <div className="mb-2">
+                            <p className="text-xl font-bold text-white">{getWinrate(totalStats)}%</p>
+                            <div className="w-full bg-[#2C2F33] h-3 rounded mt-2">
+                                <div
+                                    className="bg-green-400 h-3 rounded"
+                                    style={{width: `${getWinrate(totalStats)}%`}}
+                                />
+                            </div>
+                        </div>
+                        <div className="mt-4 text-sm space-y-1">
+                            <p className="text-green-400">Vitórias: {totalStats.wins}</p>
+                            <p className="text-red-400">Derrotas: {totalStats.losses}</p>
+                            <p className="text-gray-300">Total: {totalStats.wins + totalStats.losses}</p>
+                            <p className={`font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                Lucro: R$ {totalStats.lucro.toFixed(2)}
+                            </p>
+                        </div>
+                    </Card>
+
+                    {/* Performance total */}
+                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
+                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📈 Performance Total</h2>
+                        <p className="text-sm text-green-400 mb-1">
+                            Vitórias ({getWinrate(totalStats)}%)
+                        </p>
+                        <div className="w-full bg-[#2C2F33] h-3 rounded mb-4">
+                            <div
+                                className="bg-green-400 h-3 rounded"
+                                style={{width: `${getWinrate(totalStats)}%`}}
+                            />
+                        </div>
+                        <p className="text-sm text-red-400 mb-1">
+                            Derrotas ({100 - getWinrate(totalStats)}%)
+                        </p>
+                        <div className="w-full bg-[#2C2F33] h-3 rounded mb-2">
+                            <div
+                                className="bg-red-400 h-3 rounded"
+                                style={{width: `${100 - getWinrate(totalStats)}%`}}
+                            />
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            {totalStats.wins + totalStats.losses} Total Operações
+                        </p>
+                    </Card>
+
+                    {/* ROI total */}
+                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
+                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📉 ROI Total</h2>
+                        <p className={`text-3xl font-bold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {roiTotalPercent.toFixed(2)}%
+                        </p>
+                        <p className={`text-lg mt-2 ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            R$ {totalStats.lucro.toFixed(2)}
+                        </p>
+                    </Card>
+                </div>
+
             </main>
         </div>
     );
