@@ -97,16 +97,16 @@ export const Broker = () => {
                 const status = op.status?.toUpperCase();
                 if (status?.includes('WON')) {
                     wins++;
-                    lucro += op.price;
+                    lucro += op.pnl;
                 } else if (status?.includes('LOST')) {
                     losses++;
-                    lucro -= op.price;
+                    lucro -= op.pnl;
                 }
             });
 
             setDailyStats({ wins, losses, lucro });
 
-            const total = data.reduce((acc: number, op: any) => acc + op.price, 0);
+            const total = data.reduce((acc: number, op: any) => acc + op.pnl, 0);
             setRoiValue(lucro);
             setRoiPercent(total ? (lucro / total) * 100 : 0);
         } catch {
@@ -133,16 +133,16 @@ export const Broker = () => {
                 const status = op.status?.toUpperCase();
                 if (status?.includes('WON')) {
                     wins++;
-                    lucro += op.price;
+                    lucro += op.pnl;
                 } else if (status?.includes('LOST')) {
                     losses++;
-                    lucro -= op.price;
+                    lucro -= op.pnl;
                 }
             });
 
             setTotalStats({ wins, losses, lucro });
 
-            const total = data.reduce((acc: number, op: any) => acc + op.price, 0);
+            const total = data.reduce((acc: number, op: any) => acc + op.pnl, 0);
             setRoiTotalPercent(total ? (lucro / total) * 100 : 0);
         } catch {
             setTotalStats({wins: 0, losses: 0, lucro: 0});
@@ -306,7 +306,7 @@ export const Broker = () => {
             </span>
                                     </div>
                                     <span className={op.status === 'WIN' ? 'text-green-400' : 'text-red-400'}>
-            {op.status === 'WIN' ? '+' : '-'}R$ {op.price.toFixed(2)}
+            {op.status === 'WIN' ? '+' : '-'}R$ {op.pnl.toFixed(2)}
           </span>
                                 </div>
                             ))}
