@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import SecureField from '@/components/ui/SecureField';
 import { Switch } from '@/components/ui/switch';
 import { motion } from 'framer-motion';
+import BrokerSidebarMenu from "@/components/ui/BrokerSidebarMenu.tsx";
 
 const settingsFields = [
   { label: 'Stop Loss', key: 'stop_loss' },
