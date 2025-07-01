@@ -1,9 +1,9 @@
 import {createSlice} from "@reduxjs/toolkit";
 
 const initialState = {
-    accessToken: "",
-    refreshToken: ""
-}
+    accessToken: '',
+    refreshToken: ''
+};
 
 const tokenSlice = createSlice({
     name: 'token',
