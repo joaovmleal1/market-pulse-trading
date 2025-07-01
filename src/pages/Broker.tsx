@@ -80,7 +80,7 @@ export const Broker = () => {
   };
 
   return (
-      <div className="min-h-screen bg-[#0d0d0d] text-white">
+      <div className="min-h-screen bg-[#1E2124] text-white">
         <BrokerSidebarMenu />
         <main className="pl-72 pr-6 py-8 max-w-6xl mx-auto">
           <div className="flex flex-col items-center justify-center mb-8">
@@ -93,45 +93,6 @@ export const Broker = () => {
             )}
             <h1 className="text-2xl font-semibold text-white">{brokerInfo.name}</h1>
           </div>
-
-          {/* Card das Wallets com botão único para alternar */}
-          <Card className="bg-[#151515] border border-[#2C2F33] shadow-md mb-10">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <p className="text-base text-gray-300 font-medium">
-                  Visualizando:{" "}
-                  <span className={cn(
-                      'font-bold',
-                      selectedWallet === 'REAL' ? 'text-green-400' : 'text-yellow-400'
-                  )}>
-                  Conta {selectedWallet === 'REAL' ? 'Real' : 'Demo'}
-                </span>
-                </p>
-
-                <button
-                    onClick={handleToggleWallet}
-                    className={cn(
-                        'px-4 py-2 text-sm rounded-md font-semibold transition duration-150',
-                        selectedWallet === 'REAL'
-                            ? 'bg-yellow-400 text-black hover:bg-yellow-300'
-                            : 'bg-green-500 text-black hover:bg-green-400'
-                    )}
-                >
-                  {selectedWallet === 'REAL' ? 'Ver Conta Demo' : 'Ver Conta Real'}
-                </button>
-              </div>
-
-              <div className="text-center">
-                <p className="text-sm font-medium text-gray-200 mb-1">Saldo Atual</p>
-                <p className={cn(
-                    'text-4xl font-bold tracking-wide',
-                    selectedWallet === 'REAL' ? 'text-green-400' : 'text-yellow-400'
-                )}>
-                  R$ {saldo.toFixed(2)}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
         </main>
       </div>
   );
