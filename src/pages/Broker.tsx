@@ -277,7 +277,7 @@ export const Broker = () => {
                     {/* CARD 2 - ROI */}
                     <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
                         <h2 className="text-lg font-semibold mb-2 flex justify-between">
-                            <span className="text-[#24C3B5]">📈 ROI</span>
+                            <span className="text-[#24C3B5]">📈 ROI Diário</span>
                             <span className="text-sm text-gray-400">Hoje</span>
                         </h2>
                         <p className={`text-2xl font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -317,7 +317,7 @@ export const Broker = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                     {/* Estatísticas de Trading */}
                     <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📊 Estatísticas de Trading</h2>
+                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📊 Estatísticas de Trading Diárias</h2>
                         <div className="mb-2">
                             <p className="text-xl font-bold text-white">{getWinrate(dailyStats)}%</p>
                             <div className="w-full bg-[#2C2F33] h-3 rounded mt-2">
@@ -339,7 +339,7 @@ export const Broker = () => {
 
                     {/* Performance diária */}
                     <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📈 Performance</h2>
+                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📈 Performance Diária</h2>
                         <p className="text-sm text-green-400 mb-1">
                             Vitórias ({getWinrate(dailyStats)}%)
                         </p>
