@@ -29,13 +29,11 @@ type Trade = {
   date_time: string;
 };
 
-// Importa todas as imagens da pasta
 const imageMap = import.meta.glob('@/assets/imgs/*', {
   eager: true,
   import: 'default',
 }) as Record<string, string>;
 
-// Função para buscar imagem por nome vindo da API
 const getImagePath = (filename: string) => {
   const entry = Object.entries(imageMap).find(([key]) => key.endsWith(filename));
   return entry ? entry[1] : '';

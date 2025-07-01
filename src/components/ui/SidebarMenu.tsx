@@ -1,12 +1,14 @@
 import MultiTradingLogo from '@/components/MultiTradingLogo';
-import { User, LogOut, Clock, BarChart3, Shield } from 'lucide-react'; // adicionando ícone de admin
+import { User, LogOut, Clock, BarChart3, Shield } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
 
 const SidebarMenu = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, logout } = useAuth();
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const isActive = (path: string) => location.pathname === path;
 
@@ -18,8 +20,8 @@ const SidebarMenu = () => {
             <nav className="space-y-4">
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className={`flex items-center gap-3 ${
-                        isActive('/dashboard') ? 'text-[#24C3B5]' : 'text-white'
+                    className={`flex items-center gap-3 px-2 py-1 rounded-md transition-all duration-300 ${
+                        isActive('/dashboard') ? 'bg-[#24C3B5]/10 text-[#24C3B5]' : 'text-white'
                     } hover:text-[#24C3B5]`}
                 >
                     <BarChart3 className="w-5 h-5" /> Minhas Corretoras
@@ -27,8 +29,8 @@ const SidebarMenu = () => {
 
                 <button
                     onClick={() => navigate('/history')}
-                    className={`flex items-center gap-3 ${
-                        isActive('/history') ? 'text-[#24C3B5]' : 'text-white'
+                    className={`flex items-center gap-3 px-2 py-1 rounded-md transition-all duration-300 ${
+                        isActive('/history') ? 'bg-[#24C3B5]/10 text-[#24C3B5]' : 'text-white'
                     } hover:text-[#24C3B5]`}
                 >
                     <Clock className="w-5 h-5" /> Histórico
@@ -36,19 +38,18 @@ const SidebarMenu = () => {
 
                 <button
                     onClick={() => navigate('/profile')}
-                    className={`flex items-center gap-3 ${
-                        isActive('/profile') ? 'text-[#24C3B5]' : 'text-white'
+                    className={`flex items-center gap-3 px-2 py-1 rounded-md transition-all duration-300 ${
+                        isActive('/profile') ? 'bg-[#24C3B5]/10 text-[#24C3B5]' : 'text-white'
                     } hover:text-[#24C3B5]`}
                 >
                     <User className="w-5 h-5" /> Perfil
                 </button>
 
-                {/* Exibe o botão de administração apenas se for superuser */}
                 {user?.is_superuser && (
                     <button
                         onClick={() => navigate('/admin')}
-                        className={`flex items-center gap-3 ${
-                            isActive('/admin') ? 'text-[#24C3B5]' : 'text-white'
+                        className={`flex items-center gap-3 px-2 py-1 rounded-md transition-all duration-300 ${
+                            isActive('/admin') ? 'bg-[#24C3B5]/10 text-[#24C3B5]' : 'text-white'
                         } hover:text-[#24C3B5]`}
                     >
                         <Shield className="w-5 h-5" /> Administração
@@ -56,11 +57,31 @@ const SidebarMenu = () => {
                 )}
 
                 <button
-                    onClick={logout}
+                    onClick={() => setShowConfirm(true)}
                     className="flex items-center gap-3 text-gray-400 hover:text-red-400"
                 >
                     <LogOut className="w-5 h-5" /> Sair
                 </button>
+
+                {showConfirm && (
+                    <div className="mt-4 bg-[#1E1E1E] p-3 border border-red-500 rounded-md text-center">
+                        <p className="text-sm text-red-400 mb-2">Deseja realmente sair?</p>
+                        <div className="flex justify-center gap-3">
+                            <button
+                                onClick={logout}
+                                className="text-sm text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+                            >
+                                Sim
+                            </button>
+                            <button
+                                onClick={() => setShowConfirm(false)}
+                                className="text-sm text-gray-300 border border-gray-600 px-3 py-1 rounded hover:bg-gray-700"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                )}
             </nav>
         </aside>
     );

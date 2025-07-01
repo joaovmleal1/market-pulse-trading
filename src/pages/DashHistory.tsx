@@ -47,7 +47,7 @@ const DashHistory = () => {
   };
 
   const fetchBrokerName = async (id: number) => {
-    if (brokerNames[id]) return; // já buscado
+    if (brokerNames[id]) return;
     try {
       const res = await fetch(`https://api.multitradingob.com/brokerages/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },

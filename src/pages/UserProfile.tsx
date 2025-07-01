@@ -91,7 +91,6 @@ const UserProfile = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
                 >
-                    {/* Nome */}
                     <div>
                         <label className="text-sm text-gray-400">Nome completo</label>
                         <Input
@@ -102,7 +101,6 @@ const UserProfile = () => {
                         />
                     </div>
 
-                    {/* Email */}
                     <div>
                         <label className="text-sm text-gray-400">Email</label>
                         <Input
@@ -114,7 +112,6 @@ const UserProfile = () => {
                         />
                     </div>
 
-                    {/* Telefone */}
                     <div>
                         <label className="text-sm text-gray-400">Telefone</label>
                         <InputMask
@@ -132,9 +129,7 @@ const UserProfile = () => {
                         </InputMask>
                     </div>
 
-                    {/* Senhas */}
                     <div className="grid md:grid-cols-2 gap-4">
-                        {/* Senha atual */}
                         <div className="relative">
                             <label className="text-sm text-gray-400">Senha atual</label>
                             <Input
@@ -154,7 +149,6 @@ const UserProfile = () => {
                             </button>
                         </div>
 
-                        {/* Nova senha */}
                         <div className="relative">
                             <label className="text-sm text-gray-400">Nova senha</label>
                             <Input
