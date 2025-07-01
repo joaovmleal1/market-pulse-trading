@@ -224,7 +224,7 @@ const SettingsPage = () => {
   const allowedFields = brokerageFieldConfig[id || ''] || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      <div className="min-h-screen bg-[#1E2124] text-white">
       {/* Header */}
       <BrokerSidebarMenu />
 
@@ -257,7 +257,7 @@ const SettingsPage = () => {
                   key={field.key}
                   className="w-72"
                 >
-                  <Card className={`bg-gray-800 border-gray-700 w-full rounded-2xl shadow-lg shadow-black/30 transition-transform duration-200 hover:scale-105 ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <Card className={`bg-[#16191C] border border-[#24C3B5]/20 shadow-md rounded-2xl ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
                     <CardContent className="p-6 text-center">
                       {field.type === 'boolean' ? (
                         <>
@@ -285,7 +285,7 @@ const SettingsPage = () => {
                         <>
                           <label className="text-white block mb-2">{field.label}</label>
                           <Input
-                            className="bg-gray-700 text-white border-gray-600 text-center"
+                            className="bg-[#1F1F1F] border border-[#24C3B5]/20 text-white text-center"
                             placeholder={`Digite o(a) ${field.label.toLowerCase()}`}
                             value={formData[field.key] || ''}
                             onChange={(e) => handleChange(field.key, e.target.value)}
@@ -303,7 +303,7 @@ const SettingsPage = () => {
           <div className="flex flex-col items-center gap-4 mt-8 w-72">
             <Button
               onClick={handleSaveConfig}
-              className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
+              className="w-full bg-[#1F332B] text-green-400 border border-[#24C3B5]/40 hover:bg-[#24C3B5]/10"
               disabled={isSaving}
             >
               {isSaving ? (
@@ -319,7 +319,7 @@ const SettingsPage = () => {
             <Button
               variant="outline"
               onClick={() => navigate(-1)}
-              className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600"
+              className="w-full bg-[#1F332B] text-green-400 border border-[#24C3B5]/40 hover:bg-[#24C3B5]/10"
             >
               Voltar Sem Salvar
             </Button>
