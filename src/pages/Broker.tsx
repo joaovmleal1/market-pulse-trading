@@ -94,10 +94,10 @@ export const Broker = () => {
             let lucro = 0;
 
             data.forEach((op: any) => {
-                if (op.status === 'WIN') {
+                if (op.status?.includes('WON')) {
                     wins++;
                     lucro += op.price;
-                } else if (op.status === 'LOSS') {
+                } else if (op.status?.includes('LOST')) {
                     losses++;
                     lucro -= op.price;
                 }
