@@ -51,7 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 
     useEffect(() => {
         const localToken = localStorage.getItem('tokenState');
-        if (!accessToken && localToken) {
+
+        // Se houver token no localStorage mas não no Redux, carrega no Redux
+        if (localToken && !accessToken) {
             const parsed = JSON.parse(localToken);
             dispatch(
                 loginAction({
@@ -59,10 +61,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
                     refreshToken: parsed.refreshToken,
                 })
             );
-        } else if (accessToken) {
-            fetchUser();
+        }
+    }, []); // ← Apenas no primeiro carregamento
+
+    useEffect(() => {
+        if (accessToken) {
+            fetchUser(); // Chama após o Redux ter recebido o token
         } else {
-            setIsLoading(false);
+            setIsLoading(false); // Evita travar caso não esteja logado
         }
     }, [accessToken]);
 
@@ -171,7 +177,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
         dispatch(logoutAction());
         localStorage.removeItem('tokenState');
         setUser(null);
-        localStorage.removeItem('tokenState'); // Limpa token salvo
     };
 
     return (
