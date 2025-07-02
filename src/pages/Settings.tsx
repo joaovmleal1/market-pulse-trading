@@ -1,26 +1,26 @@
-import {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {Button} from '@/components/ui/button';
-import {Card, CardContent} from '@/components/ui/card';
-import {Input} from '@/components/ui/input';
-import {useNavigate, useParams} from 'react-router-dom';
-import {useAuth} from '@/contexts/AuthContext';
-import {Loader2} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
 import SecureField from '@/components/ui/SecureField';
-import {Switch} from '@/components/ui/switch';
-import {motion} from 'framer-motion';
+import { Switch } from '@/components/ui/switch';
+import { motion } from 'framer-motion';
 import BrokerSidebarMenu from '@/components/ui/BrokerSidebarMenu';
 
 const settingsFields = [
-    {label: 'Stop Loss', key: 'stop_loss'},
-    {label: 'Stop Win', key: 'stop_win'},
-    {label: 'Valor de Entrada', key: 'entry_price'},
-    {label: 'Conta Demo', key: 'is_demo', type: 'boolean'},
-    {label: 'Gale 1', key: 'gale_one', type: 'boolean'},
-    {label: 'Gale 2', key: 'gale_two', type: 'boolean'},
-    {label: 'API Key da Corretora', key: 'api_key', type: 'secure', brokerageOnly: true},
-    {label: 'Usuário da Corretora', key: 'brokerage_username', brokerageOnly: true},
-    {label: 'Senha da Corretora', key: 'brokerage_password', type: 'secure', brokerageOnly: true},
+    { label: 'Stop Loss', key: 'stop_loss' },
+    { label: 'Stop Win', key: 'stop_win' },
+    { label: 'Valor de Entrada', key: 'entry_price' },
+    { label: 'Conta Demo', key: 'is_demo', type: 'boolean' },
+    { label: 'Gale 1', key: 'gale_one', type: 'boolean' },
+    { label: 'Gale 2', key: 'gale_two', type: 'boolean' },
+    { label: 'API Key da Corretora', key: 'api_key', type: 'secure', brokerageOnly: true },
+    { label: 'Usuário da Corretora', key: 'brokerage_username', brokerageOnly: true },
+    { label: 'Senha da Corretora', key: 'brokerage_password', type: 'secure', brokerageOnly: true },
 ];
 
 const brokerageFieldConfig: Record<string, string[]> = {
@@ -28,28 +28,28 @@ const brokerageFieldConfig: Record<string, string[]> = {
 };
 
 const containerVariants = {
-    hidden: {opacity: 0, visibility: 'hidden'},
+    hidden: { opacity: 0, visibility: 'hidden' },
     visible: {
         opacity: 1,
         visibility: 'visible',
-        transition: {staggerChildren: 0.08},
+        transition: { staggerChildren: 0.08 },
     },
 };
 
 const itemVariants = {
-    hidden: {opacity: 0, y: 20},
+    hidden: { opacity: 0, y: 20 },
     visible: (i: number) => ({
         opacity: 1,
         y: 0,
-        transition: {delay: i * 0.05},
+        transition: { delay: i * 0.05 },
     }),
 };
 
 const SettingsPage = () => {
-    const {id} = useParams<{ id: string }>();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const {user} = useAuth();
-    const {accessToken} = useSelector((state: any) => state.token);
+    const { user } = useAuth();
+    const { accessToken } = useSelector((state: any) => state.token);
 
     const [formData, setFormData] = useState<any>({});
     const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +57,7 @@ const SettingsPage = () => {
     const [brokerageInfo, setBrokerageInfo] = useState<any>(null);
     const [userBrokerageCreated, setUserBrokerageCreated] = useState(false);
 
+    // ✅ Carrega as infos da corretora (register_url, etc)
     useEffect(() => {
         const fetchBrokerageInfo = async () => {
             if (!id) return;
@@ -70,54 +71,10 @@ const SettingsPage = () => {
             }
         };
 
-        // Garantimos que ele será chamado corretamente
         fetchBrokerageInfo();
     }, [id]);
 
-    const fetchOrCreateBrokerageConfig = async () => {
-        if (!id || !user?.id) return;
-
-        try {
-            const res = await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            let data;
-            if (res.status === 404) {
-                const createRes = await fetch(`https://api.multitradingob.com/user-brokerages`, {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_id: user?.id || 0,
-                        brokerage_id: Number(id),
-                    }),
-                });
-                data = await createRes.json();
-                setUserBrokerageCreated(true); // Marca que foi recém-criado
-            } else {
-                data = await res.json();
-                setUserBrokerageCreated(false); // Já existia
-            }
-
-            setFormData((prev: any) => ({
-                ...prev,
-                api_key: data.api_key || '',
-                brokerage_username: data.brokerage_username || '',
-                brokerage_password: data.brokerage_password || '',
-            }));
-        } catch (error) {
-            console.error('Erro ao carregar configurações da corretora:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
+    // ✅ Bot Options
     useEffect(() => {
         const fetchBotOptions = async () => {
             if (!id || !user?.id) return;
@@ -179,7 +136,7 @@ const SettingsPage = () => {
             }
         };
 
-        const fetchOrCreateBrokerageConfig = async () => {
+        const fetchUserBrokerage = async () => {
             if (!id || !user?.id) return;
 
             try {
@@ -204,8 +161,10 @@ const SettingsPage = () => {
                         }),
                     });
                     data = await createRes.json();
+                    setUserBrokerageCreated(true);
                 } else {
                     data = await res.json();
+                    setUserBrokerageCreated(false);
                 }
 
                 setFormData((prev: any) => ({
@@ -223,12 +182,12 @@ const SettingsPage = () => {
 
         if (accessToken && id) {
             fetchBotOptions();
-            fetchOrCreateBrokerageConfig();
+            fetchUserBrokerage();
         }
     }, [accessToken, id, user?.id]);
 
     const handleChange = (key: string, value: any) => {
-        setFormData((prev: any) => ({...prev, [key]: value}));
+        setFormData((prev: any) => ({ ...prev, [key]: value }));
     };
 
     const handleSaveConfig = async () => {
@@ -282,20 +241,28 @@ const SettingsPage = () => {
     const isFormReady = settingsFields.every(field => formData.hasOwnProperty(field.key));
     const allowedFields = brokerageFieldConfig[id || ''] || [];
 
+    const showCreateAccountButton =
+        brokerageInfo?.brokerage_register_url &&
+        (
+            !formData.api_key ||
+            (!formData.brokerage_username && !formData.brokerage_password) ||
+            userBrokerageCreated
+        );
+
     return (
         <div className="min-h-screen bg-[#111827] text-white">
-            <BrokerSidebarMenu/>
+            <BrokerSidebarMenu />
             {isLoading || !isFormReady ? (
                 <main className="flex-grow flex items-center justify-center p-6">
-                    <Loader2 className="animate-spin h-6 w-6 mr-2 text-cyan-400"/>
+                    <Loader2 className="animate-spin h-6 w-6 mr-2 text-cyan-400" />
                     <span className="text-gray-300">Carregando configurações...</span>
                 </main>
             ) : (
                 <motion.main
                     className="flex flex-col items-center justify-center p-4 md:p-6"
-                    initial={{opacity: 0, y: 10}}
-                    animate={{opacity: 1, y: 0}}
-                    transition={{duration: 0.6}}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
                 >
                     <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">
                         Configurações do Robô
@@ -318,12 +285,12 @@ const SettingsPage = () => {
                                     className="w-full"
                                 >
                                     <Card
-                                        className={`bg-[#1E293B] border border-cyan-500/20 rounded-xl shadow ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                        className={`bg-[#1E293B] border border-cyan-500/20 rounded-xl shadow ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
                                         <CardContent className="p-4">
                                             {field.type === 'boolean' ? (
                                                 <>
-                                                    <label
-                                                        className="block text-sm text-gray-200 mb-2">{field.label}</label>
+                                                    <label className="block text-sm text-gray-200 mb-2">{field.label}</label>
                                                     <div className="flex items-center gap-2">
                                                         <Switch
                                                             checked={!!formData[field.key]}
@@ -345,8 +312,7 @@ const SettingsPage = () => {
                                                 />
                                             ) : (
                                                 <>
-                                                    <label
-                                                        className="block text-sm text-gray-200 mb-2">{field.label}</label>
+                                                    <label className="block text-sm text-gray-200 mb-2">{field.label}</label>
                                                     <Input
                                                         className="bg-[#1F1F1F] border border-cyan-500/20 text-white text-center"
                                                         placeholder={`Digite ${field.label.toLowerCase()}`}
@@ -363,21 +329,16 @@ const SettingsPage = () => {
                         })}
                     </motion.div>
 
-                    {brokerageInfo?.brokerage_register_url &&
-                        (
-                            !formData.api_key || // Não tem API Key
-                            (!formData.brokerage_username && !formData.brokerage_password) || // Não tem login completo
-                            userBrokerageCreated // Foi criado agora (ou seja, era inexistente antes)
-                        ) && (
-                            <a
-                                href={brokerageInfo.brokerage_register_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-6 inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-cyan-400 border border-cyan-500/20 rounded-lg hover:text-cyan-300 hover:bg-cyan-500/10 transition"
-                            >
-                                Criar Conta na Corretora
-                            </a>
-                        )}
+                    {showCreateAccountButton && (
+                        <a
+                            href={brokerageInfo.brokerage_register_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-6 inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-cyan-400 border border-cyan-500/20 rounded-lg hover:text-cyan-300 hover:bg-cyan-500/10 transition"
+                        >
+                            Criar Conta na Corretora
+                        </a>
+                    )}
 
                     <div className="flex flex-col items-center gap-4 mt-8 w-full max-w-sm">
                         <Button
@@ -387,7 +348,7 @@ const SettingsPage = () => {
                         >
                             {isSaving ? (
                                 <div className="flex items-center justify-center gap-2">
-                                    <Loader2 className="h-5 w-5 animate-spin"/>
+                                    <Loader2 className="h-5 w-5 animate-spin" />
                                     Salvando...
                                 </div>
                             ) : (
