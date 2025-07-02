@@ -15,7 +15,7 @@ const Signature = () => {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="w-full max-w-2xl bg-[#1E1E1E] border border-cyan-500/20 rounded-2xl shadow-xl p-6 sm:p-8 space-y-6"
+                className="w-full max-w-2xl bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-xl p-6 sm:p-8 space-y-6"
             >
                 <div className="flex justify-between items-center">
                     <MultiTradingLogo size="sm" />
