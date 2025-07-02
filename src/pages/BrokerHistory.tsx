@@ -1,21 +1,31 @@
-
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';
 import BrokerSidebarMenu from "@/components/ui/BrokerSidebarMenu.tsx";
-import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
+
+interface Trade {
+  asset: string;
+  entry_value: number;
+  status: string;
+  date_time: string;
+  brokerage_id: number;
+}
+
+interface Brokerage {
+  id: number;
+  brokerage_name: string;
+}
 
 const BrokerHistory = () => {
   const { accessToken } = useSelector((state: any) => state.token);
   const { id } = useParams<{ id: string }>();
 
-  const [trades, setTrades] = useState([]);
-  const [brokerNames, setBrokerNames] = useState({});
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [brokerNames, setBrokerNames] = useState<Record<number, string>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [dataInicial, setDataInicial] = useState('');
   const [dataFinal, setDataFinal] = useState('');
@@ -25,12 +35,13 @@ const BrokerHistory = () => {
   const fetchTrades = async () => {
     if (!id) return;
     try {
+      setLoading(true);
       const res = await fetch(`https://api.multitradingob.com/trade-order-info/all/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      if (!res.ok) throw new Error('Erro ao buscar operações');
+      if (!res.ok) throw new Error();
       const data = await res.json();
       setTrades(data || []);
     } catch {
@@ -47,7 +58,7 @@ const BrokerHistory = () => {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!res.ok) throw new Error();
-      const data = await res.json();
+      const data: Brokerage = await res.json();
       setBrokerNames((prev) => ({ ...prev, [id]: data.brokerage_name }));
     } catch {
       setBrokerNames((prev) => ({ ...prev, [id]: 'Desconhecida' }));
@@ -74,7 +85,6 @@ const BrokerHistory = () => {
     const tradeDate = new Date(trade.date_time);
     const start = dataInicial ? new Date(dataInicial) : null;
     const end = dataFinal ? new Date(dataFinal) : null;
-
     if (start && tradeDate < start) return false;
     if (end && tradeDate > new Date(end.getTime() + 24 * 60 * 60 * 1000)) return false;
     return true;
@@ -121,45 +131,113 @@ const BrokerHistory = () => {
   };
 
   return (
-      <div className="min-h-screen bg-[#1E1E1E] text-white">
+      <div className="min-h-screen bg-[#111827] text-white">
         <BrokerSidebarMenu />
-        <main className="pl-72 max-w-6xl mx-auto p-4 pt-20 sm:p-6">
-          <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <Input type="date" value={dataInicial} onChange={(e) => setDataInicial(e.target.value)} />
-              <Input type="date" value={dataFinal} onChange={(e) => setDataFinal(e.target.value)} />
-              <Button variant="ghost" onClick={limparDatas} className="text-gray-300 border border-gray-600 hover:bg-gray-700">Limpar</Button>
-            </div>
-          </div>
+        <main className="lg:pl-72 pl-4 pr-4 w-full pt-20 pb-10">
+          <div className="mb-4 px-4 lg:px-12">
+            <h2 className="text-2xl font-bold mb-1 text-cyan-400">Histórico da Corretora</h2>
+            <p className="text-sm text-gray-400 mb-4">Total: {filteredTrades.length}</p>
 
-          {loading ? (
-              <div className="flex justify-center items-center h-40">
-                <Loader2 className="animate-spin text-cyan-400 w-8 h-8" />
+            <div className="flex flex-wrap items-end gap-4 mb-6">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Data inicial:</label>
+                <input
+                    type="date"
+                    value={dataInicial}
+                    onChange={(e) => setDataInicial(e.target.value)}
+                    className="bg-[#1E293B] border border-gray-600 rounded px-3 py-1 text-white"
+                />
               </div>
-          ) : paginatedTrades.length === 0 ? (
-              <div className="text-center text-gray-400">Nenhuma operação encontrada</div>
-          ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {paginatedTrades.map((trade, index) => (
-                    <motion.div
-                        key={index}
-                        className={`border-l-4 p-4 rounded-lg bg-[#111827] ${getStatusBorder(trade.status)}`}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                    >
-                      <div className="text-sm text-gray-400">{new Date(trade.date_time).toLocaleString()}</div>
-                      <div className="font-semibold text-gray-200">
-                        {brokerNames[trade.brokerage_id] || 'Carregando...'} - {trade.asset}
-                      </div>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-sm">{getStatusIcon(trade.status)} {trade.status}</span>
-                        <span className="text-sm text-gray-400">Entrada: {trade.entry_value}</span>
-                      </div>
-                    </motion.div>
-                ))}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Data final:</label>
+                <input
+                    type="date"
+                    value={dataFinal}
+                    onChange={(e) => setDataFinal(e.target.value)}
+                    className="bg-[#1E293B] border border-gray-600 rounded px-3 py-1 text-white"
+                />
               </div>
-          )}
+              <div className="pt-1">
+                <Button
+                    onClick={limparDatas}
+                    className="text-sm bg-cyan-500/10 border border-cyan-500 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                >
+                  Limpar datas
+                </Button>
+              </div>
+            </div>
+
+            {loading ? (
+                <div className="flex justify-center items-center h-72">
+                  <Loader2 className="animate-spin w-8 h-8 text-cyan-400" />
+                </div>
+            ) : filteredTrades.length === 0 ? (
+                <div className="flex items-center justify-center min-h-[60vh] text-gray-400 text-center">
+                  <p>Nenhuma operação registrada no período selecionado.</p>
+                </div>
+            ) : (
+                <>
+                  <motion.div
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                      initial="hidden"
+                      animate="visible"
+                      variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: {
+                          opacity: 1,
+                          y: 0,
+                          transition: { delayChildren: 0.2, staggerChildren: 0.1 },
+                        },
+                      }}
+                  >
+                    {paginatedTrades.map((trade, idx) => (
+                        <motion.div
+                            key={idx}
+                            variants={{
+                              hidden: { opacity: 0, y: 20 },
+                              visible: { opacity: 1, y: 0 },
+                            }}
+                        >
+                          <Card
+                              className={`bg-[#1E293B] border-2 ${getStatusBorder(trade.status)} rounded-xl shadow-lg transition-transform duration-200 hover:scale-[1.02]`}
+                          >
+                            <CardContent className="p-5">
+                              <h4 className="text-lg font-bold mb-2 text-cyan-400">{trade.asset}</h4>
+                              <div className="space-y-1 text-sm text-gray-300">
+                                <p><span className="text-gray-400">Corretora:</span> {brokerNames[trade.brokerage_id] || '...'}</p>
+                                <p><span className="text-gray-400">Entrada:</span> $ {trade.entry_value}</p>
+                                <p><span className="text-gray-400">Status:</span> {getStatusIcon(trade.status)} {trade.status}</p>
+                                <p><span className="text-gray-400">Data:</span> {new Date(trade.date_time).toLocaleString()}</p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                    ))}
+                  </motion.div>
+
+                  {filteredTrades.length > itemsPerPage && (
+                      <div className="flex justify-center mt-6 gap-2">
+                        <Button
+                            variant="outline"
+                            className="bg-[#1E293B] text-gray-200 hover:bg-gray-700"
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage((p) => p - 1)}
+                        >
+                          Anterior
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="bg-[#1E293B] text-gray-200 hover:bg-gray-700"
+                            disabled={currentPage * itemsPerPage >= filteredTrades.length}
+                            onClick={() => setCurrentPage((p) => p + 1)}
+                        >
+                          Próxima
+                        </Button>
+                      </div>
+                  )}
+                </>
+            )}
+          </div>
         </main>
       </div>
   );
