@@ -71,16 +71,6 @@ const NotFound = () => {
               Ir para o Início
             </motion.button>
           </div>
-
-          <div className="mt-10 flex justify-center">
-            <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
-                className="text-[#29B6F6]"
-            >
-              <Loader2 className="w-8 h-8 animate-spin" />
-            </motion.div>
-          </div>
         </motion.div>
       </motion.div>
   );
