@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 const NotFound = () => {
   const location = useLocation();
@@ -19,7 +20,7 @@ const NotFound = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1E1E1E] via-[#20232A] to-[#1E1E1E] px-6"
+          className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A0F1C] via-[#0D1628] to-[#0A0F1C] px-6"
       >
         <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -27,8 +28,20 @@ const NotFound = () => {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="text-center"
         >
+          <motion.div
+              className="flex justify-center mb-4"
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 6, ease: 'linear' }}
+          >
+            <img
+                src="/logo-light.png"
+                alt="MultiTrading Logo"
+                className="h-20 w-20 drop-shadow-lg"
+            />
+          </motion.div>
+
           <motion.h1
-              className="text-6xl md:text-7xl font-extrabold mb-4 text-[#24C3B5]"
+              className="text-6xl md:text-7xl font-extrabold mb-4 text-[#29B6F6]"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 180 }}
@@ -41,7 +54,7 @@ const NotFound = () => {
           <div className="flex justify-center gap-4 flex-wrap">
             <motion.button
                 onClick={() => navigate(-1)}
-                className="text-white bg-[#24C3B5] hover:bg-[#3ED6C8] px-6 py-3 rounded-md text-lg font-medium transition-all"
+                className="text-white bg-[#29B6F6] hover:bg-[#4FC3F7] px-6 py-3 rounded-md text-lg font-medium transition-all shadow-md"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >
@@ -50,12 +63,22 @@ const NotFound = () => {
 
             <motion.button
                 onClick={() => navigate('/')}
-                className="text-[#24C3B5] border border-[#24C3B5] hover:text-white hover:bg-[#24C3B5]/10 px-6 py-3 rounded-md text-lg font-medium transition-all"
+                className="text-[#29B6F6] border border-[#29B6F6] hover:text-white hover:bg-[#29B6F6]/10 px-6 py-3 rounded-md text-lg font-medium transition-all shadow-md"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >
               Ir para o Início
             </motion.button>
+          </div>
+
+          <div className="mt-10 flex justify-center">
+            <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
+                className="text-[#29B6F6]"
+            >
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </motion.div>
           </div>
         </motion.div>
       </motion.div>
