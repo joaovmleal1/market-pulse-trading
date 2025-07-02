@@ -134,8 +134,8 @@ const DashHistory = () => {
   return (
       <div className="min-h-screen bg-[#111827] text-white">
         <SidebarMenu />
-        <main className="lg:pl-72 pl-4 pr-4 max-w-6xl mx-auto pt-20 pb-10">
-          <div className="mb-4">
+        <main className="lg:pl-72 pl-4 pr-4 w-full pt-20 pb-10">
+          <div className="mb-4 px-4 lg:px-12">
             <h2 className="text-2xl font-bold mb-1 text-cyan-400">Histórico de Operações</h2>
             <p className="text-sm text-gray-400 mb-4">Total: {filteredTrades.length}</p>
 
@@ -179,7 +179,7 @@ const DashHistory = () => {
             ) : (
                 <>
                   <motion.div
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                       initial="hidden"
                       animate="visible"
                       variants={{
