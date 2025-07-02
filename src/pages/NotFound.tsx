@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import logo from '../assets/imgs/logo.png';
 
 const NotFound = () => {
   const location = useLocation();
@@ -26,7 +27,7 @@ const NotFound = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="text-center"
+            className="text-center w-full max-w-md"
         >
           <motion.div
               className="flex justify-center mb-4"
@@ -34,7 +35,7 @@ const NotFound = () => {
               transition={{ repeat: Infinity, duration: 6, ease: 'linear' }}
           >
             <img
-                src="/logo-light.png"
+                src={logo}
                 alt="MultiTrading Logo"
                 className="h-20 w-20 drop-shadow-lg"
             />
@@ -48,10 +49,10 @@ const NotFound = () => {
           >
             404
           </motion.h1>
-          <p className="text-xl md:text-2xl text-[#A9B1B8] mb-6">
+          <p className="text-lg md:text-xl text-[#A9B1B8] mb-6 px-2">
             Oops! A página que você está procurando não foi encontrada.
           </p>
-          <div className="flex justify-center gap-4 flex-wrap">
+          <div className="flex flex-col md:flex-row justify-center gap-4 flex-wrap">
             <motion.button
                 onClick={() => navigate(-1)}
                 className="text-white bg-[#29B6F6] hover:bg-[#4FC3F7] px-6 py-3 rounded-md text-lg font-medium transition-all shadow-md"
