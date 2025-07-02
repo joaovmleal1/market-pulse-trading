@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import SidebarMenu from '@/components/ui/SidebarMenu';
+import { Loader2 } from 'lucide-react';
 
 interface User {
     id: number;
@@ -85,50 +86,33 @@ const Admin = () => {
     });
 
     return (
-        <div className="min-h-screen bg-[#1E1E1E] text-white">
+        <div className="min-h-screen bg-[#111827] text-white">
             <SidebarMenu />
-            <main className="pl-72 max-w-6xl mx-auto p-6">
-                <h1 className="text-4xl font-bold mb-4">Painel Administrativo</h1>
+            <main className="lg:pl-72 max-w-6xl mx-auto p-4 md:p-6">
+                <h1 className="text-2xl md:text-4xl font-bold mb-6 text-gray-200">Painel Administrativo</h1>
 
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                     <div className="flex gap-2 flex-wrap">
-                        <Button
-                            onClick={() => setStatusFilter('all')}
-                            className={`text-sm ${
-                                statusFilter === 'all'
-                                    ? 'bg-[#24C3B5] text-black'
-                                    : 'bg-[#2C2F33] text-white border border-[#24C3B5]/30 hover:bg-[#24C3B5]/20'
-                            }`}
-                        >
-                            Todos
-                        </Button>
-                        <Button
-                            onClick={() => setStatusFilter('active')}
-                            className={`text-sm ${
-                                statusFilter === 'active'
-                                    ? 'bg-[#24C3B5] text-black'
-                                    : 'bg-[#2C2F33] text-white border border-[#24C3B5]/30 hover:bg-[#24C3B5]/20'
-                            }`}
-                        >
-                            Ativos
-                        </Button>
-                        <Button
-                            onClick={() => setStatusFilter('inactive')}
-                            className={`text-sm ${
-                                statusFilter === 'inactive'
-                                    ? 'bg-[#24C3B5] text-black'
-                                    : 'bg-[#2C2F33] text-white border border-[#24C3B5]/30 hover:bg-[#24C3B5]/20'
-                            }`}
-                        >
-                            Inativos
-                        </Button>
+                        {['all', 'active', 'inactive'].map((type) => (
+                            <Button
+                                key={type}
+                                onClick={() => setStatusFilter(type as any)}
+                                className={`text-sm ${
+                                    statusFilter === type
+                                        ? 'bg-cyan-500/10 text-cyan-400'
+                                        : 'bg-[#1E293B] text-gray-200 border border-cyan-500/20 hover:text-cyan-300'
+                                }`}
+                            >
+                                {type === 'all' ? 'Todos' : type === 'active' ? 'Ativos' : 'Inativos'}
+                            </Button>
+                        ))}
                     </div>
                     <input
                         type="text"
                         placeholder="Buscar por nome..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full md:w-64 px-3 py-2 rounded-md bg-[#2C2F33] text-white placeholder-gray-400 border border-[#24C3B5]/20 focus:outline-none focus:ring focus:border-[#24C3B5]"
+                        className="w-full md:w-64 px-3 py-2 rounded-md bg-[#1E293B] text-white placeholder-gray-400 border border-cyan-500/20 focus:outline-none focus:ring focus:border-cyan-400"
                     />
                 </div>
 
@@ -138,7 +122,9 @@ const Admin = () => {
                     transition={{ duration: 0.5 }}
                 >
                     {loading ? (
-                        <p className="text-gray-400">Carregando usuários...</p>
+                        <div className="flex items-center gap-2 text-gray-400">
+                            <Loader2 className="animate-spin" /> Carregando usuários...
+                        </div>
                     ) : filteredUsers.length === 0 ? (
                         <p className="text-gray-400">Nenhum usuário encontrado.</p>
                     ) : (
@@ -146,9 +132,9 @@ const Admin = () => {
                             {filteredUsers.map((u) => (
                                 <Card
                                     key={u.id}
-                                    className="bg-[#2C2F33] border border-[#24C3B5]/20 text-white p-4"
+                                    className="bg-[#1E293B] border border-cyan-500/20 text-white"
                                 >
-                                    <CardContent className="w-full flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                                    <CardContent className="p-4 w-full flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                                         <div>
                                             <p className="font-bold text-lg text-white">{u.complete_name}</p>
                                             <p className="text-sm text-gray-400">Id: {u.id}</p>
@@ -156,8 +142,8 @@ const Admin = () => {
                                             <p className="text-sm">
                                                 Último login:{' '}
                                                 <span className="text-gray-300">
-                          {u.last_login ? new Date(u.last_login).toLocaleString() : 'Nunca'}
-                        </span>
+                                                    {u.last_login ? new Date(u.last_login).toLocaleString() : 'Nunca'}
+                                                </span>
                                             </p>
                                             <p className="text-sm text-gray-400">
                                                 Superuser: {u.is_superuser ? 'Sim' : 'Não'} | Ativo: {u.is_active ? 'Sim' : 'Não'}
@@ -169,28 +155,15 @@ const Admin = () => {
                                         </div>
 
                                         <div className="flex flex-wrap gap-2">
-                                            {!u.is_active && (
-                                                <>
-                                                    <Button
-                                                        className="bg-green-600 hover:bg-green-700"
-                                                        onClick={() => activateUser(u.id, 1)}
-                                                    >
-                                                        Ativar 1 dia
-                                                    </Button>
-                                                    <Button
-                                                        className="bg-green-600 hover:bg-green-700"
-                                                        onClick={() => activateUser(u.id, 7)}
-                                                    >
-                                                        Ativar 7 dias
-                                                    </Button>
-                                                    <Button
-                                                        className="bg-green-600 hover:bg-green-700"
-                                                        onClick={() => activateUser(u.id, 30)}
-                                                    >
-                                                        Ativar 30 dias
-                                                    </Button>
-                                                </>
-                                            )}
+                                            {!u.is_active && [1, 7, 30].map((day) => (
+                                                <Button
+                                                    key={day}
+                                                    className="bg-green-600 hover:bg-green-700"
+                                                    onClick={() => activateUser(u.id, day)}
+                                                >
+                                                    Ativar {day} {day === 1 ? 'dia' : 'dias'}
+                                                </Button>
+                                            ))}
                                             {u.is_active && (
                                                 <Button
                                                     variant="destructive"
