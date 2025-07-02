@@ -54,6 +54,23 @@ const SettingsPage = () => {
   const [formData, setFormData] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [brokerageInfo, setBrokerageInfo] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchBrokerageInfo = async () => {
+      if (!id) return;
+
+      try {
+        const res = await fetch(`https://api.multitradingob.com/brokerages/${id}`);
+        const data = await res.json();
+        setBrokerageInfo(data);
+      } catch (err) {
+        console.error("Erro ao buscar informações da corretora:", err);
+      }
+    };
+
+    fetchBrokerageInfo();
+  }, [id]);
 
   useEffect(() => {
     const fetchBotOptions = async () => {
@@ -296,6 +313,17 @@ const SettingsPage = () => {
                   );
                 })}
               </motion.div>
+
+              {(!formData.api_key || !formData.brokerage_username || !formData.brokerage_password) && brokerageInfo?.brokerage_register_url && (
+                  <a
+                      href={brokerageInfo.brokerage_register_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-6 inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-cyan-400 border border-cyan-500/20 rounded-lg hover:text-cyan-300 hover:bg-cyan-500/10 transition"
+                  >
+                    Criar Conta na Corretora
+                  </a>
+              )}
 
               <div className="flex flex-col items-center gap-4 mt-8 w-full max-w-sm">
                 <Button
