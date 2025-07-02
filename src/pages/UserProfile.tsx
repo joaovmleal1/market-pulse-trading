@@ -86,7 +86,7 @@ const UserProfile = () => {
                 <h2 className="text-3xl font-bold mb-6 text-white">Editar Perfil</h2>
 
                 <motion.div
-                    className="space-y-6 bg-[#1E1E1E] p-6 rounded-xl border border-cyan-500/20 shadow-md"
+                    className="space-y-6 bg-[#111827] p-6 rounded-xl border border-cyan-500/20 shadow-md"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
