@@ -305,7 +305,7 @@ export const Broker = () => {
                             <Card key={index} className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
                                 <CardContent className="p-5">
                                     <p className="text-cyan-400 font-semibold mb-2">{item.label}</p>
-                                    <p className="text-lg">
+                                    <p className="text-lg text-gray-400">
                                         Winrate: <span className="font-bold text-green-400">{getWinrate(item.stats)}%</span>
                                     </p>
                                     <p className="text-sm text-gray-400">
