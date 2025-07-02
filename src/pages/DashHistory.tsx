@@ -1,12 +1,13 @@
+// DashHistory.tsx
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SidebarMenu from '@/components/ui/SidebarMenu';
 
-type Trade = {
+interface Trade {
   symbol: string;
   order_type: string;
   quantity: number;
@@ -14,12 +15,12 @@ type Trade = {
   status: string;
   date_time: string;
   brokerage_id: number;
-};
+}
 
-type Brokerage = {
+interface Brokerage {
   id: number;
   brokerage_name: string;
-};
+}
 
 const DashHistory = () => {
   const { accessToken } = useSelector((state: any) => state.token);
@@ -29,20 +30,24 @@ const DashHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [dataInicial, setDataInicial] = useState('');
   const [dataFinal, setDataFinal] = useState('');
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 12;
 
   const fetchTrades = async () => {
     try {
+      setLoading(true);
       const res = await fetch(`https://api.multitradingob.com/trade-order-info/all`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      if (!res.ok) throw new Error('Erro ao buscar operações');
+      if (!res.ok) throw new Error();
       const data = await res.json();
       setTrades(data || []);
     } catch {
       setTrades([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -127,11 +132,11 @@ const DashHistory = () => {
   };
 
   return (
-      <div className="min-h-screen bg-[#1E1E1E] text-white">
+      <div className="min-h-screen bg-[#111827] text-white">
         <SidebarMenu />
-        <main className="pl-72 max-w-6xl mx-auto p-6">
+        <main className="pl-72 md:pl-72 max-w-6xl mx-auto p-6">
           <div className="mb-4">
-            <h2 className="text-2xl font-bold mb-1">Histórico de Operações</h2>
+            <h2 className="text-2xl font-bold mb-1 text-cyan-400">Histórico de Operações</h2>
             <p className="text-sm text-gray-400 mb-4">Total: {filteredTrades.length}</p>
 
             <div className="flex flex-wrap items-end gap-4 mb-6">
@@ -141,7 +146,7 @@ const DashHistory = () => {
                     type="date"
                     value={dataInicial}
                     onChange={(e) => setDataInicial(e.target.value)}
-                    className="bg-gray-800 border border-gray-600 rounded px-3 py-1 text-white"
+                    className="bg-[#1E293B] border border-gray-600 rounded px-3 py-1 text-white"
                 />
               </div>
               <div>
@@ -150,27 +155,31 @@ const DashHistory = () => {
                     type="date"
                     value={dataFinal}
                     onChange={(e) => setDataFinal(e.target.value)}
-                    className="bg-gray-800 border border-gray-600 rounded px-3 py-1 text-white"
+                    className="bg-[#1E293B] border border-gray-600 rounded px-3 py-1 text-white"
                 />
               </div>
               <div className="pt-1">
                 <Button
                     onClick={limparDatas}
-                    className="text-sm bg-transparent border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-white transition"
+                    className="text-sm bg-cyan-500/10 border border-cyan-500 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
                 >
                   Limpar datas
                 </Button>
               </div>
             </div>
 
-            {filteredTrades.length === 0 ? (
-                <div className="flex items-center justify-center min-h-[70vh] text-gray-400 text-center">
+            {loading ? (
+                <div className="flex justify-center items-center h-72">
+                  <Loader2 className="animate-spin w-8 h-8 text-cyan-400" />
+                </div>
+            ) : filteredTrades.length === 0 ? (
+                <div className="flex items-center justify-center min-h-[60vh] text-gray-400 text-center">
                   <p>Nenhuma operação registrada no período selecionado.</p>
                 </div>
             ) : (
                 <>
                   <motion.div
-                      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
                       initial="hidden"
                       animate="visible"
                       variants={{
@@ -191,12 +200,12 @@ const DashHistory = () => {
                             }}
                         >
                           <Card
-                              className={`bg-[#2C2F33] border-2 ${getStatusBorder(
+                              className={`bg-[#1E293B] border-2 ${getStatusBorder(
                                   trade.status
-                              )} rounded-2xl shadow-md shadow-black/40 transition-transform duration-200 hover:scale-[1.02]`}
+                              )} rounded-xl shadow-lg transition-transform duration-200 hover:scale-[1.02]`}
                           >
                             <CardContent className="p-5">
-                              <h4 className="text-xl font-bold mb-2 text-cyan-300">{trade.symbol}</h4>
+                              <h4 className="text-lg font-bold mb-2 text-cyan-400">{trade.symbol}</h4>
                               <div className="space-y-1 text-sm text-gray-300">
                                 <p>
                                   <span className="text-gray-400">Corretora:</span>{' '}
@@ -230,7 +239,7 @@ const DashHistory = () => {
                       <div className="flex justify-center mt-6 gap-2">
                         <Button
                             variant="outline"
-                            className="bg-transparent text-white"
+                            className="bg-[#1E293B] text-gray-200 hover:bg-gray-700"
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage((p) => p - 1)}
                         >
@@ -238,7 +247,7 @@ const DashHistory = () => {
                         </Button>
                         <Button
                             variant="outline"
-                            className="bg-transparent text-white"
+                            className="bg-[#1E293B] text-gray-200 hover:bg-gray-700"
                             disabled={currentPage * itemsPerPage >= filteredTrades.length}
                             onClick={() => setCurrentPage((p) => p + 1)}
                         >
