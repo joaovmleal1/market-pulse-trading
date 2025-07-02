@@ -131,7 +131,7 @@ const Home = () => {
 
                     {/* Crypto Logos */}
                     <motion.div
-                        className="flex justify-center items-center space-x-6 mt-12 flex-wrap gap-4"
+                        className="grid grid-cols-3 sm:grid-cols-5 gap-6 justify-items-center mt-12"
                         initial="hidden"
                         animate="visible"
                         variants={{
