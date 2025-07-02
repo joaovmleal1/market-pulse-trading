@@ -57,6 +57,22 @@ const SettingsPage = () => {
     const [brokerageInfo, setBrokerageInfo] = useState<any>(null);
     const [userBrokerageCreated, setUserBrokerageCreated] = useState(false);
 
+    useEffect(() => {
+        const fetchBrokerageInfo = async () => {
+            if (!id) return;
+
+            try {
+                const res = await fetch(`https://api.multitradingob.com/brokerages/${id}`);
+                const data = await res.json();
+                setBrokerageInfo(data);
+            } catch (error) {
+                console.error('Erro ao buscar dados da corretora:', error);
+            }
+        };
+
+        fetchBrokerageInfo();
+    }, [id]);
+
     const fetchOrCreateBrokerageConfig = async () => {
         if (!id || !user?.id) return;
 
