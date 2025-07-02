@@ -40,7 +40,7 @@ const BrokerSidebarMenu = () => {
                 <button
                     onClick={() => navigate(`/settings/${brokerId}`)}
                     className={`flex items-center gap-3 ${
-                        isActive(`/broker/${brokerId}/settings`) ? 'text-[#24C3B5]' : 'text-white'
+                        isActive(`/settings/${brokerId}`) ? 'text-[#24C3B5]' : 'text-white'
                     } hover:text-[#24C3B5]`}
                 >
                     <Settings className="w-5 h-5" /> Configurações

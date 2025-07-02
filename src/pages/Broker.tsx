@@ -107,7 +107,7 @@ export const Broker = () => {
                 }
             });
 
-            setDailyStats({ wins, losses, lucro });
+            setDailyStats({wins, losses, lucro});
 
             const total = data.reduce((acc: number, op: any) => acc + op.pnl, 0);
             setRoiValue(lucro);
@@ -143,7 +143,7 @@ export const Broker = () => {
                 }
             });
 
-            setTotalStats({ wins, losses, lucro });
+            setTotalStats({wins, losses, lucro});
 
             const total = data.reduce((acc: number, op: any) => acc + op.pnl, 0);
             setRoiTotalPercent(total ? (lucro / total) * 100 : 0);
@@ -158,8 +158,17 @@ export const Broker = () => {
         const action = botStatus === 1 ? 'stop' : 'start';
         const url = `https://bot.multitradingob.com/${action}/${userId}/${id}`;
 
+        const username = import.meta.env.VITE_BASIC_AUTH_USER;
+        const password = import.meta.env.VITE_BASIC_AUTH_PASS;
+        const credentials = btoa(`${username}:${password}`);
+
         try {
-            const res = await fetch(url);
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Basic ${credentials}`,
+                },
+            });
             if (res.ok) {
                 setBotStatus((prev) => (prev === 1 ? 0 : 1));
             }
@@ -168,128 +177,166 @@ export const Broker = () => {
         }
     };
 
-    useEffect(() => {
-        if (accessToken) {
-            fetchWallets();
-            fetchBrokerInfo();
-            fetchBotOptions();
-            fetchTradeOrders();
-            fetchAllTrades();
-        }
-    }, [accessToken]);
+        useEffect(() => {
+            if (accessToken) {
+                fetchWallets();
+                fetchBrokerInfo();
+                fetchBotOptions();
+                fetchTradeOrders();
+                fetchAllTrades();
+            }
+        }, [accessToken]);
 
-    const getWinrate = (stats: { wins: number; losses: number }) => {
-        const total = stats.wins + stats.losses;
-        return total === 0 ? 0 : Math.round((stats.wins / total) * 100);
-    };
+        const getWinrate = (stats: { wins: number; losses: number }) => {
+            const total = stats.wins + stats.losses;
+            return total === 0 ? 0 : Math.round((stats.wins / total) * 100);
+        };
 
-    const imageMap = import.meta.glob('@/assets/imgs/*', {
-        eager: true,
-        import: 'default',
-    }) as Record<string, string>;
+        const imageMap = import.meta.glob('@/assets/imgs/*', {
+            eager: true,
+            import: 'default',
+        }) as Record<string, string>;
 
-    const getImagePath = (filename: string) => {
-        const entry = Object.entries(imageMap).find(([key]) => key.endsWith(filename));
-        return entry ? entry[1] : '';
-    };
+        const getImagePath = (filename: string) => {
+            const entry = Object.entries(imageMap).find(([key]) => key.endsWith(filename));
+            return entry ? entry[1] : '';
+        };
 
-    const imageSrc = getImagePath(brokerInfo.icon);
-    const saldo = selectedWallet === 'REAL' ? wallets.REAL ?? 0 : wallets.DEMO ?? 0;
+        const imageSrc = getImagePath(brokerInfo.icon);
+        const saldo = selectedWallet === 'REAL' ? wallets.REAL ?? 0 : wallets.DEMO ?? 0;
 
-    const handleToggleWallet = () => {
-        setSelectedWallet((prev) => (prev === 'REAL' ? 'DEMO' : 'REAL'));
-    };
+        const handleToggleWallet = () => {
+            setSelectedWallet((prev) => (prev === 'REAL' ? 'DEMO' : 'REAL'));
+        };
 
-    return (
-        <div className="min-h-screen bg-[#1E2124] text-white">
-            <BrokerSidebarMenu />
-            <main className="pl-72 pr-6 py-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
-                        <CardContent className="p-6 space-y-2">
-                            <p className="text-gray-400 text-sm">Saldo disponível</p>
-                            <p className={`text-3xl font-bold ${saldoColor}`}>R$ {saldo.toFixed(2)}</p>
-                            <p className="text-gray-400 text-sm">{contaLabel}</p>
-                            <button
-                                onClick={handleToggleWallet}
-                                className="mt-4 w-full px-4 py-2 bg-[#24C3B5]/20 hover:bg-[#24C3B5]/30 text-[#24C3B5] rounded-xl border border-[#24C3B5]/40 transition"
-                            >
-                                Trocar para {isReal ? 'Demo' : 'Real'}
-                            </button>
-                        </CardContent>
-                    </Card>
-
-
-                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
-                        <CardContent className="p-6 space-y-2">
-                            <div className="flex justify-between items-center">
-                                <p className="text-[#24C3B5] font-semibold">🤖 Status do Bot</p>
-                                <span
-                                    className={`px-3 py-1 text-sm rounded-full ${
-                                        botStatus === 1 ? 'bg-green-600' : 'bg-red-600'
-                                    } text-white`}
+        return (
+            <div className="min-h-screen bg-[#1E2124] text-white">
+                <BrokerSidebarMenu/>
+                <main className="pl-72 pr-6 py-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Card
+                            className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                            <CardContent className="p-6 space-y-2">
+                                <p className="text-gray-400 text-sm">Saldo disponível</p>
+                                <p className={`text-3xl font-bold ${saldoColor}`}>R$ {saldo.toFixed(2)}</p>
+                                <p className="text-gray-400 text-sm">{contaLabel}</p>
+                                <button
+                                    onClick={handleToggleWallet}
+                                    className="mt-4 w-full px-4 py-2 bg-[#24C3B5]/20 hover:bg-[#24C3B5]/30 text-[#24C3B5] rounded-xl border border-[#24C3B5]/40 transition"
                                 >
+                                    Trocar para {isReal ? 'Demo' : 'Real'}
+                                </button>
+                            </CardContent>
+                        </Card>
+
+                        <Card
+                            className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10 flex flex-col justify-between">
+                            <CardContent className="p-6 space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <p className="text-[#24C3B5] font-semibold">🤖 Status do Bot</p>
+                                    <span
+                                        className={`px-3 py-1 text-sm rounded-full ${
+                                            botStatus === 1 ? 'bg-[#3ECF8E]' : 'bg-[#FF6B6B]'
+                                        } text-white`}
+                                    >
                   {botStatus === 1 ? 'Ativo' : 'Parado'}
                 </span>
-                            </div>
-                            <p className="text-sm text-gray-400">{isDemo ? 'Conta demo' : 'Conta real'}</p>
-                            {brokerInfo.icon && (
-                                <img
-                                    src={imageSrc}
-                                    alt="Logo corretora"
-                                    className="w-20 h-20 object-contain mx-auto mt-4"
-                                />
-                            )}
-                            <button
-                                onClick={toggleBot}
-                                className={`mt-4 w-full px-4 py-2 rounded-xl font-semibold transition text-white ${
-                                    botStatus === 1 ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
-                                }`}
-                            >
-                                {botStatus === 1 ? 'Parar bot' : 'Ativar bot'}
-                            </button>
-                        </CardContent>
-                    </Card>
+                                </div>
+                                <p className="text-sm text-gray-400">{isDemo ? 'Conta demo' : 'Conta real'}</p>
+                                {brokerInfo.icon && (
+                                    <img
+                                        src={imageSrc}
+                                        alt="Logo corretora"
+                                        className="w-20 h-20 object-contain mx-auto mt-4"
+                                    />
+                                )}
+                                <button
+                                    onClick={toggleBot}
+                                    className={`mt-4 w-full px-4 py-2 rounded-xl font-semibold transition text-white ${
+                                        botStatus === 1 ? 'bg-[#FF6B6B] hover:bg-red-500' : 'bg-[#3ECF8E] hover:bg-emerald-500'
+                                    }`}
+                                >
+                                    {botStatus === 1 ? 'Parar bot' : 'Ativar bot'}
+                                </button>
+                            </CardContent>
+                        </Card>
 
-                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
-                        <CardContent className="p-6">
-                            <p className="text-[#24C3B5] font-semibold mb-2">📈 ROI Diário</p>
-                            <p className={`text-3xl font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>{roiPercent.toFixed(2)}%</p>
-                            <p className="text-sm text-gray-400 mt-2">Lucro: <span className={`font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>R$ {roiValue.toFixed(2)}</span></p>
-                        </CardContent>
-                    </Card>
-                </div>
+                        <Card
+                            className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                            <CardContent className="p-6">
+                                <p className="text-[#24C3B5] font-semibold mb-2">📈 ROI Diário</p>
+                                <p className={`text-3xl font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>{roiPercent.toFixed(2)}%</p>
+                                <p className="text-sm text-gray-400 mt-2">Lucro: <span
+                                    className={`font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>R$ {roiValue.toFixed(2)}</span>
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
-                        <CardContent className="p-6">
-                            <p className="text-[#24C3B5] font-semibold mb-2">📊 Estatísticas Diárias</p>
-                            <p className="text-lg">Winrate: <span className="text-white font-bold">{getWinrate(dailyStats)}%</span></p>
-                            <p className="text-green-400 text-sm">Vitórias: {dailyStats.wins}</p>
-                            <p className="text-red-400 text-sm">Derrotas: {dailyStats.losses}</p>
-                            <p className={`text-sm font-semibold ${dailyStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>Lucro: R$ {dailyStats.lucro.toFixed(2)}</p>
-                        </CardContent>
-                    </Card>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+                        {[{label: '📊 Estatísticas Diárias', stats: dailyStats}, {
+                            label: '📈 Estatísticas Totais',
+                            stats: totalStats
+                        }].map((item, index) => (
+                            <Card key={index}
+                                  className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                                <CardContent className="p-6">
+                                    <p className="text-[#24C3B5] font-semibold mb-2">{item.label}</p>
+                                    <div className="mb-2">
+                                        <p className="text-lg">Winrate: <span
+                                            className="text-white font-bold">{getWinrate(item.stats)}%</span></p>
+                                        <div className="w-full h-3 bg-[#2C2F33] rounded-full mt-1">
+                                            <div
+                                                className="h-3 rounded-full bg-green-400"
+                                                style={{width: `${getWinrate(item.stats)}%`}}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                    <p className="text-green-400 text-sm">Vitórias: {item.stats.wins}</p>
+                                    <p className="text-red-400 text-sm">Derrotas: {item.stats.losses}</p>
+                                    <p className={`text-sm font-semibold ${item.stats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>Lucro:
+                                        R$ {item.stats.lucro.toFixed(2)}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
 
-                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
-                        <CardContent className="p-6">
-                            <p className="text-[#24C3B5] font-semibold mb-2">📈 Estatísticas Totais</p>
-                            <p className="text-lg">Winrate: <span className="text-white font-bold">{getWinrate(totalStats)}%</span></p>
-                            <p className="text-green-400 text-sm">Vitórias: {totalStats.wins}</p>
-                            <p className="text-red-400 text-sm">Derrotas: {totalStats.losses}</p>
-                            <p className={`text-sm font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>Lucro: R$ {totalStats.lucro.toFixed(2)}</p>
-                        </CardContent>
-                    </Card>
+                        <Card
+                            className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                            <CardContent className="p-6">
+                                <p className="text-[#24C3B5] font-semibold mb-2">📉 ROI Total</p>
+                                <p className={`text-3xl font-bold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>{roiTotalPercent.toFixed(2)}%</p>
+                                <p className={`text-sm font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>R$ {totalStats.lucro.toFixed(2)}</p>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
-                        <CardContent className="p-6">
-                            <p className="text-[#24C3B5] font-semibold mb-2">📉 ROI Total</p>
-                            <p className={`text-3xl font-bold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>{roiTotalPercent.toFixed(2)}%</p>
-                            <p className={`text-sm font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>R$ {totalStats.lucro.toFixed(2)}</p>
-                        </CardContent>
-                    </Card>
-                </div>
-            </main>
-        </div>
-    );
-};
+                    <div className="mt-10">
+                        <Card
+                            className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                            <CardContent className="p-6">
+                                <div className="flex justify-between items-center mb-4">
+                                    <p className="text-[#24C3B5] font-semibold">📊 Últimas Operações</p>
+                                    <button className="text-sm text-blue-400 hover:underline">Ver histórico</button>
+                                </div>
+                                {recentOrders.length === 0 ? (
+                                    <p className="text-gray-400">Nenhuma operação registrada hoje.</p>
+                                ) : (
+                                    <ul className="space-y-2 text-sm">
+                                        {recentOrders.slice(0, 5).map((op, idx) => (
+                                            <li key={idx} className="flex justify-between">
+                                                <span>{op.symbol}</span>
+                                                <span
+                                                    className={op.status === 'WIN' ? 'text-green-400' : 'text-red-400'}>
+                        {op.status === 'WIN' ? '+' : '-'}R$ {op.pnl.toFixed(2)}
+                      </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+                </main>
+            </div>
+        );
+    };

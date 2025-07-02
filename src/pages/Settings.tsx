@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import MultiTradingLogo from '@/components/MultiTradingLogo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,7 @@ import { Loader2 } from 'lucide-react';
 import SecureField from '@/components/ui/SecureField';
 import { Switch } from '@/components/ui/switch';
 import { motion } from 'framer-motion';
-import BrokerSidebarMenu from "@/components/ui/BrokerSidebarMenu.tsx";
+import BrokerSidebarMenu from '@/components/ui/BrokerSidebarMenu';
 
 const settingsFields = [
   { label: 'Stop Loss', key: 'stop_loss' },
@@ -33,8 +32,8 @@ const containerVariants = {
   visible: {
     opacity: 1,
     visibility: 'visible',
-    transition: { staggerChildren: 0.08 }
-  }
+    transition: { staggerChildren: 0.08 },
+  },
 };
 
 const itemVariants = {
@@ -42,14 +41,14 @@ const itemVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.05 }
-  })
+    transition: { delay: i * 0.05 },
+  }),
 };
 
 const SettingsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { accessToken } = useSelector((state: any) => state.token);
 
   const [formData, setFormData] = useState<any>({});
@@ -69,7 +68,6 @@ const SettingsPage = () => {
         });
 
         if (res.status === 404) {
-          // Criar bot_options
           const createRes = await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
             method: 'POST',
             headers: {
@@ -174,7 +172,6 @@ const SettingsPage = () => {
     try {
       setIsSaving(true);
 
-      // Atualizar bot_options
       await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
         method: 'PUT',
         headers: {
@@ -196,7 +193,6 @@ const SettingsPage = () => {
         }),
       });
 
-      // Atualizar user_brokerages
       await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
         method: 'PUT',
         headers: {
@@ -225,108 +221,106 @@ const SettingsPage = () => {
 
   return (
       <div className="min-h-screen bg-[#1E2124] text-white">
-      {/* Header */}
-      <BrokerSidebarMenu />
+        <BrokerSidebarMenu />
+        {isLoading || !isFormReady ? (
+            <main className="flex-grow flex items-center justify-center text-white text-lg p-6">
+              Carregando configurações...
+            </main>
+        ) : (
+            <motion.main
+                className="flex flex-col items-center justify-center p-6"
+                initial={{ opacity: 0, visibility: 'hidden', y: 10 }}
+                animate={{ opacity: 1, visibility: 'visible', y: 0 }}
+                transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-3xl font-bold text-white mb-6 text-center">Configurações</h2>
 
-      {isLoading || !isFormReady ? (
-        <main className="flex-grow flex items-center justify-center text-white text-lg p-6">
-          Carregando configurações...
-        </main>
-      ) : (
-        <motion.main
-          className="flex flex-col items-center justify-center p-6"
-          initial={{ opacity: 0, visibility: 'hidden', y: 10 }}
-          animate={{ opacity: 1, visibility: 'visible', y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-3xl font-bold text-white mb-6 text-center">Configurações</h2>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full justify-items-center"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {settingsFields.map((field, index) => {
-              const isBrokerField = field.brokerageOnly;
-              const isEnabled = !isBrokerField || allowedFields.includes(field.key);
-              return (
-                <motion.div
-                  variants={itemVariants}
-                  custom={index}
-                  key={field.key}
-                  className="w-72"
-                >
-                  <Card className={`bg-[#16191C] border border-[#24C3B5]/20 shadow-md rounded-2xl ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                    <CardContent className="p-6 text-center">
-                      {field.type === 'boolean' ? (
-                        <>
-                          <label className="text-white block mb-2">{field.label}</label>
-                          <div className="flex items-center justify-center space-x-2">
-                            <Switch
-                              checked={!!formData[field.key]}
-                              onCheckedChange={(checked) => handleChange(field.key, !!checked)}
-                              disabled={!isEnabled}
-                            />
-                            <span className="text-white">
+              <motion.div
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full justify-items-center"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+              >
+                {settingsFields.map((field, index) => {
+                  const isBrokerField = field.brokerageOnly;
+                  const isEnabled = !isBrokerField || allowedFields.includes(field.key);
+                  return (
+                      <motion.div
+                          variants={itemVariants}
+                          custom={index}
+                          key={field.key}
+                          className="w-72"
+                      >
+                        <Card className={`bg-[#16191C] border border-[#24C3B5]/20 shadow-md rounded-2xl ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                          <CardContent className="p-6 text-center">
+                            {field.type === 'boolean' ? (
+                                <>
+                                  <label className="text-white block mb-2">{field.label}</label>
+                                  <div className="flex items-center justify-center space-x-2">
+                                    <Switch
+                                        checked={!!formData[field.key]}
+                                        onCheckedChange={(checked) => handleChange(field.key, !!checked)}
+                                        disabled={!isEnabled}
+                                    />
+                                    <span className="text-white">
                               {formData[field.key] ? 'Ativado' : 'Desativado'}
                             </span>
-                          </div>
-                        </>
-                      ) : field.type === 'secure' ? (
-                        <SecureField
-                          label={field.label}
-                          name={field.key}
-                          value={formData[field.key] || ''}
-                          onChange={handleChange}
-                          disabled={!isEnabled}
-                        />
-                      ) : (
-                        <>
-                          <label className="text-white block mb-2">{field.label}</label>
-                          <Input
-                            className="bg-[#1F1F1F] border border-[#24C3B5]/20 text-white text-center"
-                            placeholder={`Digite o(a) ${field.label.toLowerCase()}`}
-                            value={formData[field.key] || ''}
-                            onChange={(e) => handleChange(field.key, e.target.value)}
-                            disabled={!isEnabled}
-                          />
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </motion.div>
+                                  </div>
+                                </>
+                            ) : field.type === 'secure' ? (
+                                <SecureField
+                                    label={field.label}
+                                    name={field.key}
+                                    value={formData[field.key] || ''}
+                                    onChange={handleChange}
+                                    disabled={!isEnabled}
+                                />
+                            ) : (
+                                <>
+                                  <label className="text-white block mb-2">{field.label}</label>
+                                  <Input
+                                      className="bg-[#1F1F1F] border border-[#24C3B5]/20 text-white text-center"
+                                      placeholder={`Digite o(a) ${field.label.toLowerCase()}`}
+                                      value={formData[field.key] || ''}
+                                      onChange={(e) => handleChange(field.key, e.target.value)}
+                                      disabled={!isEnabled}
+                                  />
+                                </>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                  );
+                })}
+              </motion.div>
 
-          <div className="flex flex-col items-center gap-4 mt-8 w-72">
-            <Button
-              onClick={handleSaveConfig}
-              className="w-full bg-[#1F332B] text-green-400 border border-[#24C3B5]/40 hover:bg-[#24C3B5]/10"
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Salvando...
-                </div>
-              ) : (
-                'Atualizar Configurações'
-              )}
-            </Button>
+              <div className="flex flex-col items-center gap-4 mt-8 w-72">
+                <Button
+                    onClick={handleSaveConfig}
+                    className="w-full bg-[#1F332B] text-green-400 border border-[#24C3B5]/40 hover:bg-[#24C3B5]/10"
+                    disabled={isSaving}
+                >
+                  {isSaving ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Salvando...
+                      </div>
+                  ) : (
+                      'Atualizar Configurações'
+                  )}
+                </Button>
 
-            <Button
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className="w-full bg-[#1F332B] text-green-400 border border-[#24C3B5]/40 hover:bg-[#24C3B5]/10"
-            >
-              Voltar Sem Salvar
-            </Button>
-          </div>
-        </motion.main>
-      )}
-    </div>
+                <Button
+                    variant="outline"
+                    onClick={() => navigate(-1)}
+                    className="w-full bg-[#1F332B] text-green-400 border border-[#24C3B5]/40 hover:bg-[#24C3B5]/10"
+                >
+                  Voltar Sem Salvar
+                </Button>
+              </div>
+            </motion.main>
+        )}
+      </div>
   );
 };
 
