@@ -227,9 +227,8 @@ export const Broker = () => {
                     <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
                 </div>
             ) : (
-                <main className="p-4 sm:p-6 md:pl-72 md:pr-10 md:py-10 transition-all">
+                <main className="p-4 sm:p-6 md:pl-72 md:pr-10 md:py-10 pt-20 transition-all">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* Saldo e Troca */}
                         <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
                             <CardContent className="p-5 space-y-2">
                                 <p className="text-gray-400 text-sm">Saldo disponível</p>
@@ -244,7 +243,6 @@ export const Broker = () => {
                             </CardContent>
                         </Card>
 
-                        {/* Status do Bot */}
                         <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
                             <CardContent className="p-5 space-y-3">
                                 <div className="flex justify-between items-center">
@@ -278,7 +276,6 @@ export const Broker = () => {
                             </CardContent>
                         </Card>
 
-                        {/* ROI Diário */}
                         <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
                             <CardContent className="p-5">
                                 <p className="text-cyan-400 font-semibold mb-1">📈 ROI Diário</p>
@@ -303,69 +300,75 @@ export const Broker = () => {
                         </Card>
                     </div>
 
-                    {/* Estatísticas diárias e totais */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
                         {[{ label: '📊 Estatísticas Diárias', stats: dailyStats }, { label: '📈 Estatísticas Totais', stats: totalStats }].map((item, index) => (
                             <Card key={index} className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
                                 <CardContent className="p-5">
                                     <p className="text-cyan-400 font-semibold mb-2">{item.label}</p>
-                                    <p className="text-lg">Winrate: <span className="font-bold text-white">{getWinrate(item.stats)}%</span></p>
-                                    <div className="w-full h-3 bg-[#2C2F33] rounded-full mt-1 mb-2">
+                                    <p className="text-lg">
+                                        Winrate: <span className="font-bold text-green-400">{getWinrate(item.stats)}%</span>
+                                    </p>
+                                    <p className="text-sm text-gray-400">
+                                        Derrotas: <span className="font-bold text-red-400">{100 - getWinrate(item.stats)}%</span>
+                                    </p>
+                                    <div className="w-full h-4 bg-gray-700 rounded-full overflow-hidden mt-2 flex">
                                         <div
-                                            className="h-3 rounded-full bg-green-400"
+                                            className="h-full bg-green-400"
                                             style={{ width: `${getWinrate(item.stats)}%` }}
                                         ></div>
+                                        <div
+                                            className="h-full bg-red-500"
+                                            style={{ width: `${100 - getWinrate(item.stats)}%` }}
+                                        ></div>
                                     </div>
-                                    <p className="text-green-400 text-sm">Vitórias: {item.stats.wins}</p>
+                                    <p className="text-green-400 text-sm mt-2">Vitórias: {item.stats.wins}</p>
                                     <p className="text-red-400 text-sm">Derrotas: {item.stats.losses}</p>
                                     <p className={`text-sm font-semibold ${item.stats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        Lucro: R$ {item.stats.lucro.toFixed(2)}
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        ))}
+                                    Lucro: R$ {item.stats.lucro.toFixed(2)}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
 
-                        {/* ROI Total */}
-                        <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
-                            <CardContent className="p-5">
-                                <p className="text-cyan-400 font-semibold mb-1">📉 ROI Total</p>
-                                <p className={`text-3xl font-bold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    {roiTotalPercent.toFixed(2)}%
-                                </p>
-                                <p className={`text-sm font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    R$ {totalStats.lucro.toFixed(2)}
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </div>
+            <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
+              <CardContent className="p-5">
+                <p className="text-cyan-400 font-semibold mb-1">📉 ROI Total</p>
+                <p className={`text-3xl font-bold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {roiTotalPercent.toFixed(2)}%
+                </p>
+                <p className={`text-sm font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  R$ {totalStats.lucro.toFixed(2)}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-                    {/* Últimas Operações */}
-                    <div className="mt-10">
-                        <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
-                            <CardContent className="p-5">
-                                <div className="flex justify-between items-center mb-4">
-                                    <p className="text-cyan-400 font-semibold">📊 Últimas Operações</p>
-                                    <button className="text-sm text-cyan-400 hover:text-cyan-300 transition">Ver histórico</button>
-                                </div>
-                                {recentOrders.length === 0 ? (
-                                    <p className="text-gray-400">Nenhuma operação registrada hoje.</p>
-                                ) : (
-                                    <ul className="space-y-2 text-sm">
-                                        {recentOrders.slice(0, 5).map((op, idx) => (
-                                            <li key={idx} className="flex justify-between">
-                                                <span>{op.symbol}</span>
-                                                <span className={op.status === 'WIN' ? 'text-green-400' : 'text-red-400'}>
+          <div className="mt-10">
+            <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
+              <CardContent className="p-5">
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-cyan-400 font-semibold">📊 Últimas Operações</p>
+                  <button className="text-sm text-cyan-400 hover:text-cyan-300 transition">Ver histórico</button>
+                </div>
+                {recentOrders.length === 0 ? (
+                  <p className="text-gray-400">Nenhuma operação registrada hoje.</p>
+                ) : (
+                  <ul className="space-y-2 text-sm">
+                    {recentOrders.slice(0, 5).map((op, idx) => (
+                      <li key={idx} className="flex justify-between">
+                        <span>{op.symbol}</span>
+                        <span className={op.status === 'WIN' ? 'text-green-400' : 'text-red-400'}>
                           {op.status === 'WIN' ? '+' : '-'}R$ {op.pnl.toFixed(2)}
                         </span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </div>
-                </main>
-            )}
-        </div>
-    );
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      )}
+    </div>
+  );
 };
