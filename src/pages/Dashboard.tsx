@@ -131,7 +131,7 @@ const Dashboard = () => {
                     <Card className="bg-[#111827] border border-[#06B6D4]/30 rounded-xl hover:bg-gray-700 transition-all duration-300">
                       <CardContent className="p-4 flex flex-col items-center text-center">
                         <img src={imageSrc} alt={b.brokerage_name} className="w-14 h-14 object-contain mb-3" />
-                        <h3 className="text-lg md:text-xl font-bold mb-2">{b.brokerage_name}</h3>
+                        <h3 className="text-lg md:text-xl font-bold mb-2 text-cyan-400">{b.brokerage_name}</h3>
                         <div className="text-sm text-gray-500 space-y-1">
                           <p><span className="text-gray-500">Status:</span> <span className="text-gray-200">{getStatusLabel(info.bot?.bot_status)}</span></p>
                           <p><span className="text-gray-500">Lucro:</span> <span className="text-cyan-400">R$ {info.bot?.win_value?.toFixed(2) ?? '0.00'}</span></p>
