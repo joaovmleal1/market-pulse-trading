@@ -21,6 +21,9 @@ export const Broker = () => {
     const [dailyStats, setDailyStats] = useState({wins: 0, losses: 0, lucro: 0});
     const [totalStats, setTotalStats] = useState({wins: 0, losses: 0, lucro: 0});
     const [roiTotalPercent, setRoiTotalPercent] = useState<number>(0);
+    const isReal = selectedWallet === 'REAL';
+    const saldoColor = isReal ? 'text-green-400' : 'text-orange-400';
+    const contaLabel = isReal ? 'Conta real' : 'Conta demo';
 
     const fetchWallets = async () => {
         if (!id) return;
@@ -150,7 +153,6 @@ export const Broker = () => {
         }
     };
 
-
     const toggleBot = async () => {
         if (!userId || !id) return;
         const action = botStatus === 1 ? 'stop' : 'start';
@@ -166,7 +168,6 @@ export const Broker = () => {
         }
     };
 
-
     useEffect(() => {
         if (accessToken) {
             fetchWallets();
@@ -181,7 +182,6 @@ export const Broker = () => {
         const total = stats.wins + stats.losses;
         return total === 0 ? 0 : Math.round((stats.wins / total) * 100);
     };
-
 
     const imageMap = import.meta.glob('@/assets/imgs/*', {
         eager: true,
@@ -200,234 +200,96 @@ export const Broker = () => {
         setSelectedWallet((prev) => (prev === 'REAL' ? 'DEMO' : 'REAL'));
     };
 
-    const isReal = selectedWallet === 'REAL';
-    const saldoColor = isReal ? 'text-green-400' : 'text-orange-400';
-    const contaLabel = isReal ? 'Conta real' : 'Conta demo';
-
     return (
         <div className="min-h-screen bg-[#1E2124] text-white">
-            <BrokerSidebarMenu/>
-            <main className="pl-72 pr-4 py-8"> {/* ← padding direito reduzido */}
-                <div className="flex flex-col mb-6">
-                    <div className="flex flex-col items-center mb-4">
-                        {brokerInfo.icon && (
-                            <img
-                                src={imageSrc}
-                                alt={brokerInfo.name}
-                                className="w-14 h-14 object-contain mb-3"
-                            />
-                        )}
-                        <h1 className="text-2xl font-semibold text-white">{brokerInfo.name}</h1>
-                    </div>
-
-                    {/* Card ocupa toda a largura possível */}
-                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 shadow-sm w-full">
-                        <CardContent className="flex items-center justify-between p-6">
-                            <div className="flex flex-col">
-                                <span className="text-sm text-gray-400 mb-1">Seu saldo disponível</span>
-                                <span className={`text-3xl font-bold ${isReal ? 'text-green-400' : 'text-orange-400'}`}>
-                R$ {saldo.toFixed(2)}
-              </span>
-                                <span className="text-sm text-gray-400 mt-1">{contaLabel}</span>
-                            </div>
+            <BrokerSidebarMenu />
+            <main className="pl-72 pr-6 py-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                        <CardContent className="p-6 space-y-2">
+                            <p className="text-gray-400 text-sm">Saldo disponível</p>
+                            <p className={`text-3xl font-bold ${saldoColor}`}>R$ {saldo.toFixed(2)}</p>
+                            <p className="text-gray-400 text-sm">{contaLabel}</p>
                             <button
                                 onClick={handleToggleWallet}
-                                className="px-4 py-2 rounded-lg bg-[#1F332B] text-green-400 hover:bg-[#24C3B5]/10 transition border border-[#24C3B5]/40"
+                                className="mt-4 w-full px-4 py-2 bg-[#24C3B5]/20 hover:bg-[#24C3B5]/30 text-[#24C3B5] rounded-xl border border-[#24C3B5]/40 transition"
                             >
                                 Trocar para {isReal ? 'Demo' : 'Real'}
                             </button>
                         </CardContent>
                     </Card>
-                </div>
 
-                {/* GRID DOS 3 CARDS */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* CARD 1 - Status do Bot */}
-                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                            <span className="text-[#24C3B5]">🤖 Status do Bot</span>
-                            <span
-                                className={`ml-auto text-sm px-2 py-1 rounded-full ${
-                                    botStatus === 1 ? 'bg-green-600' : 'bg-red-600'
-                                } text-white`}
+
+                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                        <CardContent className="p-6 space-y-2">
+                            <div className="flex justify-between items-center">
+                                <p className="text-[#24C3B5] font-semibold">🤖 Status do Bot</p>
+                                <span
+                                    className={`px-3 py-1 text-sm rounded-full ${
+                                        botStatus === 1 ? 'bg-green-600' : 'bg-red-600'
+                                    } text-white`}
+                                >
+                  {botStatus === 1 ? 'Ativo' : 'Parado'}
+                </span>
+                            </div>
+                            <p className="text-sm text-gray-400">{isDemo ? 'Conta demo' : 'Conta real'}</p>
+                            {brokerInfo.icon && (
+                                <img
+                                    src={imageSrc}
+                                    alt="Logo corretora"
+                                    className="w-20 h-20 object-contain mx-auto mt-4"
+                                />
+                            )}
+                            <button
+                                onClick={toggleBot}
+                                className={`mt-4 w-full px-4 py-2 rounded-xl font-semibold transition text-white ${
+                                    botStatus === 1 ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+                                }`}
                             >
-      {botStatus === 1 ? 'Ativo' : 'Parado'}
-    </span>
-                        </h2>
-
-                        <p className="text-sm text-gray-400 mb-2">Tipo de conta:</p>
-                        <span className="text-orange-400 text-sm mb-4">{isDemo ? 'Conta demo' : 'Conta real'}</span>
-
-                        {brokerInfo.icon && (
-                            <img src={imageSrc} alt="Logo corretora" className="w-24 h-auto mb-4"/>
-                        )}
-
-                        <button
-                            onClick={toggleBot}
-                            className={`mt-2 w-full py-2 rounded-md text-sm font-semibold transition ${
-                                botStatus === 1
-                                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                                    : 'bg-green-600 hover:bg-green-700 text-white'
-                            }`}
-                        >
-                            {botStatus === 1 ? 'Parar bot' : 'Ativar bot'}
-                        </button>
+                                {botStatus === 1 ? 'Parar bot' : 'Ativar bot'}
+                            </button>
+                        </CardContent>
                     </Card>
 
-                    {/* CARD 2 - ROI */}
-                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-2 flex justify-between">
-                            <span className="text-[#24C3B5]">📈 ROI Diário</span>
-                            <span className="text-sm text-gray-400">Hoje</span>
-                        </h2>
-                        <p className={`text-2xl font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {roiPercent.toFixed(2)}%
-                        </p>
-                        <div className="mt-2 text-sm text-gray-400">Lucro Acumulado</div>
-                        <div className={`text-lg font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            R$ {roiValue.toFixed(2)}
-                        </div>
-                    </Card>
-
-                    {/* CARD 3 - Operações Recentes */}
-                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-2 flex justify-between">
-                            <span className="text-[#24C3B5]">📊 Operações Recentes</span>
-                            <span className="text-sm text-blue-400 cursor-pointer hover:underline">Ver histórico</span>
-                        </h2>
-                        <div className="space-y-2 text-sm">
-                            {recentOrders.length === 0 && <p className="text-gray-400">Nenhuma operação hoje.</p>}
-                            {recentOrders.slice(0, 5).map((op, idx) => (
-                                <div key={idx} className="flex justify-between">
-                                    <div className="flex gap-2">
-                                        <span>{op.symbol}</span>
-                                        <span className="text-gray-500">
-              ({new Date(op.date_time).toLocaleDateString()})
-            </span>
-                                    </div>
-                                    <span className={op.status === 'WIN' ? 'text-green-400' : 'text-red-400'}>
-            {op.status === 'WIN' ? '+' : '-'}R$ {op.pnl.toFixed(2)}
-          </span>
-                                </div>
-                            ))}
-                        </div>
-                    </Card>
-                </div>
-                {/* Estatísticas e performance diárias */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                    {/* Estatísticas de Trading */}
-                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📊 Estatísticas de Trading Diárias</h2>
-                        <div className="mb-2">
-                            <p className="text-xl font-bold text-white">{getWinrate(dailyStats)}%</p>
-                            <div className="w-full bg-[#2C2F33] h-3 rounded mt-2">
-                                <div
-                                    className="bg-green-400 h-3 rounded"
-                                    style={{width: `${getWinrate(dailyStats)}%`}}
-                                />
-                            </div>
-                        </div>
-                        <div className="mt-4 text-sm space-y-1">
-                            <p className="text-green-400">Vitórias: {dailyStats.wins}</p>
-                            <p className="text-red-400">Derrotas: {dailyStats.losses}</p>
-                            <p className="text-gray-300">Total: {dailyStats.wins + dailyStats.losses}</p>
-                            <p className={`font-semibold ${dailyStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                Lucro: R$ {dailyStats.lucro.toFixed(2)}
-                            </p>
-                        </div>
-                    </Card>
-
-                    {/* Performance diária */}
-                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📈 Performance Diária</h2>
-                        <p className="text-sm text-green-400 mb-1">
-                            Vitórias ({getWinrate(dailyStats)}%)
-                        </p>
-                        <div className="w-full bg-[#2C2F33] h-3 rounded mb-4">
-                            <div
-                                className="bg-green-400 h-3 rounded"
-                                style={{width: `${getWinrate(dailyStats)}%`}}
-                            />
-                        </div>
-                        <p className="text-sm text-red-400 mb-1">
-                            Derrotas ({100 - getWinrate(dailyStats)}%)
-                        </p>
-                        <div className="w-full bg-[#2C2F33] h-3 rounded mb-2">
-                            <div
-                                className="bg-red-400 h-3 rounded"
-                                style={{width: `${100 - getWinrate(dailyStats)}%`}}
-                            />
-                        </div>
-                        <p className="text-sm text-gray-400">
-                            {dailyStats.wins + dailyStats.losses} Total Operações
-                        </p>
+                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                        <CardContent className="p-6">
+                            <p className="text-[#24C3B5] font-semibold mb-2">📈 ROI Diário</p>
+                            <p className={`text-3xl font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>{roiPercent.toFixed(2)}%</p>
+                            <p className="text-sm text-gray-400 mt-2">Lucro: <span className={`font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>R$ {roiValue.toFixed(2)}</span></p>
+                        </CardContent>
                     </Card>
                 </div>
 
-                {/* Estatísticas totais */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                    {/* Estatísticas totais */}
-                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📊 Estatísticas Totais</h2>
-                        <div className="mb-2">
-                            <p className="text-xl font-bold text-white">{getWinrate(totalStats)}%</p>
-                            <div className="w-full bg-[#2C2F33] h-3 rounded mt-2">
-                                <div
-                                    className="bg-green-400 h-3 rounded"
-                                    style={{width: `${getWinrate(totalStats)}%`}}
-                                />
-                            </div>
-                        </div>
-                        <div className="mt-4 text-sm space-y-1">
-                            <p className="text-green-400">Vitórias: {totalStats.wins}</p>
-                            <p className="text-red-400">Derrotas: {totalStats.losses}</p>
-                            <p className="text-gray-300">Total: {totalStats.wins + totalStats.losses}</p>
-                            <p className={`font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                Lucro: R$ {totalStats.lucro.toFixed(2)}
-                            </p>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                        <CardContent className="p-6">
+                            <p className="text-[#24C3B5] font-semibold mb-2">📊 Estatísticas Diárias</p>
+                            <p className="text-lg">Winrate: <span className="text-white font-bold">{getWinrate(dailyStats)}%</span></p>
+                            <p className="text-green-400 text-sm">Vitórias: {dailyStats.wins}</p>
+                            <p className="text-red-400 text-sm">Derrotas: {dailyStats.losses}</p>
+                            <p className={`text-sm font-semibold ${dailyStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>Lucro: R$ {dailyStats.lucro.toFixed(2)}</p>
+                        </CardContent>
                     </Card>
 
-                    {/* Performance total */}
-                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📈 Performance Total</h2>
-                        <p className="text-sm text-green-400 mb-1">
-                            Vitórias ({getWinrate(totalStats)}%)
-                        </p>
-                        <div className="w-full bg-[#2C2F33] h-3 rounded mb-4">
-                            <div
-                                className="bg-green-400 h-3 rounded"
-                                style={{width: `${getWinrate(totalStats)}%`}}
-                            />
-                        </div>
-                        <p className="text-sm text-red-400 mb-1">
-                            Derrotas ({100 - getWinrate(totalStats)}%)
-                        </p>
-                        <div className="w-full bg-[#2C2F33] h-3 rounded mb-2">
-                            <div
-                                className="bg-red-400 h-3 rounded"
-                                style={{width: `${100 - getWinrate(totalStats)}%`}}
-                            />
-                        </div>
-                        <p className="text-sm text-gray-400">
-                            {totalStats.wins + totalStats.losses} Total Operações
-                        </p>
+                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                        <CardContent className="p-6">
+                            <p className="text-[#24C3B5] font-semibold mb-2">📈 Estatísticas Totais</p>
+                            <p className="text-lg">Winrate: <span className="text-white font-bold">{getWinrate(totalStats)}%</span></p>
+                            <p className="text-green-400 text-sm">Vitórias: {totalStats.wins}</p>
+                            <p className="text-red-400 text-sm">Derrotas: {totalStats.losses}</p>
+                            <p className={`text-sm font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>Lucro: R$ {totalStats.lucro.toFixed(2)}</p>
+                        </CardContent>
                     </Card>
 
-                    {/* ROI total */}
-                    <Card className="bg-[#16191C] border border-[#24C3B5]/20 p-4">
-                        <h2 className="text-lg font-semibold mb-4 text-[#24C3B5]">📉 ROI Total</h2>
-                        <p className={`text-3xl font-bold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {roiTotalPercent.toFixed(2)}%
-                        </p>
-                        <p className={`text-lg mt-2 ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            R$ {totalStats.lucro.toFixed(2)}
-                        </p>
+                    <Card className="bg-[#2a2d32]/80 backdrop-blur-md border border-[#24C3B5]/30 rounded-2xl shadow-md shadow-[#24C3B5]/10">
+                        <CardContent className="p-6">
+                            <p className="text-[#24C3B5] font-semibold mb-2">📉 ROI Total</p>
+                            <p className={`text-3xl font-bold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>{roiTotalPercent.toFixed(2)}%</p>
+                            <p className={`text-sm font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>R$ {totalStats.lucro.toFixed(2)}</p>
+                        </CardContent>
                     </Card>
                 </div>
-
             </main>
         </div>
     );
-
 };
