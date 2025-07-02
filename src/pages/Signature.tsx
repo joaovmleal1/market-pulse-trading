@@ -93,33 +93,33 @@ const Signature = () => {
                                     onClick={() => {
                                         if (user) {
                                             const url = `https://pay.kirvano.com/3ed1d972-7047-421a-809f-be816c09fd19?user_id=\${user.id}&email=\${encodeURIComponent(user.email)}`;
-                      window.location.href = url;
-                    }
-                  }}
-                  disabled={!user}
-                >
-                  Assinar plano Semanal/Mensal
-                </Button>
+                                            window.location.href = url;
+                                        }
+                                    }}
+                                    disabled={!user}
+                                >
+                                    Assinar plano Semanal/Mensal
+                                </Button>
 
-                <Button
-                  className="w-full bg-gradient-to-r from-cyan-600 to-cyan-400 hover:brightness-110 text-white"
-                  onClick={() => {
-                    if (user) {
-                      const url = `https://pay.kirvano.com/c9d1c2f5-a627-4902-9400-47f0454c0777?user_id=\${user.id}&email=\${encodeURIComponent(user.email)}`;
-                      window.location.href = url;
-                    }
-                  }}
-                  disabled={!user}
-                >
-                  Assinar plano Diário
-                </Button>
-              </div>
-            </div>
-          </>
-        )}
-      </motion.div>
-    </div>
-  );
+                                <Button
+                                    className="w-full bg-gradient-to-r from-cyan-600 to-cyan-400 hover:brightness-110 text-white"
+                                    onClick={() => {
+                                        if (user) {
+                                            const url = `https://pay.kirvano.com/c9d1c2f5-a627-4902-9400-47f0454c0777?user_id=\${user.id}&email=\${encodeURIComponent(user.email)}`;
+                                            window.location.href = url;
+                                        }
+                                    }}
+                                    disabled={!user}
+                                >
+                                    Assinar plano Diário
+                                </Button>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </motion.div>
+        </div>
+    );
 };
 
 export default Signature;
