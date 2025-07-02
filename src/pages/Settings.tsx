@@ -63,7 +63,12 @@ const SettingsPage = () => {
             if (!id) return;
 
             try {
-                const res = await fetch(`https://api.multitradingob.com/brokerages/${id}`);
+                const res = await fetch(`https://api.multitradingob.com/brokerages/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
                 const data = await res.json();
                 setBrokerageInfo(data);
             } catch (error) {
