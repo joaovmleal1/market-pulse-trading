@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,6 +7,8 @@ import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';
 import BrokerSidebarMenu from "@/components/ui/BrokerSidebarMenu.tsx";
+import { Input } from '@/components/ui/input';
+import { Loader2 } from 'lucide-react';
 
 const BrokerHistory = () => {
   const { accessToken } = useSelector((state: any) => state.token);
@@ -16,6 +19,7 @@ const BrokerHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [dataInicial, setDataInicial] = useState('');
   const [dataFinal, setDataFinal] = useState('');
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 12;
 
   const fetchTrades = async () => {
@@ -31,6 +35,8 @@ const BrokerHistory = () => {
       setTrades(data || []);
     } catch {
       setTrades([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,8 +123,43 @@ const BrokerHistory = () => {
   return (
       <div className="min-h-screen bg-[#1E1E1E] text-white">
         <BrokerSidebarMenu />
-        <main className="pl-72 max-w-6xl mx-auto p-6">
-          {/* Conteúdo conforme enviado acima */}
+        <main className="pl-72 max-w-6xl mx-auto p-4 pt-20 sm:p-6">
+          <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Input type="date" value={dataInicial} onChange={(e) => setDataInicial(e.target.value)} />
+              <Input type="date" value={dataFinal} onChange={(e) => setDataFinal(e.target.value)} />
+              <Button variant="ghost" onClick={limparDatas} className="text-gray-300 border border-gray-600 hover:bg-gray-700">Limpar</Button>
+            </div>
+          </div>
+
+          {loading ? (
+              <div className="flex justify-center items-center h-40">
+                <Loader2 className="animate-spin text-cyan-400 w-8 h-8" />
+              </div>
+          ) : paginatedTrades.length === 0 ? (
+              <div className="text-center text-gray-400">Nenhuma operação encontrada</div>
+          ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {paginatedTrades.map((trade, index) => (
+                    <motion.div
+                        key={index}
+                        className={`border-l-4 p-4 rounded-lg bg-[#111827] ${getStatusBorder(trade.status)}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                    >
+                      <div className="text-sm text-gray-400">{new Date(trade.date_time).toLocaleString()}</div>
+                      <div className="font-semibold text-gray-200">
+                        {brokerNames[trade.brokerage_id] || 'Carregando...'} - {trade.asset}
+                      </div>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-sm">{getStatusIcon(trade.status)} {trade.status}</span>
+                        <span className="text-sm text-gray-400">Entrada: {trade.entry_value}</span>
+                      </div>
+                    </motion.div>
+                ))}
+              </div>
+          )}
         </main>
       </div>
   );
