@@ -70,6 +70,7 @@ const SettingsPage = () => {
             }
         };
 
+        // Garantimos que ele será chamado corretamente
         fetchBrokerageInfo();
     }, [id]);
 
