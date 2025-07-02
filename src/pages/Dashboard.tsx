@@ -49,7 +49,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!accessToken) return;
-
     fetch('https://api.multitradingob.com/brokerages', {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
@@ -99,12 +98,12 @@ const Dashboard = () => {
   };
 
   return (
-      <div className="min-h-screen bg-[#1E1E1E] text-white">
+      <div className="min-h-screen bg-[#0D0F11] text-white flex flex-col lg:flex-row">
         <SidebarMenu />
-        <div className="pl-72 p-6">
+        <div className="flex-1 p-4 md:p-6 lg:pl-72">
           <div className="flex justify-end mb-6">
-            <div className="bg-[#2C2F33] px-4 py-2 rounded-md border border-[#24C3B5]/20">
-              Olá, <span className="text-[#24C3B5] font-semibold">{user?.complete_name}</span>
+            <div className="bg-[#1A1D21] px-4 py-2 rounded-md border border-[#21B0A3]/30 text-sm md:text-base">
+              Olá, <span className="text-[#21B0A3] font-semibold">{user?.complete_name}</span>
             </div>
           </div>
 
@@ -113,11 +112,11 @@ const Dashboard = () => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl font-bold mb-2">Minhas Corretoras</h2>
-            <p className="text-gray-400">Informações gerais por corretora</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">Minhas Corretoras</h2>
+            <p className="text-gray-400 text-sm">Informações gerais por corretora</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
             {brokers.map((b, i) => {
               const info = data[b.id] || {};
               const imageSrc = getImagePath(b.brokerage_icon);
@@ -128,44 +127,18 @@ const Dashboard = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 + i * 0.1 }}
                   >
-                    <Card className="bg-[#2C2F33] border border-[#24C3B5]/30 rounded-xl hover:shadow-md shadow-black/30 transition-all duration-300">
-                      <CardContent className="relative p-6">
-                        <div className="flex flex-col items-center">
-                          <img
-                              src={imageSrc}
-                              alt={b.brokerage_name}
-                              className="w-14 h-14 object-contain mb-4"
-                          />
-                          <h3 className="text-xl font-bold text-white mb-3">{b.brokerage_name}</h3>
-
-                          <div className="text-sm text-gray-300 space-y-1 text-center">
-                            <p>
-                              <span className="text-gray-400">Status:</span>{' '}
-                              <span className="text-white">{getStatusLabel(info.bot?.bot_status)}</span>
-                            </p>
-                            <p>
-                              <span className="text-gray-400">Lucro:</span>{' '}
-                              <span className="text-green-400">
-                            R$ {info.bot?.win_value.toFixed(2) ?? '0.00'}
-                          </span>
-                            </p>
-                            <p>
-                              <span className="text-gray-400">Perdas:</span>{' '}
-                              <span className="text-red-400">
-                            R$ {info.bot?.loss_value.toFixed(2) ?? '0.00'}
-                          </span>
-                            </p>
-                            {info.lastTrade && (
-                                <p>
-                                  <span className="text-gray-400">Última:</span>{' '}
-                                  {info.lastTrade.symbol} — {info.lastTrade.status}
-                                </p>
-                            )}
-                          </div>
+                    <Card className="bg-[#1A1D21] border border-[#21B0A3]/30 rounded-xl hover:shadow-lg transition-all duration-300">
+                      <CardContent className="p-4 flex flex-col items-center text-center">
+                        <img src={imageSrc} alt={b.brokerage_name} className="w-14 h-14 object-contain mb-3" />
+                        <h3 className="text-lg md:text-xl font-bold mb-2">{b.brokerage_name}</h3>
+                        <div className="text-sm text-gray-300 space-y-1">
+                          <p><span className="text-gray-400">Status:</span> <span className="text-white">{getStatusLabel(info.bot?.bot_status)}</span></p>
+                          <p><span className="text-gray-400">Lucro:</span> <span className="text-green-400">R$ {info.bot?.win_value?.toFixed(2) ?? '0.00'}</span></p>
+                          <p><span className="text-gray-400">Perdas:</span> <span className="text-red-400">R$ {info.bot?.loss_value?.toFixed(2) ?? '0.00'}</span></p>
+                          {info.lastTrade && <p><span className="text-gray-400">Última:</span> {info.lastTrade.symbol} — {info.lastTrade.status}</p>}
                         </div>
-
                         <Button
-                            className="mt-6 w-full bg-[#24C3B5] hover:bg-[#1ca79c] transition-all duration-200"
+                            className="mt-4 w-full bg-[#21B0A3] hover:bg-[#1a988f] text-white transition-all"
                             onClick={() => navigate(`/broker/${b.id}`)}
                         >
                           Operar
