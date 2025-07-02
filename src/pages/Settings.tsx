@@ -220,23 +220,26 @@ const SettingsPage = () => {
   const allowedFields = brokerageFieldConfig[id || ''] || [];
 
   return (
-      <div className="min-h-screen bg-[#1E2124] text-white">
+      <div className="min-h-screen bg-[#111827] text-white">
         <BrokerSidebarMenu />
         {isLoading || !isFormReady ? (
-            <main className="flex-grow flex items-center justify-center text-white text-lg p-6">
-              Carregando configurações...
+            <main className="flex-grow flex items-center justify-center p-6">
+              <Loader2 className="animate-spin h-6 w-6 mr-2 text-cyan-400" />
+              <span className="text-gray-300">Carregando configurações...</span>
             </main>
         ) : (
             <motion.main
-                className="flex flex-col items-center justify-center p-6"
-                initial={{ opacity: 0, visibility: 'hidden', y: 10 }}
-                animate={{ opacity: 1, visibility: 'visible', y: 0 }}
+                className="flex flex-col items-center justify-center p-4 md:p-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl font-bold text-white mb-6 text-center">Configurações</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">
+                Configurações do Robô
+              </h2>
 
               <motion.div
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full justify-items-center"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-6xl"
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
@@ -249,20 +252,20 @@ const SettingsPage = () => {
                           variants={itemVariants}
                           custom={index}
                           key={field.key}
-                          className="w-72"
+                          className="w-full"
                       >
-                        <Card className={`bg-[#16191C] border border-[#24C3B5]/20 shadow-md rounded-2xl ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                          <CardContent className="p-6 text-center">
+                        <Card className={`bg-[#1E293B] border border-cyan-500/20 rounded-xl shadow ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                          <CardContent className="p-4">
                             {field.type === 'boolean' ? (
                                 <>
-                                  <label className="text-white block mb-2">{field.label}</label>
-                                  <div className="flex items-center justify-center space-x-2">
+                                  <label className="block text-sm text-gray-200 mb-2">{field.label}</label>
+                                  <div className="flex items-center gap-2">
                                     <Switch
                                         checked={!!formData[field.key]}
                                         onCheckedChange={(checked) => handleChange(field.key, !!checked)}
                                         disabled={!isEnabled}
                                     />
-                                    <span className="text-white">
+                                    <span className="text-sm text-gray-300">
                               {formData[field.key] ? 'Ativado' : 'Desativado'}
                             </span>
                                   </div>
@@ -277,10 +280,10 @@ const SettingsPage = () => {
                                 />
                             ) : (
                                 <>
-                                  <label className="text-white block mb-2">{field.label}</label>
+                                  <label className="block text-sm text-gray-200 mb-2">{field.label}</label>
                                   <Input
-                                      className="bg-[#1F1F1F] border border-[#24C3B5]/20 text-white text-center"
-                                      placeholder={`Digite o(a) ${field.label.toLowerCase()}`}
+                                      className="bg-[#1F1F1F] border border-cyan-500/20 text-white text-center"
+                                      placeholder={`Digite ${field.label.toLowerCase()}`}
                                       value={formData[field.key] || ''}
                                       onChange={(e) => handleChange(field.key, e.target.value)}
                                       disabled={!isEnabled}
@@ -294,10 +297,10 @@ const SettingsPage = () => {
                 })}
               </motion.div>
 
-              <div className="flex flex-col items-center gap-4 mt-8 w-72">
+              <div className="flex flex-col items-center gap-4 mt-8 w-full max-w-sm">
                 <Button
                     onClick={handleSaveConfig}
-                    className="w-full bg-[#1F332B] text-green-400 border border-[#24C3B5]/40 hover:bg-[#24C3B5]/10"
+                    className="w-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
                     disabled={isSaving}
                 >
                   {isSaving ? (
@@ -313,9 +316,9 @@ const SettingsPage = () => {
                 <Button
                     variant="outline"
                     onClick={() => navigate(-1)}
-                    className="w-full bg-[#1F332B] text-green-400 border border-[#24C3B5]/40 hover:bg-[#24C3B5]/10"
+                    className="w-full border border-gray-600 text-gray-300 hover:bg-gray-700"
                 >
-                  Voltar Sem Salvar
+                  Cancelar
                 </Button>
               </div>
             </motion.main>
