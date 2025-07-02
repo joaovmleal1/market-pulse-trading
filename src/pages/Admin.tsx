@@ -88,8 +88,8 @@ const Admin = () => {
     return (
         <div className="min-h-screen bg-[#111827] text-white">
             <SidebarMenu />
-            <main className="lg:pl-72 max-w-6xl mx-auto p-4 md:p-6">
-                <h1 className="text-2xl md:text-4xl font-bold mb-6 text-gray-200">Painel Administrativo</h1>
+            <main className="pt-16 lg:pl-72 max-w-6xl mx-auto p-4 md:p-6">
+            <h1 className="text-2xl md:text-4xl font-bold mb-6 text-gray-200">Painel Administrativo</h1>
 
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                     <div className="flex gap-2 flex-wrap">
