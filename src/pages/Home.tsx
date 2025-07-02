@@ -119,16 +119,6 @@ const Home = () => {
                         </motion.div>
                     </motion.div>
 
-                    {/* Spinner decorativo */}
-                    <motion.div
-                        className="flex justify-center mt-12"
-                        initial={{ rotate: 0 }}
-                        animate={{ rotate: 360 }}
-                        transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-                    >
-                        <Loader2 className="w-12 h-12 text-[#00E0FF] opacity-20" />
-                    </motion.div>
-
                     {/* Crypto Logos */}
                     <motion.div
                         className="grid grid-cols-3 sm:grid-cols-5 gap-6 justify-items-center mt-12"
