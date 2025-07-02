@@ -82,11 +82,11 @@ const UserProfile = () => {
     return (
         <div className="min-h-screen bg-[#1E1E1E] text-white">
             <SidebarMenu />
-            <main className="pl-72 pr-8 py-10 max-w-4xl mx-auto">
+            <main className="md:pl-72 p-4 md:pr-8 py-10 max-w-4xl mx-auto">
                 <h2 className="text-3xl font-bold mb-6">Editar Perfil</h2>
 
                 <motion.div
-                    className="space-y-6 bg-[#2C2F33] p-6 rounded-xl border border-[#24C3B5]/20 shadow-md"
+                    className="space-y-6 bg-[#111827] p-6 rounded-xl border border-cyan-500/20 shadow-md"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -97,7 +97,7 @@ const UserProfile = () => {
                             name="complete_name"
                             value={form.complete_name}
                             onChange={handleChange}
-                            className="transition-all duration-300 bg-[#1E1E1E] text-white border border-gray-600 mt-1 focus:ring-2 focus:ring-[#24C3B5] focus:outline-none"
+                            className="bg-[#1E1E1E] text-white border border-gray-600 mt-1 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
                         />
                     </div>
 
@@ -108,7 +108,7 @@ const UserProfile = () => {
                             type="email"
                             value={form.email}
                             onChange={handleChange}
-                            className="transition-all duration-300 bg-[#1E1E1E] text-white border border-gray-600 mt-1 focus:ring-2 focus:ring-[#24C3B5] focus:outline-none"
+                            className="bg-[#1E1E1E] text-white border border-gray-600 mt-1 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
                         />
                     </div>
 
@@ -123,7 +123,7 @@ const UserProfile = () => {
                                 <Input
                                     {...inputProps}
                                     name="phone_number"
-                                    className="transition-all duration-300 bg-[#1E1E1E] text-white border border-gray-600 mt-1 focus:ring-2 focus:ring-[#24C3B5] focus:outline-none"
+                                    className="bg-[#1E1E1E] text-white border border-gray-600 mt-1 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
                                 />
                             )}
                         </InputMask>
@@ -138,11 +138,11 @@ const UserProfile = () => {
                                 value={form.old_password}
                                 onChange={handleChange}
                                 placeholder="Obrigatória para alterar senha"
-                                className="transition-all duration-300 bg-[#1E1E1E] text-white border border-gray-600 mt-1 pr-10 focus:ring-2 focus:ring-[#24C3B5] focus:outline-none"
+                                className="bg-[#1E1E1E] text-white border border-gray-600 mt-1 pr-10 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
                             />
                             <button
                                 type="button"
-                                className="absolute top-9 right-3 text-gray-400 hover:text-white transition"
+                                className="absolute top-9 right-3 text-gray-400 hover:text-white"
                                 onClick={() => setShowOldPassword((prev) => !prev)}
                             >
                                 {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -157,11 +157,11 @@ const UserProfile = () => {
                                 value={form.password}
                                 onChange={handleChange}
                                 placeholder="Deixe em branco para manter a senha"
-                                className="transition-all duration-300 bg-[#1E1E1E] text-white border border-gray-600 mt-1 pr-10 focus:ring-2 focus:ring-[#24C3B5] focus:outline-none"
+                                className="bg-[#1E1E1E] text-white border border-gray-600 mt-1 pr-10 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
                             />
                             <button
                                 type="button"
-                                className="absolute top-9 right-3 text-gray-400 hover:text-white transition"
+                                className="absolute top-9 right-3 text-gray-400 hover:text-white"
                                 onClick={() => setShowPassword((prev) => !prev)}
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -173,7 +173,7 @@ const UserProfile = () => {
                         <Button
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="mt-2 bg-[#24C3B5] hover:bg-[#1ca79c] transition-all duration-300"
+                            className="mt-2 bg-cyan-500 hover:bg-cyan-600 transition-all duration-300"
                         >
                             {loading ? 'Salvando...' : 'Salvar alterações'}
                         </Button>
