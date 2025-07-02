@@ -1,5 +1,5 @@
 
-import { useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,6 +23,7 @@ export const Broker = () => {
     const [totalStats, setTotalStats] = useState({ wins: 0, losses: 0, lucro: 0 });
     const [roiTotalPercent, setRoiTotalPercent] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
+    const navigate = useNavigate();
 
     const isReal = selectedWallet === 'REAL';
     const saldoColor = isReal ? 'text-green-400' : 'text-orange-400';
@@ -348,7 +349,8 @@ export const Broker = () => {
               <CardContent className="p-5">
                 <div className="flex justify-between items-center mb-4">
                   <p className="text-cyan-400 font-semibold">📊 Últimas Operações</p>
-                  <button className="text-sm text-cyan-400 hover:text-cyan-300 transition">Ver histórico</button>
+                  <button className="text-sm text-cyan-400 hover:text-cyan-300 transition"
+                          onClick={() => navigate(`/broker/${id}/history`)} >Ver histórico</button>
                 </div>
                 {recentOrders.length === 0 ? (
                   <p className="text-gray-400">Nenhuma operação registrada hoje.</p>
