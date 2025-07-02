@@ -90,6 +90,7 @@ const Register = () => {
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
+              viewport={{ once: true }}
           />
         </div>
     );
@@ -102,6 +103,7 @@ const Register = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
             className="w-full max-w-md"
+            viewport={{ once: true }}
         >
           <Card className="bg-[#1F2937] border border-cyan-700/30 shadow-xl rounded-xl">
             <CardHeader className="text-center">
@@ -110,6 +112,7 @@ const Register = () => {
                     whileHover={{ scale: 1.05 }}
                     onClick={() => navigate('/')}
                     className="text-cyan-300 hover:text-white text-sm flex items-center gap-1"
+                    viewport={{ once: true }}
                 >
                   ← Voltar ao Início
                 </motion.button>
@@ -122,6 +125,7 @@ const Register = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                   className="text-2xl text-white font-bold"
+                  viewport={{ once: true }}
               >
                 Criar Conta
               </motion.h2>
@@ -143,6 +147,7 @@ const Register = () => {
                       className="w-full rounded-lg px-4 py-2 bg-[#111827] border border-cyan-700/20 text-white placeholder-cyan-400 outline-none focus:ring-2 focus:ring-cyan-500"
                       whileFocus={{ scale: 1.01 }}
                       transition={{ type: 'spring', stiffness: 300 }}
+                      viewport={{ once: true }}
                   />
                 </div>
 
@@ -158,6 +163,7 @@ const Register = () => {
                       className="w-full rounded-lg px-4 py-2 bg-[#111827] border border-cyan-700/20 text-white placeholder-cyan-400 outline-none focus:ring-2 focus:ring-cyan-500"
                       whileFocus={{ scale: 1.01 }}
                       transition={{ type: 'spring', stiffness: 300 }}
+                      viewport={{ once: true }}
                   />
                 </div>
 
@@ -174,6 +180,7 @@ const Register = () => {
                         className="w-full rounded-lg px-4 py-2 bg-[#111827] border border-cyan-700/20 text-white placeholder-cyan-400 outline-none focus:ring-2 focus:ring-cyan-500"
                         whileFocus={{ scale: 1.01 }}
                         transition={{ type: 'spring', stiffness: 300 }}
+                        viewport={{ once: true }}
                     />
                     <button
                         type="button"
@@ -199,6 +206,7 @@ const Register = () => {
                         className="w-full rounded-lg px-4 py-2 bg-[#111827] border border-cyan-700/20 text-white placeholder-cyan-400 outline-none focus:ring-2 focus:ring-cyan-500"
                         whileFocus={{ scale: 1.01 }}
                         transition={{ type: 'spring', stiffness: 300 }}
+                        viewport={{ once: true }}
                     />
                     <button
                         type="button"
@@ -217,6 +225,7 @@ const Register = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={loading}
+                    viewport={{ once: true }}
                 >
                   {loading ? (
                       <motion.div
@@ -224,6 +233,7 @@ const Register = () => {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.3 }}
+                          viewport={{ once: true }}
                       >
                         <svg
                             className="animate-spin h-5 w-5 text-white"
@@ -258,6 +268,7 @@ const Register = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
                   className="mt-6 text-center"
+                  viewport={{ once: true }}
               >
                 <p className="text-cyan-100">
                   Já tem uma conta?{' '}
