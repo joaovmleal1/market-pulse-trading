@@ -134,7 +134,7 @@ const DashHistory = () => {
   return (
       <div className="min-h-screen bg-[#111827] text-white">
         <SidebarMenu />
-        <main className="pl-72 md:pl-72 max-w-6xl mx-auto p-6">
+        <main className="lg:pl-72 pl-4 pr-4 max-w-6xl mx-auto pt-20 pb-10">
           <div className="mb-4">
             <h2 className="text-2xl font-bold mb-1 text-cyan-400">Histórico de Operações</h2>
             <p className="text-sm text-gray-400 mb-4">Total: {filteredTrades.length}</p>
