@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Signature = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
 
     return (
         <div className="min-h-screen bg-[#111827] text-white flex items-center justify-center p-4 sm:p-6">
@@ -22,7 +22,7 @@ const Signature = () => {
                     <Button
                         variant="ghost"
                         className="text-gray-400 hover:text-cyan-300"
-                        onClick={() => navigate('/')}
+                        onClick={() =>{ logout();navigate('/');}}
                     >
                         Voltar
                     </Button>
