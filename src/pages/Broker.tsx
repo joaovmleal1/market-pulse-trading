@@ -232,7 +232,7 @@ export const Broker = () => {
                         <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
                             <CardContent className="p-5 space-y-2">
                                 <p className="text-gray-400 text-sm">Saldo disponível</p>
-                                <p className={`text-3xl font-bold ${saldoColor}`}>R$ {saldo.toFixed(2)}</p>
+                                <p className={`text-3xl font-bold ${saldoColor}`}>$ {saldo.toFixed(2)}</p>
                                 <p className="text-gray-400 text-sm">{contaLabel}</p>
                                 <button
                                     onClick={handleToggleWallet}
@@ -293,7 +293,7 @@ export const Broker = () => {
                                             roiValue >= 0 ? 'text-green-400' : 'text-red-400'
                                         }`}
                                     >
-                    R$ {roiValue.toFixed(2)}
+                    $ {roiValue.toFixed(2)}
                   </span>
                                 </p>
                             </CardContent>
@@ -324,7 +324,7 @@ export const Broker = () => {
                                     <p className="text-green-400 text-sm mt-2">Vitórias: {item.stats.wins}</p>
                                     <p className="text-red-400 text-sm">Derrotas: {item.stats.losses}</p>
                                     <p className={`text-sm font-semibold ${item.stats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    Lucro: R$ {item.stats.lucro.toFixed(2)}
+                                    Lucro: $ {item.stats.lucro.toFixed(2)}
                   </p>
                 </CardContent>
               </Card>
@@ -337,7 +337,7 @@ export const Broker = () => {
                   {roiTotalPercent.toFixed(2)}%
                 </p>
                 <p className={`text-sm font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  R$ {totalStats.lucro.toFixed(2)}
+                  $ {totalStats.lucro.toFixed(2)}
                 </p>
               </CardContent>
             </Card>
@@ -358,7 +358,7 @@ export const Broker = () => {
                       <li key={idx} className="flex justify-between">
                         <span>{op.symbol}</span>
                         <span className={op.status === 'WIN' ? 'text-green-400' : 'text-red-400'}>
-                          {op.status === 'WIN' ? '+' : '-'}R$ {op.pnl.toFixed(2)}
+                          {op.status === 'WIN' ? '+' : '-'}$ {op.pnl.toFixed(2)}
                         </span>
                       </li>
                     ))}
