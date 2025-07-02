@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -98,12 +99,12 @@ const Dashboard = () => {
   };
 
   return (
-      <div className="min-h-screen bg-[#0D0F11] text-white flex flex-col lg:flex-row">
+      <div className="min-h-screen bg-[#1E293B] text-gray-200 flex flex-col lg:flex-row">
         <SidebarMenu />
         <div className="flex-1 p-4 md:p-6 lg:pl-72">
           <div className="flex justify-end mb-6">
-            <div className="bg-[#1A1D21] px-4 py-2 rounded-md border border-[#21B0A3]/30 text-sm md:text-base">
-              Olá, <span className="text-[#21B0A3] font-semibold">{user?.complete_name}</span>
+            <div className="bg-[#111827] px-4 py-2 rounded-md border border-[#06B6D4]/30 text-sm md:text-base">
+              Olá, <span className="text-[#06B6D4] font-semibold">{user?.complete_name}</span>
             </div>
           </div>
 
@@ -113,7 +114,7 @@ const Dashboard = () => {
               transition={{ duration: 0.5 }}
           >
             <h2 className="text-2xl md:text-3xl font-bold mb-2">Minhas Corretoras</h2>
-            <p className="text-gray-400 text-sm">Informações gerais por corretora</p>
+            <p className="text-gray-500 text-sm">Informações gerais por corretora</p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
@@ -127,18 +128,18 @@ const Dashboard = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 + i * 0.1 }}
                   >
-                    <Card className="bg-[#1A1D21] border border-[#21B0A3]/30 rounded-xl hover:shadow-lg transition-all duration-300">
+                    <Card className="bg-[#111827] border border-[#06B6D4]/30 rounded-xl hover:bg-gray-700 transition-all duration-300">
                       <CardContent className="p-4 flex flex-col items-center text-center">
                         <img src={imageSrc} alt={b.brokerage_name} className="w-14 h-14 object-contain mb-3" />
                         <h3 className="text-lg md:text-xl font-bold mb-2">{b.brokerage_name}</h3>
-                        <div className="text-sm text-gray-300 space-y-1">
-                          <p><span className="text-gray-400">Status:</span> <span className="text-white">{getStatusLabel(info.bot?.bot_status)}</span></p>
-                          <p><span className="text-gray-400">Lucro:</span> <span className="text-green-400">R$ {info.bot?.win_value?.toFixed(2) ?? '0.00'}</span></p>
-                          <p><span className="text-gray-400">Perdas:</span> <span className="text-red-400">R$ {info.bot?.loss_value?.toFixed(2) ?? '0.00'}</span></p>
-                          {info.lastTrade && <p><span className="text-gray-400">Última:</span> {info.lastTrade.symbol} — {info.lastTrade.status}</p>}
+                        <div className="text-sm text-gray-500 space-y-1">
+                          <p><span className="text-gray-500">Status:</span> <span className="text-gray-200">{getStatusLabel(info.bot?.bot_status)}</span></p>
+                          <p><span className="text-gray-500">Lucro:</span> <span className="text-cyan-400">R$ {info.bot?.win_value?.toFixed(2) ?? '0.00'}</span></p>
+                          <p><span className="text-gray-500">Perdas:</span> <span className="text-red-400">R$ {info.bot?.loss_value?.toFixed(2) ?? '0.00'}</span></p>
+                          {info.lastTrade && <p><span className="text-gray-500">Última:</span> {info.lastTrade.symbol} — {info.lastTrade.status}</p>}
                         </div>
                         <Button
-                            className="mt-4 w-full bg-[#21B0A3] hover:bg-[#1a988f] text-white transition-all"
+                            className="mt-4 w-full bg-[#06B6D4] hover:bg-[#67E8F9] text-gray-200 transition-all"
                             onClick={() => navigate(`/broker/${b.id}`)}
                         >
                           Operar
