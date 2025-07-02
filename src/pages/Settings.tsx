@@ -335,14 +335,18 @@ const SettingsPage = () => {
                     </motion.div>
 
                     {showCreateAccountButton && (
-                        <a
-                            href={brokerageInfo.brokerage_register_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-6 inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-cyan-400 border border-cyan-500/20 rounded-lg hover:text-cyan-300 hover:bg-cyan-500/10 transition"
+                        <Button
+                            asChild
+                            className="w-full mt-6 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300 hover:bg-cyan-500/10"
                         >
-                            Criar Conta na Corretora
-                        </a>
+                            <a
+                                href={brokerageInfo.brokerage_register_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Criar Conta na Corretora
+                            </a>
+                        </Button>
                     )}
 
                     <div className="flex flex-col items-center gap-4 mt-8 w-full max-w-sm">
