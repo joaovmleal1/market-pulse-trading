@@ -25,6 +25,8 @@ const settingsFields = [
 
 const brokerageFieldConfig: Record<string, string[]> = {
     '1': ['api_key'],
+    '2': ['brokerage_username', 'brokerage_password'],
+    '3': ['brokerage_username', 'brokerage_password'],
 };
 
 const containerVariants = {
