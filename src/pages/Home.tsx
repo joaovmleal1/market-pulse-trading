@@ -8,46 +8,45 @@ import AnimatedCounter from '@/components/AnimatedCounter';
 import NewsSection from '@/components/NewsSection';
 import TradingViewChart from '@/components/TradingViewChart';
 import MultiTradingLogo from '@/components/MultiTradingLogo';
-import heroImage from '@/assets/logo.png';
 
 const features = [
     {
         icon: BarChart3,
         title: 'Análise Avançada',
-        description: 'Ferramentas profissionais de análise técnica com indicadores em tempo real para decisões inteligentes.'
+        description: 'Ferramentas profissionais de análise técnica com indicadores em tempo real para decisões inteligentes.',
     },
     {
         icon: Shield,
         title: 'Segurança Total',
-        description: 'Criptografia de nível bancário e autenticação multi-fator para proteger seus investimentos.'
+        description: 'Criptografia de nível bancário e autenticação multi-fator para proteger seus investimentos.',
     },
     {
         icon: Zap,
         title: 'Execução Rápida',
-        description: 'Orders executadas em milissegundos com conexão direta às principais exchanges globais.'
+        description: 'Orders executadas em milissegundos com conexão direta às principais exchanges globais.',
     },
     {
         icon: TrendingUp,
         title: 'Trading Automatizado',
-        description: 'Bots inteligentes e estratégias automatizadas para maximizar seus lucros 24/7.'
+        description: 'Bots inteligentes e estratégias automatizadas para maximizar seus lucros 24/7.',
     },
     {
         icon: Users,
         title: 'Comunidade Ativa',
-        description: 'Conecte-se com traders experientes e aprenda com os melhores do mercado.'
+        description: 'Conecte-se com traders experientes e aprenda com os melhores do mercado.',
     },
     {
         icon: Smartphone,
         title: 'App Mobile',
-        description: 'Trade em qualquer lugar com nosso aplicativo otimizado para dispositivos móveis.'
-    }
+        description: 'Trade em qualquer lugar com nosso aplicativo otimizado para dispositivos móveis.',
+    },
 ];
 
 const stats = [
     { value: 50000, prefix: '+', suffix: '', label: 'Usuários Ativos' },
     { value: 2500000, prefix: 'R$ ', suffix: '+', label: 'Volume Negociado' },
     { value: 98, prefix: '', suffix: '%', label: 'Uptime da Plataforma' },
-    { value: 150, prefix: '+', suffix: '', label: 'Países Atendidos' }
+    { value: 150, prefix: '+', suffix: '', label: 'Países Atendidos' },
 ];
 
 const Home = () => {
@@ -58,13 +57,11 @@ const Home = () => {
             <header className="relative z-50 px-6 py-4 bg-background/80 backdrop-blur-md border-b border-border/50">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <MultiTradingLogo size="md" />
-
                     <nav className="hidden md:flex items-center space-x-8">
                         <a href="#features" className="text-muted-foreground hover:text-primary transition-smooth">Recursos</a>
                         <a href="#stats" className="text-muted-foreground hover:text-primary transition-smooth">Estatísticas</a>
                         <a href="#contact" className="text-muted-foreground hover:text-primary transition-smooth">Contato</a>
                     </nav>
-
                     <div className="flex items-center space-x-4">
                         <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>Login</Button>
                         <Button variant="default" size="sm" onClick={() => navigate('/register')}>Começar Agora</Button>
@@ -73,7 +70,7 @@ const Home = () => {
             </header>
 
             <section className="relative gradient-hero min-h-screen flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10" style={{ backgroundImage: `url(${heroImage})` }}></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-background to-muted opacity-10" />
                 <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
                     <div className="slide-up">
                         <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
