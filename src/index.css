@@ -2,37 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Multi Trading OB Design System - Technological Trading Aesthetic */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base colors for light mode */
+    --background: 220 26% 4%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 220 20% 6%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 20% 6%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Crypto green as primary */
+    --primary: 158 64% 52%;
+    --primary-foreground: 220 26% 4%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Tech blue as secondary */
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 220 26% 4%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 20% 14%;
+    --muted-foreground: 220 14% 71%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 220 26% 4%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 20% 14%;
+    --input: 220 20% 14%;
+    --ring: 158 64% 52%;
 
-    --radius: 0.5rem;
+    /* Trading specific colors */
+    --success: 158 64% 52%;
+    --success-foreground: 220 26% 4%;
+    --warning: 48 96% 53%;
+    --warning-foreground: 220 26% 4%;
+    --profit: 158 64% 52%;
+    --loss: 0 84% 60%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(158 64% 52%), hsl(217 91% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 26% 4%) 0%, hsl(220 20% 6%) 50%, hsl(220 26% 4%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 20% 6%), hsl(220 20% 8%));
+
+    /* Glows and shadows */
+    --glow-primary: 0 0 20px hsl(158 64% 52% / 0.3);
+    --glow-secondary: 0 0 20px hsl(217 91% 60% / 0.3);
+    --shadow-elevated: 0 10px 25px -3px hsl(220 26% 4% / 0.7);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -97,5 +123,125 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Custom utility classes for trading aesthetics */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .glow-secondary {
+    box-shadow: var(--glow-secondary);
+  }
+
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  /* Trading specific animations */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .slide-up {
+    animation: slide-up 0.6s ease-out;
+  }
+
+  .fade-in-scale {
+    animation: fade-in-scale 0.8s ease-out;
+  }
+}
+
+@layer utilities {
+  /* Keyframes for animations */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(158 64% 52% / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px hsl(158 64% 52% / 0.6);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in-scale {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Trading number animations */
+  @keyframes number-up {
+    from {
+      color: hsl(var(--success));
+      transform: translateY(5px);
+    }
+    to {
+      color: hsl(var(--foreground));
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes number-down {
+    from {
+      color: hsl(var(--destructive));
+      transform: translateY(-5px);
+    }
+    to {
+      color: hsl(var(--foreground));
+      transform: translateY(0);
+    }
+  }
+
+  .number-up {
+    animation: number-up 0.5s ease-out;
+  }
+
+  .number-down {
+    animation: number-down 0.5s ease-out;
   }
 }
