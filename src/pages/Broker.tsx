@@ -29,31 +29,84 @@ export const Broker = () => {
     const saldoColor = isReal ? 'text-green-400' : 'text-orange-400';
     const contaLabel = isReal ? 'Conta real' : 'Conta demo';
 
+    const BROKERAGE_CONFIGS: Record<
+        string,
+        {
+            authType: 'api_key' | 'credentials';
+            walletUrl: string;
+        }
+    > = {
+        XOFRE: {
+            authType: 'api_key',
+            walletUrl: 'https://broker-api.mybroker.dev/token/wallets',
+        },
+        AVALON: {
+            authType: 'credentials',
+            walletUrl: 'http://localhost:3001/api/account/balance',
+        },
+        POLARIUM: {
+            authType: 'credentials',
+            walletUrl: 'http://localhost:3002/api/account/balance',
+        },
+    };
+
     const fetchWallets = async () => {
         if (!id) return;
+
         try {
             const res = await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             const data = await res.json();
+            const brokerageName = data?.brokerage_name?.toUpperCase();
 
-            if (data?.api_key) {
+            const config = BROKERAGE_CONFIGS[brokerageName];
+            if (!config) {
+                console.warn('Corretora não configurada');
+                setWallets({});
+                return;
+            }
+
+            let walletData = [];
+
+            if (config.authType === 'api_key' && data?.api_key) {
                 const decodedApiKey = atob(data.api_key);
-                const walletRes = await fetch('https://broker-api.mybroker.dev/token/wallets', {
+                const res = await fetch(config.walletUrl, {
                     headers: { 'api-token': decodedApiKey },
                 });
-                const walletData = await walletRes.json();
-                const real = walletData.find((w: any) => w.type === 'REAL');
-                const demo = walletData.find((w: any) => w.type === 'DEMO');
-                setWallets({
-                    REAL: real?.balance ?? 0,
-                    DEMO: demo?.balance ?? 0,
+                walletData = await res.json();
+            } else if (
+                config.authType === 'credentials' &&
+                data?.brokerage_username &&
+                data?.brokerage_password
+            ) {
+                const res = await fetch(config.walletUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: data.brokerage_username,
+                        password: data.brokerage_password,
+                    }),
                 });
+                walletData = await res.json();
+            } else {
+                console.warn('Credenciais ausentes ou inválidas');
+                setWallets({});
+                return;
             }
-        } catch {
+
+            const real = walletData.find((w: any) => w.type === 'REAL');
+            const demo = walletData.find((w: any) => w.type === 'DEMO');
+            setWallets({
+                REAL: real?.balance ?? 0,
+                DEMO: demo?.balance ?? 0,
+            });
+        } catch (err) {
+            console.error('Erro ao buscar wallets:', err);
             setWallets({});
         }
     };
+
 
     const fetchBrokerInfo = async () => {
         if (!id) return;
