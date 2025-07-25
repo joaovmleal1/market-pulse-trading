@@ -8,7 +8,7 @@ import AnimatedCounter from '@/components/AnimatedCounter';
 import NewsSection from '@/components/NewsSection';
 import TradingViewChart from '@/components/TradingViewChart';
 import MultiTradingLogo from '@/components/MultiTradingLogo';
-import heroImage from '@/assets/hero-trading.jpg';
+import heroImage from '@/assets/logo.png';
 
 const features = [
     {
@@ -73,7 +73,7 @@ const Home = () => {
             </header>
 
             <section className="relative gradient-hero min-h-screen flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20" style={{ backgroundImage: `url(${heroImage})` }}></div>
+                <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10" style={{ backgroundImage: `url(${heroImage})` }}></div>
                 <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
                     <div className="slide-up">
                         <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
