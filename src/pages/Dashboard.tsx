@@ -1,4 +1,3 @@
-// Dashboard.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -48,6 +47,20 @@ const Dashboard = () => {
 
   const [brokers, setBrokers] = useState<Brokerage[]>([]);
   const [data, setData] = useState<Record<number, { bot?: BotOptions; lastTrade?: Trade }>>({});
+  const [showTelegramAlert, setShowTelegramAlert] = useState(false);
+
+  useEffect(() => {
+    // Mostrar alerta se for o primeiro login
+    const hasJoinedTelegram = localStorage.getItem('hasJoinedTelegram');
+    if (!hasJoinedTelegram) {
+      setShowTelegramAlert(true);
+    }
+  }, []);
+
+  const handleConfirmTelegram = () => {
+    localStorage.setItem('hasJoinedTelegram', 'true');
+    setShowTelegramAlert(false);
+  };
 
   useEffect(() => {
     if (!accessToken) return;
@@ -108,6 +121,30 @@ const Dashboard = () => {
               Olá, <span className="text-cyan-400 font-semibold">{user?.complete_name}</span>
             </div>
           </div>
+
+          {showTelegramAlert && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+                <div className="bg-[#1E293B] p-6 rounded-xl border border-cyan-500/20 shadow-xl max-w-sm text-center">
+                  <h3 className="text-xl font-bold mb-3 text-cyan-400">Entre no Canal do Telegram</h3>
+                  <p className="text-sm text-gray-300 mb-4">
+                    Para acompanhar as novidades, alertas e sinais, entre no nosso canal oficial do Telegram.
+                  </p>
+                  <div className="flex flex-col gap-3">
+                    <a
+                        href="https://t.me/+b4uPhME4zSw1MWFh"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-cyan-500 hover:bg-cyan-400 text-white font-semibold py-2 rounded transition-all"
+                    >
+                      Acessar Canal
+                    </a>
+                    <Button onClick={handleConfirmTelegram} className="bg-gray-700 hover:bg-gray-600">
+                      Já entrei
+                    </Button>
+                  </div>
+                </div>
+              </div>
+          )}
 
           <motion.div
               initial={{ y: -20, opacity: 0 }}

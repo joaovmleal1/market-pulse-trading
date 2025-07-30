@@ -2,7 +2,7 @@
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import MultiTradingLogo from '@/components/MultiTradingLogo';
-import { BarChart3, Settings, Clock, LogOut, LayoutDashboard, Shield, Menu } from 'lucide-react';
+import { BarChart3, Settings, Clock, LogOut, LayoutDashboard, Shield, Menu, Send } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -58,6 +58,17 @@ const BrokerSidebarMenu = () => {
                     >
                         <LayoutDashboard className="w-5 h-5" /> Dashboard
                     </button>
+
+                    {/* Link externo para o grupo do Telegram */}
+                    <a
+                        href="https://t.me/+b4uPhME4zSw1MWFh"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-3 py-2 rounded-md w-full text-gray-200 hover:text-cyan-300 transition-all duration-200"
+                    >
+                        <Send className="w-5 h-5" /> Canal Telegram
+                    </a>
+
                     {user?.is_superuser && (
                         <button
                             onClick={() => navigate('/admin')}

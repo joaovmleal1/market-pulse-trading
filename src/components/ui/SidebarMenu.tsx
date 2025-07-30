@@ -1,5 +1,5 @@
 import MultiTradingLogo from '@/components/MultiTradingLogo';
-import { User, LogOut, Clock, BarChart3, Shield, HelpCircle, Menu } from 'lucide-react';
+import { User, LogOut, Clock, BarChart3, Shield, HelpCircle, Menu, Send } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
@@ -57,6 +57,14 @@ const SidebarMenu = () => {
                     >
                         <HelpCircle className="w-5 h-5" /> Central de Ajuda
                     </button>
+                    <a
+                        href="https://t.me/+b4uPhME4zSw1MWFh"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-3 py-2 rounded-md w-full text-gray-200 hover:text-cyan-300 transition-all duration-200"
+                    >
+                        <Send className="w-5 h-5" /> Canal no Telegram
+                    </a>
                 </div>
             </div>
 
@@ -77,6 +85,7 @@ const SidebarMenu = () => {
                 </div>
             )}
 
+            {/* Logout */}
             <div className="pt-4 border-t border-gray-700">
                 <button
                     onClick={() => setShowConfirm(true)}
