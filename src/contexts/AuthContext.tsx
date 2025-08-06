@@ -138,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const credentials = btoa(`${basicUser}:${basicPass}`);
 
             await axios.post(
-                `${api.defaults.baseURL}/create`,
+                `${api.defaults.baseURL}`,
                 {
                     complete_name: name,
                     email,
