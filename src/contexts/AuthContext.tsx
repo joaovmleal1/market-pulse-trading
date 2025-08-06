@@ -12,6 +12,7 @@ interface AuthUser {
     is_superuser: boolean;
     is_active: boolean;
     activated_at: Date;
+    polarium_registered: boolean;
 }
 
 interface AuthContextType {

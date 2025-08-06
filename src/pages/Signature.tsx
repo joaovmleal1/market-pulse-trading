@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +7,11 @@ import { useAuth } from '@/contexts/AuthContext';
 const Signature = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+
+    const isSuperUser = user?.is_superuser;
+    const isRegistered = user?.polarium_registered;
+    const isActive = user?.is_active;
+    const needsRegistration = !isSuperUser && !isRegistered;
 
     return (
         <div className="min-h-screen bg-[#111827] text-white flex items-center justify-center p-4 sm:p-6">
@@ -22,13 +26,43 @@ const Signature = () => {
                     <Button
                         variant="ghost"
                         className="text-gray-400 hover:text-cyan-300"
-                        onClick={() =>{ logout();navigate('/');}}
+                        onClick={() => {
+                            logout();
+                            navigate('/');
+                        }}
                     >
                         Voltar
                     </Button>
                 </div>
 
-                {user?.is_active ? (
+                {needsRegistration ? (
+                    <>
+                        <motion.h1
+                            className="text-2xl sm:text-3xl font-bold text-cyan-400"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            Antes de continuar...
+                        </motion.h1>
+                        <p className="text-gray-300 text-base sm:text-lg leading-relaxed">
+                            Para ter acesso aos planos e começar a operar com inteligência artificial,
+                            é necessário se registrar gratuitamente na nossa plataforma parceira.
+                        </p>
+                        <p className="text-gray-400 text-sm sm:text-base">
+                            Esse registro é rápido, gratuito e garante que você esteja conectado corretamente à infraestrutura da Polarium.
+                        </p>
+                        <Button
+                            className="w-full bg-gradient-to-r from-cyan-600 to-cyan-400 hover:brightness-110 text-white"
+                            onClick={() => {
+                                const url = `https://plataforma.parceira.com.br/registro?ref=SEU-LINK-DE-AFILIADO&user_id=${user?.id}&email=${encodeURIComponent(user?.email ?? '')}`;
+                                window.location.href = url;
+                            }}
+                        >
+                            Registrar na Plataforma Parceira
+                        </Button>
+                    </>
+                ) : isActive ? (
                     <>
                         <motion.h1
                             className="text-2xl sm:text-3xl font-bold text-cyan-400"
