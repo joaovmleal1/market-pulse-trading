@@ -55,7 +55,7 @@ const Signature = () => {
                         <Button
                             className="w-full bg-gradient-to-r from-cyan-600 to-cyan-400 hover:brightness-110 text-white"
                             onClick={() => {
-                                const url = `https://plataforma.parceira.com.br/registro?ref=SEU-LINK-DE-AFILIADO&user_id=${user?.id}&email=${encodeURIComponent(user?.email ?? '')}`;
+                                const url = `https://trade.polariumbroker.com/register?aff=785464&aff_model=revenue&afftrack=`;
                                 window.location.href = url;
                             }}
                         >
