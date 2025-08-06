@@ -56,7 +56,8 @@ const Signature = () => {
                         <Button
                             className="w-full bg-gradient-to-r from-cyan-600 to-cyan-400 hover:brightness-110 text-white"
                             onClick={() => {
-                                const url = `https://trade.polariumbroker.com/register?aff=785464&aff_model=revenue&afftrack=&clickid=${user.id}_${encodeURIComponent(user.email)}`;
+                                const clickid = `${user.id}_${encodeURIComponent(user.email)}`;
+                                const url = `https://trade.polariumbroker.com/register?aff=785464&aff_model=revenue&afftrack=multitrading&clickid=${clickid}`;
                                 window.open(url, '_blank');
                             }}
                         >
