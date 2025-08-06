@@ -9,7 +9,7 @@ const Signature = () => {
     const { user, logout } = useAuth();
 
     const isSuperUser = user?.is_superuser;
-    const isRegistered = user?.polarium_registered;
+    const isRegistered = user?.polarium_registered && user?.avalon_registered && user?.xofre_registered;
     const isActive = user?.is_active;
     const needsRegistration = !isSuperUser && !isRegistered;
 
@@ -46,22 +46,47 @@ const Signature = () => {
                             Antes de continuar...
                         </motion.h1>
                         <p className="text-gray-300 text-base sm:text-lg leading-relaxed">
-                            Para ter acesso aos planos e começar a operar com inteligência artificial e nossos melhores traders,
-                            é necessário se registrar gratuitamente na nossa plataforma parceira.
+                            Para acessar os planos e começar a operar, é necessário se registrar gratuitamente em nossas plataformas parceiras.
                         </p>
                         <p className="text-gray-400 text-sm sm:text-base">
-                            Esse registro é rápido, gratuito e garante que você esteja conectado corretamente à infraestrutura da Polarium.
-                            Lembrando que você deve utilizar o mesmo e-mail cadastrado aqui para evitar problemas de sincronização.
+                            🔸 A <strong>Xofre</strong> roda de forma 100% automática.<br />
+                            🔸 <strong>Polarium</strong> e <strong>Avalon</strong> funcionam com lives e sala VIP exclusiva (Em breve com sinais automáticos também).
                         </p>
-                        <Button
-                            className="w-full bg-gradient-to-r from-cyan-600 to-cyan-400 hover:brightness-110 text-white"
-                            onClick={() => {
-                                const link = `https://trade.polariumbroker.com/register?aff=785464&clickid=uid${user.id}`;
-                                window.open(link, '_blank');
-                            }}
-                        >
-                            Registrar na Plataforma Parceira
-                        </Button>
+                        <p className="text-gray-500 text-xs">
+                            Use o mesmo e-mail do seu cadastro atual para garantir a sincronização correta.
+                        </p>
+
+                        <div className="flex flex-col gap-3 pt-2">
+                            <Button
+                                className="w-full bg-gradient-to-r from-cyan-600 to-cyan-400 hover:brightness-110 text-white"
+                                onClick={() => {
+                                    const link = `https://trade.polariumbroker.com/register?aff=785464&clickid=uid${user.id}`;
+                                    window.open(link, '_blank');
+                                }}
+                            >
+                                Registrar na Polarium
+                            </Button>
+
+                            <Button
+                                className="w-full bg-gradient-to-r from-purple-600 to-purple-400 hover:brightness-110 text-white"
+                                onClick={() => {
+                                    const link = `https://trade.avalonbroker.com/register?aff=752205&clickid=uid${user.id}`;
+                                    window.open(link, '_blank');
+                                }}
+                            >
+                                Registrar na Avalon
+                            </Button>
+
+                            <Button
+                                className="w-full bg-gradient-to-r from-green-600 to-green-400 hover:brightness-110 text-white"
+                                onClick={() => {
+                                    const link = `https://app.xofre.com/auth/register?affiliateId=01JW6Z7KB5J89BBA1J6YNR7D1W`;
+                                    window.open(link, '_blank');
+                                }}
+                            >
+                                Registrar na Xofre (Autônoma)
+                            </Button>
+                        </div>
                     </>
                 ) : isActive ? (
                     <>

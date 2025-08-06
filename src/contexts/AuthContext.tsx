@@ -13,6 +13,8 @@ interface AuthUser {
     is_active: boolean;
     activated_at: Date;
     polarium_registered: boolean;
+    avalon_registered: boolean;
+    xofre_registered: boolean;
 }
 
 interface AuthContextType {
