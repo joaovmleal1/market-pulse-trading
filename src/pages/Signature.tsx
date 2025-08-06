@@ -46,17 +46,18 @@ const Signature = () => {
                             Antes de continuar...
                         </motion.h1>
                         <p className="text-gray-300 text-base sm:text-lg leading-relaxed">
-                            Para ter acesso aos planos e começar a operar com inteligência artificial,
+                            Para ter acesso aos planos e começar a operar com inteligência artificial e nossos melhores traders,
                             é necessário se registrar gratuitamente na nossa plataforma parceira.
                         </p>
                         <p className="text-gray-400 text-sm sm:text-base">
                             Esse registro é rápido, gratuito e garante que você esteja conectado corretamente à infraestrutura da Polarium.
+                            Lembrando que você deve utilizar o mesmo e-mail cadastrado aqui para evitar problemas de sincronização.
                         </p>
                         <Button
                             className="w-full bg-gradient-to-r from-cyan-600 to-cyan-400 hover:brightness-110 text-white"
                             onClick={() => {
                                 const url = `https://trade.polariumbroker.com/register?aff=785464&aff_model=revenue&afftrack=`;
-                                window.location.href = url;
+                                window.open(url, '_blank');
                             }}
                         >
                             Registrar na Plataforma Parceira
@@ -127,7 +128,7 @@ const Signature = () => {
                                     onClick={() => {
                                         if (user) {
                                             const url = `https://pay.kirvano.com/3ed1d972-7047-421a-809f-be816c09fd19?user_id=${user.id}&email=${encodeURIComponent(user.email)}`;
-                                            window.location.href = url;
+                                            window.open(url, '_blank');
                                         }
                                     }}
                                     disabled={!user}
@@ -140,7 +141,7 @@ const Signature = () => {
                                     onClick={() => {
                                         if (user) {
                                             const url = `https://pay.kirvano.com/c9d1c2f5-a627-4902-9400-47f0454c0777?user_id=${user.id}&email=${encodeURIComponent(user.email)}`;
-                                            window.location.href = url;
+                                            window.open(url, '_blank');
                                         }
                                     }}
                                     disabled={!user}
