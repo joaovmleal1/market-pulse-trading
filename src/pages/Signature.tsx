@@ -8,6 +8,7 @@ const Signature = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
+    console.log("USER DATA", user);
     const isSuperUser = user?.is_superuser;
     const isRegistered = user?.polarium_registered && user?.avalon_registered && user?.xofre_registered;
     const isActive = user?.is_active;
