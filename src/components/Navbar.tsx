@@ -25,7 +25,7 @@ export const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-primary rounded-lg">
-              <img src={Logo} alt="Logo" className="h-6 w-auto" />
+              <img src={Logo} alt="Logo" className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold text-foreground">Multi Trading</span>
           </div>
