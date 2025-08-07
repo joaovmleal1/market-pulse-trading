@@ -45,7 +45,11 @@ export const Navbar = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" size="sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.href = "/login"}
+            >
               Login
             </Button>
             <Button variant="default" size="sm" onClick={scrollToSignup}>
