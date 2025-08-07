@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, TrendingUp } from "lucide-react";
+import Logo from "@/assets/logo.png";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,9 +24,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-primary rounded-lg">
-              <TrendingUp className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <img src={Logo} alt="Logo" className="h-10 w-auto" />
             <span className="text-xl font-bold text-foreground">
               Multi Trading
             </span>
