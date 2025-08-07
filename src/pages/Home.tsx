@@ -3,16 +3,16 @@ import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { LiveIndicator } from "@/components/LiveIndicator";
 import { TradingStats } from "@/components/TradingStats";
-
 import { Footer } from "@/components/Footer";
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Star, Play, TrendingUp, Zap, Shield } from "lucide-react";
 import tradingBg from "@/assets/imgs/trading-bg.jpg";
 
-const Index = () => {
-  const [isLive, setIsLive] = useState(true); // Simula se há live ativa
+const Home = () => {
+  const [isLive, setIsLive] = useState(true);
 
   const features = [
     {
@@ -56,37 +56,33 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-hero">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section id="home">
         <HeroSection />
       </section>
 
       {/* Live Section */}
-      <section className="py-20 relative">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            <div className="lg:col-span-2 space-y-8">
-              <div className="text-center lg:text-left">
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                  Acompanhe as Operações em Tempo Real
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Tenha acesso exclusivo às nossas operações ao vivo e veja como 
-                  nossa plataforma gera resultados consistentes todos os dias.
-                </p>
-              </div>
-              
+      <section className="py-12 px-4 md:py-20 md:px-6 relative">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+            <div className="lg:col-span-2 space-y-8 text-center lg:text-left">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
+                Acompanhe as Operações em Tempo Real
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground">
+                Tenha acesso exclusivo às nossas operações ao vivo e veja como nossa plataforma gera resultados consistentes todos os dias.
+              </p>
               <TradingStats />
             </div>
-            
+
             <div className="space-y-6">
-              <LiveIndicator 
-                isLive={isLive} 
+              <LiveIndicator
+                isLive={isLive}
                 viewerCount={847}
-                onJoinLive={() => alert('Redirecionando para a live...')}
+                onJoinLive={() => alert("Redirecionando para a live...")}
               />
-              
+
               <Card className="bg-gradient-card backdrop-blur-sm border-border/50 p-6 shadow-card">
                 <h3 className="font-bold text-foreground mb-3">Próximas Lives</h3>
                 <div className="space-y-2 text-sm">
@@ -110,57 +106,51 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section id="platform" className="py-20 relative">
-        <div 
+      <section id="platform" className="py-20 px-4 md:px-6 relative">
+        <div
           className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: `url(${tradingBg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat"
           }}
         ></div>
-        
-        <div className="container mx-auto px-6 relative z-10">
+
+        <div className="container mx-auto relative z-10">
           <div className="text-center mb-16">
             <Badge variant="outline" className="border-primary text-primary mb-4">
               Tecnologia de Ponta
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-6">
               Por que Escolher o Multi Trading?
             </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Nossa plataforma combina inteligência artificial avançada com anos de experiência 
-              em mercados financeiros para entregar resultados consistentes.
+            <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto">
+              Nossa plataforma combina inteligência artificial avançada com anos de experiência em mercados financeiros para entregar resultados consistentes.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-16">
             {features.map((feature, index) => (
-              <Card 
+              <Card
                 key={index}
                 className="bg-gradient-card backdrop-blur-sm border-border/50 p-8 shadow-card hover:shadow-glow transition-all duration-300 hover:scale-105 text-center"
               >
                 <div className="mx-auto w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
                   <feature.icon className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-4">
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground">
-                  {feature.description}
-                </p>
+                <h3 className="text-xl font-bold text-foreground mb-4">{feature.title}</h3>
+                <p className="text-muted-foreground">{feature.description}</p>
               </Card>
             ))}
           </div>
 
           {/* Proof Section */}
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-foreground mb-8">
-              Resultados Comprovados
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <h3 className="text-2xl font-bold text-foreground mb-8">Resultados Comprovados</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {testimonials.map((testimonial, index) => (
-                <Card 
+                <Card
                   key={index}
                   className="bg-gradient-card backdrop-blur-sm border-border/50 p-6 shadow-card"
                 >
@@ -169,9 +159,7 @@ const Index = () => {
                       <Star key={i} className="h-4 w-4 fill-warning text-warning" />
                     ))}
                   </div>
-                  <p className="text-muted-foreground mb-4 italic">
-                    "{testimonial.comment}"
-                  </p>
+                  <p className="text-muted-foreground mb-4 italic">"{testimonial.comment}"</p>
                   <div>
                     <p className="font-semibold text-foreground">{testimonial.name}</p>
                     <p className="text-sm text-muted-foreground">{testimonial.role}</p>
@@ -184,24 +172,21 @@ const Index = () => {
       </section>
 
       {/* Signup Section */}
-      <section id="signup" className="py-20">
-        <div className="container mx-auto px-6">
+      <section id="signup" className="py-20 px-4 md:px-6">
+        <div className="container mx-auto">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-8">
-                <div>
-                  <Badge variant="outline" className="border-success text-success mb-4">
-                    Oferta Limitada
-                  </Badge>
-                  <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                    Comece a Lucrar
-                    <span className="block text-primary">100% Gratuitamente</span>
-                  </h2>
-                  <p className="text-lg text-muted-foreground mb-8">
-                    Não perca a oportunidade de transformar sua vida financeira. 
-                    Junte-se a milhares de traders que já descobriram o poder do trading automático.
-                  </p>
-                </div>
+              <div className="order-2 lg:order-1 space-y-8">
+                <Badge variant="outline" className="border-success text-success mb-4">
+                  Oferta Limitada
+                </Badge>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-6">
+                  Comece a Lucrar <span className="block text-primary">100% Gratuitamente</span>
+                </h2>
+                <p className="text-base sm:text-lg text-muted-foreground mb-8">
+                  Não perca a oportunidade de transformar sua vida financeira. 
+                  Junte-se a milhares de traders que já descobriram o poder do trading automático.
+                </p>
 
                 <div className="space-y-4">
                   {[
@@ -228,7 +213,7 @@ const Index = () => {
                 </div>
               </div>
 
-              <div className="flex justify-center">
+              <div className="order-1 lg:order-2 flex justify-center">
                 <Card className="bg-gradient-card backdrop-blur-sm border-border/50 p-8 shadow-card max-w-md w-full text-center">
                   <div className="mb-6">
                     <div className="flex items-center justify-center gap-2 mb-3">
@@ -236,9 +221,7 @@ const Index = () => {
                         100% GRATUITO
                       </Badge>
                     </div>
-                    <h3 className="text-2xl font-bold text-foreground mb-2">
-                      Comece a Lucrar Hoje
-                    </h3>
+                    <h3 className="text-2xl font-bold text-foreground mb-2">Comece a Lucrar Hoje</h3>
                     <p className="text-muted-foreground">
                       Junte-se a milhares de traders que já transformaram suas vidas
                     </p>
@@ -258,11 +241,11 @@ const Index = () => {
                     ))}
                   </div>
 
-                  <Button 
-                    variant="default" 
-                    size="lg" 
+                  <Button
+                    variant="default"
+                    size="lg"
                     className="w-full mb-6"
-                    onClick={() => window.open('https://t.me/multitrading_oficial', '_blank')}
+                    onClick={() => window.open("https://t.me/multitrading_oficial", "_blank")}
                   >
                     <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
@@ -294,4 +277,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Home;
