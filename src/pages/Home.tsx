@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Star, Play, TrendingUp, Zap, Shield } from "lucide-react";
-import tradingBg from "@/assets/trading-bg.jpg";
+import tradingBg from "@/assets/imgs/trading-bg.jpg";
 
 const Index = () => {
   const [isLive, setIsLive] = useState(true); // Simula se há live ativa
@@ -259,8 +259,8 @@ const Index = () => {
                   </div>
 
                   <Button 
-                    variant="hero" 
-                    size="xl" 
+                    variant="default" 
+                    size="lg" 
                     className="w-full mb-6"
                     onClick={() => window.open('https://t.me/multitrading_oficial', '_blank')}
                   >
