@@ -24,10 +24,10 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <img src={Logo} alt="Logo" className="h-10 w-auto" />
-            <span className="text-xl font-bold text-foreground">
-              Multi Trading
-            </span>
+            <div className="p-2 bg-gradient-primary rounded-lg">
+              <img src={Logo} alt="Logo" className="h-6 w-auto" />
+            </div>
+            <span className="text-xl font-bold text-foreground">Multi Trading</span>
           </div>
 
           {/* Desktop Navigation */}
