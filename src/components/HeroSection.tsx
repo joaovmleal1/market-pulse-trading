@@ -71,8 +71,8 @@ export const HeroSection = () => {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-slide-up">
             <Button 
-              variant="default" 
-              size="lg"
+              variant="hero" 
+              size="xl"
               onClick={scrollToSignup}
               className="min-w-[280px]"
             >
@@ -82,7 +82,7 @@ export const HeroSection = () => {
             
             <Button 
               variant="outline" 
-              size="lg"
+              size="xl"
               className="min-w-[200px] border-border/50 bg-background/10 backdrop-blur-sm hover:bg-background/20"
             >
               <Play className="h-5 w-5 mr-2" />
