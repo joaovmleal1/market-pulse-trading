@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { LiveIndicator } from "@/components/LiveIndicator";
@@ -12,7 +12,29 @@ import { CheckCircle, Star, Play, TrendingUp, Zap, Shield } from "lucide-react";
 import tradingBg from "@/assets/imgs/trading-bg.jpg";
 
 const Home = () => {
-  const [isLive, setIsLive] = useState(true);
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    const fetchIsLive = async () => {
+      try {
+        const res = await fetch("https://api.multitradingob.com/site-options/all");
+        if (!res.ok) throw new Error("Erro ao buscar opções do site");
+
+        const data = await res.json();
+
+        // Procura pela chave is_live
+        const isLiveOption = data.find((opt: any) => opt.key_name === "is_live");
+
+        if (isLiveOption) {
+          setIsLive(isLiveOption.key_value.toLowerCase() === "true");
+        }
+      } catch (error) {
+        console.error("Erro ao buscar is_live:", error);
+      }
+    };
+
+    fetchIsLive();
+  }, []);
 
   const features = [
     {
