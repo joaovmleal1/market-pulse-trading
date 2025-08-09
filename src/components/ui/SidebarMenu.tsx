@@ -12,13 +12,13 @@ const SidebarMenu = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  // 🔴 Live state
-  const [isLive, setIsLive] = useState(false);
-  const [liveUrl, setLiveUrl] = useState<string | null>(null);
+  // 🔴 Live state — alinhado com BrokerSidebarMenu
+  const [isLive, setIsLive] = useState<boolean>(false);
+  const [liveUrl, setLiveUrl] = useState<string>('https://t.me/+b4uPhME4zSw1MWFh');
 
   const isActive = (path: string) => location.pathname === path;
 
-  // 🔐 Busca is_live e live_url com Basic Auth
+  // 🔐 Busca is_live e live_url com Basic Auth (mesma lógica do BrokerSidebarMenu)
   useEffect(() => {
     const controller = new AbortController();
 
@@ -54,7 +54,7 @@ const SidebarMenu = () => {
         setIsLive(isLiveBool);
 
         const url = map['live_url'] ? String(map['live_url']).trim() : '';
-        setLiveUrl(url || 'https://t.me/multitrading_oficial');
+        if (url) setLiveUrl(url); // mantém default caso não venha nada
       } catch (err: any) {
         if (err?.name !== 'AbortError') {
           console.error('Erro ao buscar site-options:', err);
@@ -66,31 +66,23 @@ const SidebarMenu = () => {
     return () => controller.abort();
   }, []);
 
-  // 🔔 Alerta de live
+  // 🔔 Alerta de live (mesmo estilo)
   const LiveBanner = () =>
     isLive ? (
       <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 px-3 py-2 text-sm flex items-center justify-between">
         <span className="font-medium">🔴 Estamos AO VIVO agora!</span>
-        <a
-          href={liveUrl ?? 'https://t.me/multitrading_oficial'}
-          target="_blank"
-          rel="noreferrer"
-          className="underline hover:no-underline"
-        >
-          Entrar
-        </a>
       </div>
     ) : null;
 
   const menuItems = (
     <nav className="space-y-6">
-      {/* 👉 Primeiro link: botão para a LIVE (quando ativo) */}
+      {/* 👉 Primeiro link: botão para a LIVE (quando ativo) — igual ao BrokerSidebarMenu */}
       {isLive && (
         <a
-          href={liveUrl ?? 'https://t.me/multitrading_oficial'}
+          href={liveUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 px-3 py-2 rounded-md w-full bg-cyan-600/20 text-cyan-300 hover:bg-cyan-600/30 transition-all duration-200"
+          className="flex items-center gap-3 px-3 py-2 rounded-md w-full text-gray-100 bg-red-500/10 border border-red-500/30 hover:text-white hover:bg-red-500/20 transition-all duration-200"
         >
           <Send className="w-5 h-5" /> Entrar na Live (Telegram)
         </a>
