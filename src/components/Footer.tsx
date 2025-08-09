@@ -1,4 +1,5 @@
 import { TrendingUp, Mail, Phone, MapPin } from "lucide-react";
+import Logo from "@/assets/imgs/logo.png";
 
 export const Footer = () => {
   return (
@@ -8,9 +9,9 @@ export const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-primary rounded-lg">
-                <TrendingUp className="h-6 w-6 text-primary-foreground" />
-              </div>
+            <div className="p-2 rounded-lg">
+              <img src={Logo} alt="Logo" className="h-10 w-10 text-primary-foreground" />
+            </div>
               <span className="text-xl font-bold text-foreground">
                 Multi Trading
               </span>
@@ -51,10 +52,10 @@ export const Footer = () => {
                 <Mail className="h-4 w-4" />
                 <span>contato@multitrading.com</span>
               </div>
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
                 <span>+55 (11) 9999-9999</span>
-              </div>
+              </div> */}
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
                 <span>São Paulo, SP - Brasil</span>
