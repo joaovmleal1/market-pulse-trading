@@ -15,27 +15,57 @@ const Home = () => {
   const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchIsLive = async () => {
       try {
-        const res = await fetch("https://api.multitradingob.com/site-options/all");
-        if (!res.ok) throw new Error("Erro ao buscar opções do site");
+        const basicUser = import.meta.env.VITE_BASIC_AUTH_USER;
+        const basicPass = import.meta.env.VITE_BASIC_AUTH_PASS;
 
-        const data = await res.json();
-
-        // Procura pela chave is_live
-        const isLiveOption = data.find((opt: any) => opt.key_name === "is_live");
-
-        if (isLiveOption) {
-          setIsLive(isLiveOption.key_value.toLowerCase() === "true");
+        if (!basicUser || !basicPass) {
+          console.warn("Basic auth envs não definidas (VITE_BASIC_AUTH_USER / VITE_BASIC_AUTH_PASS).");
         }
-      } catch (error) {
-        console.error("Erro ao buscar is_live:", error);
+
+        const credentials = btoa(`${basicUser}:${basicPass}`);
+
+        const res = await fetch("https://api.multitradingob.com/site-options/all", {
+          method: "GET",
+          headers: {
+            Authorization: `Basic ${credentials}`,
+            "Content-Type": "application/json",
+          },
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          throw new Error(`Erro ao buscar opções do site: ${res.status} ${res.statusText}`);
+        }
+
+        const data: Array<{ key_name: string; key_value: string }> = await res.json();
+
+        // Mapeia por chave pra facilitar
+        const map = Object.fromEntries(data.map(opt => [opt.key_name, opt.key_value]));
+
+        // is_live pode vir "true"/"false" (string). Vamos tolerar "1"/"0" também.
+        const isLiveRaw = String(map["is_live"] ?? "").trim().toLowerCase();
+        const isLiveBool = isLiveRaw === "true" || isLiveRaw === "1";
+
+        setIsLive(isLiveBool);
+
+        // opcional: pegar a url da live se existir
+        // if (map["live_url"]) setLiveUrl(String(map["live_url"]));
+
+      } catch (error: any) {
+        if (error?.name !== "AbortError") {
+          console.error("Erro ao buscar is_live:", error);
+        }
       }
     };
 
     fetchIsLive();
+    return () => controller.abort();
   }, []);
-
+  
   const features = [
     {
       icon: Zap,
