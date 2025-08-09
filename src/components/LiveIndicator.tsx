@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,14 +8,13 @@ import { Play, Users, TrendingUp } from "lucide-react";
 interface LiveIndicatorProps {
   isLive?: boolean;
   viewerCount?: number;
-  onJoinLive?: () => void;
 }
 
 export const LiveIndicator = ({ 
   isLive = false, 
-  viewerCount = 0, 
-  onJoinLive = () => window.open('https://youtube.com/live', '_blank')
+  viewerCount = 0
 }: LiveIndicatorProps) => {
+  const navigate = useNavigate();
   const [viewers, setViewers] = useState(viewerCount);
 
   useEffect(() => {
@@ -25,6 +25,10 @@ export const LiveIndicator = ({
       return () => clearInterval(interval);
     }
   }, [isLive]);
+
+  const handleJoin = () => {
+    navigate("/login");
+  };
 
   if (!isLive) {
     return (
@@ -71,7 +75,7 @@ export const LiveIndicator = ({
       <Button 
         variant="live" 
         size="lg" 
-        onClick={onJoinLive}
+        onClick={handleJoin}
         className="w-full"
       >
         <Play className="h-5 w-5 mr-2" />
