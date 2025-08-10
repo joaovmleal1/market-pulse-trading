@@ -20,6 +20,7 @@ interface TradeOrder {
   status?: string;
   pnl: number;
   symbol?: string;
+  date_time?: string;
 }
 
 export const Broker = () => {
@@ -184,7 +185,6 @@ export const Broker = () => {
         if (!res.ok) throw new Error(`XOFRE wallets falhou: ${res.status}`);
         const walletData = await res.json();
 
-        // normaliza
         const { REAL, DEMO } = normalizeWallets(walletData);
         setWallets({
           REAL: REAL ?? 0,
@@ -268,13 +268,15 @@ export const Broker = () => {
       const res = await fetch(`https://api.multitradingob.com/trade-order-info/today/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      const data: TradeOrder[] = await res.json();
-      setRecentOrders(data);
+      const data = res.ok ? await res.json() : [];
+      const arr: TradeOrder[] = Array.isArray(data) ? data : [];
+
+      setRecentOrders(arr);
 
       let wins = 0;
       let losses = 0;
       let lucro = 0;
-      data.forEach((op) => {
+      arr.forEach((op) => {
         const s = op.status?.toUpperCase();
         if (s?.includes('WON')) {
           wins++;
@@ -286,7 +288,7 @@ export const Broker = () => {
       });
       setDailyStats({ wins, losses, lucro });
 
-      const total = data.reduce((acc, op) => acc + op.pnl, 0);
+      const total = arr.reduce((acc, op) => acc + op.pnl, 0);
       setRoiValue(lucro);
       setRoiPercent(total ? (lucro / total) * 100 : 0);
     } catch {
@@ -303,12 +305,13 @@ export const Broker = () => {
       const res = await fetch(`https://api.multitradingob.com/trade-order-info/all/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      const data: TradeOrder[] = await res.json();
+      const data = res.ok ? await res.json() : [];
+      const arr: TradeOrder[] = Array.isArray(data) ? data : [];
 
       let wins = 0;
       let losses = 0;
       let lucro = 0;
-      data.forEach((op) => {
+      arr.forEach((op) => {
         const s = op.status?.toUpperCase();
         if (s?.includes('WON')) {
           wins++;
@@ -320,7 +323,7 @@ export const Broker = () => {
       });
       setTotalStats({ wins, losses, lucro });
 
-      const total = data.reduce((acc, op) => acc + op.pnl, 0);
+      const total = arr.reduce((acc, op) => acc + op.pnl, 0);
       setRoiTotalPercent(total ? (lucro / total) * 100 : 0);
     } catch {
       setTotalStats({ wins: 0, losses: 0, lucro: 0 });
@@ -360,7 +363,7 @@ export const Broker = () => {
   const getWinrate = (s: { wins: number; losses: number }) => {
     const total = s.wins + s.losses;
     return total === 0 ? 0 : Math.round((s.wins / total) * 100);
-    };
+  };
 
   const imageSrc = getImagePath(brokerInfo.icon);
   const isReal = selectedWallet === 'REAL';
