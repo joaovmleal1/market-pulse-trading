@@ -160,56 +160,96 @@ export const Broker = () => {
   }
 
   const fetchWallets = async () => {
-    if (!id) return;
-    try {
-      const res = await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!res.ok) throw new Error('Falha user-brokerages');
-      const ub = await res.json();
+  if (!id) return;
 
-      const brokerageName = String(ub?.brokerage_name || '').toUpperCase();
-      const cfg = BROKERAGE_CONFIGS[brokerageName];
-      if (!cfg) {
-        console.warn('Corretora não configurada:', brokerageName);
+  try {
+    // 1) Busca os dados da corretora do usuário (nome + credenciais)
+    const ubRes = await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!ubRes.ok) throw new Error(`Falha ao buscar user-brokerages: ${ubRes.status}`);
+    const ubData = await ubRes.json();
+
+    const rawName = String(ubData?.brokerage_name ?? '').trim();
+    const nameKey = rawName.toUpperCase();
+
+    console.debug('[wallets] brokerage_name:', rawName, '→ key:', nameKey);
+
+    // 2) Decide URL/método por corretora
+    //    XOFRE = GET com api-token
+    //    AVALON/POLARIUM = POST com { email, password } para localhost (portas expostas no docker-compose)
+    let walletData: any[] = [];
+
+    if (nameKey === 'XOFRE') {
+      const apiKeyB64: string | undefined = ubData?.api_key;
+      if (!apiKeyB64) {
+        console.warn('[wallets] XOFRE sem api_key em user-brokerages');
         setWallets({});
         return;
       }
-
-      let walletPayload: any;
-
-      if (cfg.authType === 'api_key') {
-        const decodedApiKey = atob(ub.api_key || '');
-        const r = await fetch(cfg.walletUrl, {
-          method: cfg.method, // GET
-          headers: { 'api-token': decodedApiKey },
-        });
-        if (!r.ok) throw new Error(`XOFRE wallet ${r.status}`);
-        walletPayload = await r.json();
-      } else {
-        const email = ub.brokerage_username;
-        const password = ub.brokerage_password;
-        if (!email || !password) throw new Error('Credenciais ausentes');
-
-        const r = await fetch(cfg.walletUrl, {
-          method: cfg.method, // POST
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
-        if (!r.ok) throw new Error(`${brokerageName} wallet ${r.status}`);
-        walletPayload = await r.json();
-      }
-
-      const normalized = normalizeWallets(walletPayload);
-      setWallets({
-        REAL: normalized.REAL ?? 0,
-        DEMO: normalized.DEMO ?? 0,
+      const apiKey = atob(apiKeyB64); // backend salvou em base64
+      const res = await fetch('https://broker-api.mybroker.dev/token/wallets', {
+        method: 'GET',
+        headers: { 'api-token': apiKey },
       });
-    } catch (err) {
-      console.error('Erro ao buscar wallets:', err);
-      setWallets({});
+      if (!res.ok) throw new Error(`XOFRE wallets falhou: ${res.status}`);
+      walletData = await res.json();
+
+      // XOFRE costuma trazer algo tipo [{ type:'REAL', balance: 123 }, { type:'DEMO', balance: 456 }]
+      const real = walletData.find((w: any) => String(w.type).toUpperCase() === 'REAL');
+      const demo = walletData.find((w: any) => String(w.type).toUpperCase() === 'DEMO');
+
+      setWallets({
+        REAL: real?.balance ?? real?.amount ?? 0,
+        DEMO: demo?.balance ?? demo?.amount ?? 0,
+      });
+      return;
     }
-  };
+
+    // Para AVALON e POLARIUM precisamos de email/senha
+    const email = ubData?.brokerage_username;
+    const password = ubData?.brokerage_password;
+    if (!email || !password) {
+      console.warn('[wallets] Credenciais ausentes para', rawName);
+      setWallets({});
+      return;
+    }
+
+    // URLs locais (containers já expostos nas portas 3001/3002 no host)
+    let balanceUrl = '';
+    if (nameKey === 'AVALON') {
+      balanceUrl = 'http://localhost:3001/api/account/balance';
+    } else if (nameKey === 'POLARIUM') {
+      balanceUrl = 'http://localhost:3002/api/account/balance';
+    } else {
+      console.warn('Corretora não configurada:', rawName);
+      setWallets({});
+      return;
+    }
+
+    const res = await fetch(balanceUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) throw new Error(`${nameKey} balance falhou: ${res.status}`);
+    const data = await res.json();
+
+    // Formato esperado do backend local: { balances: [{ type: 'real'|'demo', amount: number }, ...] }
+    const balances: any[] = Array.isArray(data?.balances) ? data.balances : [];
+
+    const real = balances.find(b => String(b.type).toUpperCase() === 'REAL');
+    const demo = balances.find(b => String(b.type).toUpperCase() === 'DEMO');
+
+    setWallets({
+      REAL: real?.amount ?? real?.balance ?? 0,
+      DEMO: demo?.amount ?? demo?.balance ?? 0,
+    });
+  } catch (err) {
+    console.error('Erro ao buscar wallets:', err);
+    setWallets({});
+  }
+};
   // -----------------------------------------------
 
   const fetchBrokerInfo = async () => {
