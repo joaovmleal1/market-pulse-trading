@@ -15,7 +15,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import { Broker } from "./pages/Broker";
+import Broker from "./pages/Broker";
 import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
