@@ -15,7 +15,7 @@ const BrokerSidebarMenu = () => {
 
   // 🔴 LIVE state
   const [isLive, setIsLive] = useState<boolean>(false);
-  const [liveUrl, setLiveUrl] = useState<string>("https://t.me/+b4uPhME4zSw1MWFh");
+  const [liveUrl, setLiveUrl] = useState<string>('');
 
   // Busca opções do site (is_live e live_url) com Basic Auth
   useEffect(() => {
@@ -72,7 +72,7 @@ const BrokerSidebarMenu = () => {
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-3 py-2 rounded-md w-full text-gray-100 bg-red-500/10 border border-red-500/30 hover:text-white hover:bg-red-500/20 transition-all duration-200"
             >
-              <Send className="w-5 h-5" /> Entrar na Live (Telegram)
+              <Send className="w-5 h-5" /> Entrar na Live
             </a>
           )}
 
