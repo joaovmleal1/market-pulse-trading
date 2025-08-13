@@ -10,9 +10,36 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
-app.use(cors());
-app.use(express.json()); // <- importante pra ler req.body
+// ===== Middlewares =====
+app.use(cors());           // se quiser, restrinja com { origin: ['https://seu-dominio.com'] }
+app.use(express.json());   // necessário para ler req.body
+
+// Util: fetch com timeout
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit = {},
+  ms = 10000
+): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
+  try {
+    const res = await fetch(url, { ...init, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+// Util: envia a resposta “como veio” do upstream
+async function relay(upstream: Response, res: Response) {
+  const contentType = upstream.headers.get('content-type') || 'application/json';
+  const text = await upstream.text();
+  res
+    .status(upstream.status)
+    .type(contentType)
+    .set('cache-control', 'no-store')
+    .send(text);
+}
 
 // ===== Rotas internas (proxy) =====
 
@@ -27,17 +54,17 @@ app.post(
         return;
       }
 
-      const upstream = await fetch('http://localhost:3001/api/account/balance', {
+      const upstream = await fetchWithTimeout('http://localhost:3001/api/account/balance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+        body: JSON.stringify({ email, password })
+      }, 15000);
 
-      const text = await upstream.text(); // preserva payload como vier
-      res.status(upstream.status).type(upstream.headers.get('content-type') || 'application/json').send(text);
-    } catch (err) {
-      console.error('[proxy avalon] erro:', err);
-      res.status(502).json({ error: 'Upstream Avalon indisponível' });
+      await relay(upstream, res);
+    } catch (err: any) {
+      const reason = err?.name === 'AbortError' ? 'timeout' : 'erro inesperado';
+      console.error('[proxy avalon] erro:', err?.message || err);
+      res.status(502).json({ error: `Upstream Avalon indisponível (${reason})` });
     }
   }
 );
@@ -53,17 +80,17 @@ app.post(
         return;
       }
 
-      const upstream = await fetch('http://localhost:3002/api/account/balance', {
+      const upstream = await fetchWithTimeout('http://localhost:3002/api/account/balance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+        body: JSON.stringify({ email, password })
+      }, 15000);
 
-      const text = await upstream.text();
-      res.status(upstream.status).type(upstream.headers.get('content-type') || 'application/json').send(text);
-    } catch (err) {
-      console.error('[proxy polarium] erro:', err);
-      res.status(502).json({ error: 'Upstream Polarium indisponível' });
+      await relay(upstream, res);
+    } catch (err: any) {
+      const reason = err?.name === 'AbortError' ? 'timeout' : 'erro inesperado';
+      console.error('[proxy polarium] erro:', err?.message || err);
+      res.status(502).json({ error: `Upstream Polarium indisponível (${reason})` });
     }
   }
 );
@@ -79,25 +106,24 @@ app.get(
         return;
       }
 
-      // se sua api_key já estiver em base64 no banco, decodifique aqui
-      let decoded = '';
+      // se sua api_key já estiver em base64 no banco, decodifique aqui; senão usa direta
+      let decoded = apiKeyB64;
       try {
         decoded = Buffer.from(apiKeyB64, 'base64').toString('utf8');
       } catch {
-        // se já vier “puro”, usa direto
-        decoded = apiKeyB64;
+        // já “pura”
       }
 
-      const upstream = await fetch('https://broker-api.mybroker.dev/token/wallets', {
+      const upstream = await fetchWithTimeout('https://broker-api.mybroker.dev/token/wallets', {
         method: 'GET',
-        headers: { 'api-token': decoded },
-      });
+        headers: { 'api-token': decoded }
+      }, 10000);
 
-      const text = await upstream.text();
-      res.status(upstream.status).type(upstream.headers.get('content-type') || 'application/json').send(text);
-    } catch (err) {
-      console.error('[proxy xofre] erro:', err);
-      res.status(502).json({ error: 'Upstream Xofre indisponível' });
+      await relay(upstream, res);
+    } catch (err: any) {
+      const reason = err?.name === 'AbortError' ? 'timeout' : 'erro inesperado';
+      console.error('[proxy xofre] erro:', err?.message || err);
+      res.status(502).json({ error: `Upstream Xofre indisponível (${reason})` });
     }
   }
 );
