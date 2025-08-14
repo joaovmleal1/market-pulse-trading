@@ -17,8 +17,8 @@ const settingsFields = [
   { label: 'Valor de Entrada (Preço)', key: 'entry_price' },
 
   // ✅ Novos campos de valor para gales
-  { label: 'Valor Gale 1 (R$)', key: 'gale_one_value' },
-  { label: 'Valor Gale 2 (R$)', key: 'gale_two_value' },
+  { label: 'Valor Gale 1 (Preço)', key: 'gale_one_value' },
+  { label: 'Valor Gale 2 (Preço)', key: 'gale_two_value' },
 
   { label: 'Conta Demo', key: 'is_demo', type: 'boolean' },
   { label: 'Gale 1', key: 'gale_one', type: 'boolean' },
