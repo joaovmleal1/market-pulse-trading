@@ -31,7 +31,7 @@ interface SiteOption {
   description: string;
   id: number;
 }
-const LIVE_ENABLED_KEY = 'live_enabled';
+const IS_LIVE_KEY = 'is_live';
 const LIVE_URL_KEY = 'live_url';
 
 // Helpers para Basic Auth a partir do .env (Vite)
@@ -39,7 +39,6 @@ const BASIC_USER = import.meta.env.VITE_BASIC_AUTH_USER as string | undefined;
 const BASIC_PASS = import.meta.env.VITE_BASIC_AUTH_PASS as string | undefined;
 
 function toBase64(str: string) {
-  // Suporta unicode com TextEncoder
   const bytes = new TextEncoder().encode(str);
   let binary = '';
   for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
@@ -87,7 +86,7 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('users');
 
   /** =========================
-   *  Aba: Usuários (seu código)
+   *  Aba: Usuários
    *  ========================= */
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -161,7 +160,7 @@ const Admin = () => {
   const [liveUrl, setLiveUrl] = useState<string>('');
 
   const [originalOptions, setOriginalOptions] = useState<Record<string, string>>({
-    [LIVE_ENABLED_KEY]: 'false',
+    [IS_LIVE_KEY]: 'false',
     [LIVE_URL_KEY]: '',
   });
 
@@ -184,7 +183,7 @@ const Admin = () => {
 
       const res = await fetch('https://api.multitradingob.com/site-options/all', {
         headers: {
-          Authorization: basicAuth, // BASIC AUTH
+          Authorization: basicAuth, // BASIC
           Accept: 'application/json',
         },
       });
@@ -200,14 +199,14 @@ const Admin = () => {
       const map = new Map<string, string>();
       data.forEach((opt) => map.set(opt.key_name, opt.key_value ?? ''));
 
-      const liveEnabledStr = map.get(LIVE_ENABLED_KEY) ?? 'false';
+      const liveEnabledStr = map.get(IS_LIVE_KEY) ?? 'false';
       const liveUrlStr = map.get(LIVE_URL_KEY) ?? '';
 
       setLiveEnabled(parseBool(liveEnabledStr));
       setLiveUrl(liveUrlStr);
 
       setOriginalOptions({
-        [LIVE_ENABLED_KEY]: liveEnabledStr,
+        [IS_LIVE_KEY]: liveEnabledStr,
         [LIVE_URL_KEY]: liveUrlStr,
       });
     } catch (err) {
@@ -245,8 +244,8 @@ const Admin = () => {
       const currUrl = liveUrl ?? '';
 
       const tasks: Array<Promise<any>> = [];
-      if (currEnabled !== originalOptions[LIVE_ENABLED_KEY]) {
-        tasks.push(putSiteOption(LIVE_ENABLED_KEY, currEnabled));
+      if (currEnabled !== originalOptions[IS_LIVE_KEY]) {
+        tasks.push(putSiteOption(IS_LIVE_KEY, currEnabled));
       }
       if (currUrl !== originalOptions[LIVE_URL_KEY]) {
         tasks.push(putSiteOption(LIVE_URL_KEY, currUrl));
@@ -255,7 +254,7 @@ const Admin = () => {
       if (tasks.length > 0) {
         await Promise.all(tasks);
         setOriginalOptions({
-          [LIVE_ENABLED_KEY]: currEnabled,
+          [IS_LIVE_KEY]: currEnabled,
           [LIVE_URL_KEY]: currUrl,
         });
       }
@@ -267,7 +266,7 @@ const Admin = () => {
   };
 
   const dirtyOptions =
-    String(liveEnabled) !== originalOptions[LIVE_ENABLED_KEY] ||
+    String(liveEnabled) !== originalOptions[IS_LIVE_KEY] ||
     (liveUrl ?? '') !== originalOptions[LIVE_URL_KEY];
 
   useEffect(() => {
@@ -391,7 +390,7 @@ const Admin = () => {
     <div className="min-h-screen bg-[#111827] text-white">
       <SidebarMenu />
       <main className="pt-16 lg:pl-72 max-w-6xl mx-auto p-4 md:p-6">
-        <h1 className="text-2xl md:text-4xl font-bold mb-6 text-gray-200">Painel Administrativo</h1>
+        <h1 className="text-2xl md:4xl lg:text-4xl font-bold mb-6 text-gray-200">Painel Administrativo</h1>
 
         {/* Menu Horizontal */}
         <div className="flex flex-wrap gap-2 mb-8">
@@ -511,7 +510,7 @@ const Admin = () => {
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         GET: <code>/site-options/all</code> (Basic) · PUT:{' '}
-                        <code>/site-options/{LIVE_URL_KEY}?value=...</code> (Bearer)
+                        <code>/site-options/{IS_LIVE_KEY}?value=...</code> (Bearer)
                       </p>
                     </div>
 
