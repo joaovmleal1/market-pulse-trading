@@ -508,10 +508,6 @@ const Admin = () => {
                         className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
                         placeholder="https://..."
                       />
-                      <p className="text-xs text-gray-500 mt-1">
-                        GET: <code>/site-options/all</code> (Basic) · PUT:{' '}
-                        <code>/site-options/{IS_LIVE_KEY}?value=...</code> (Bearer)
-                      </p>
                     </div>
 
                     <div className="pt-2">
