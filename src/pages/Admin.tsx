@@ -169,7 +169,6 @@ const Admin = () => {
     if (!v) return false;
     const s = String(v).trim().toLowerCase();
     return s === 'true' || s === '1' || s === 'yes';
-    // ajuste aqui se o backend tiver outros formatos
   };
 
   const fetchSiteOptions = async () => {
@@ -185,7 +184,7 @@ const Admin = () => {
 
       const res = await fetch('https://api.multitradingob.com/site-options/all', {
         headers: {
-          Authorization: basicAuth, // <-- BASIC AUTH
+          Authorization: basicAuth, // BASIC AUTH
           Accept: 'application/json',
         },
       });
@@ -218,30 +217,19 @@ const Admin = () => {
     }
   };
 
-  // PUT com Bearer; tenta {key_value} e faz fallback {value} se 422
+  // PUT com Bearer; envia value como query param (?value=...)
   const putSiteOption = async (name: string, value: string) => {
-    const url = `https://api.multitradingob.com/site-options/${name}`;
-    const headers = {
-      Authorization: `Bearer ${accessToken}`, // <-- OAUTH Bearer
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    };
+    const url = `https://api.multitradingob.com/site-options/${encodeURIComponent(
+      name
+    )}?value=${encodeURIComponent(value)}`;
 
-    // 1ª tentativa: { key_value }
-    let res = await fetch(url, {
+    const res = await fetch(url, {
       method: 'PUT',
-      headers,
-      body: JSON.stringify({ key_value: value }),
+      headers: {
+        Authorization: `Bearer ${accessToken}`, // OAuth Bearer
+        Accept: 'application/json',
+      },
     });
-
-    if (res.status === 422 || res.status === 400) {
-      // 2ª tentativa: { value }
-      res = await fetch(url, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({ value }),
-      });
-    }
 
     if (!res.ok) {
       const text = await res.text();
@@ -522,8 +510,8 @@ const Admin = () => {
                         placeholder="https://..."
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        GET: <code>/site-options/all</code> (Basic Auth) · PUT:{' '}
-                        <code>/site-options/{LIVE_URL_KEY}</code> (Bearer)
+                        GET: <code>/site-options/all</code> (Basic) · PUT:{' '}
+                        <code>/site-options/{LIVE_URL_KEY}?value=...</code> (Bearer)
                       </p>
                     </div>
 
