@@ -34,6 +34,24 @@ interface SiteOption {
 const LIVE_ENABLED_KEY = 'live_enabled';
 const LIVE_URL_KEY = 'live_url';
 
+// Helpers para Basic Auth a partir do .env (Vite)
+const BASIC_USER = import.meta.env.VITE_BASIC_AUTH_USER as string | undefined;
+const BASIC_PASS = import.meta.env.VITE_BASIC_AUTH_PASS as string | undefined;
+
+function toBase64(str: string) {
+  // Suporta unicode com TextEncoder
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+function buildBasicAuthHeader() {
+  if (!BASIC_USER || !BASIC_PASS) return undefined;
+  const token = toBase64(`${BASIC_USER}:${BASIC_PASS}`);
+  return `Basic ${token}`;
+}
+
 /** =========================
  *  Lançamentos ao vivo
  *  ========================= */
@@ -69,7 +87,7 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('users');
 
   /** =========================
-   *  Aba: Usuários
+   *  Aba: Usuários (seu código)
    *  ========================= */
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -139,11 +157,9 @@ const Admin = () => {
   const [loadingOptions, setLoadingOptions] = useState(false);
   const [savingOptions, setSavingOptions] = useState(false);
 
-  // estado espelhado nos 2 parâmetros que você precisa agora
   const [liveEnabled, setLiveEnabled] = useState<boolean>(false);
   const [liveUrl, setLiveUrl] = useState<string>('');
 
-  // guarda os valores originais para habilitar/desabilitar o botão Salvar somente se houver mudanças
   const [originalOptions, setOriginalOptions] = useState<Record<string, string>>({
     [LIVE_ENABLED_KEY]: 'false',
     [LIVE_URL_KEY]: '',
@@ -153,14 +169,33 @@ const Admin = () => {
     if (!v) return false;
     const s = String(v).trim().toLowerCase();
     return s === 'true' || s === '1' || s === 'yes';
+    // ajuste aqui se o backend tiver outros formatos
   };
 
   const fetchSiteOptions = async () => {
     try {
       setLoadingOptions(true);
+
+      const basicAuth = buildBasicAuthHeader();
+      if (!basicAuth) {
+        console.error('Faltam VITE_BASIC_AUTH_USER / VITE_BASIC_AUTH_PASS no .env');
+        setLoadingOptions(false);
+        return;
+      }
+
       const res = await fetch('https://api.multitradingob.com/site-options/all', {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: {
+          Authorization: basicAuth, // <-- BASIC AUTH
+          Accept: 'application/json',
+        },
       });
+
+      if (!res.ok) {
+        console.error('Falha ao carregar site-options/all:', res.status, await res.text());
+        setLoadingOptions(false);
+        return;
+      }
+
       const data: SiteOption[] = await res.json();
 
       const map = new Map<string, string>();
@@ -183,43 +218,54 @@ const Admin = () => {
     }
   };
 
+  // PUT com Bearer; tenta {key_value} e faz fallback {value} se 422
+  const putSiteOption = async (name: string, value: string) => {
+    const url = `https://api.multitradingob.com/site-options/${name}`;
+    const headers = {
+      Authorization: `Bearer ${accessToken}`, // <-- OAUTH Bearer
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+
+    // 1ª tentativa: { key_value }
+    let res = await fetch(url, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ key_value: value }),
+    });
+
+    if (res.status === 422 || res.status === 400) {
+      // 2ª tentativa: { value }
+      res = await fetch(url, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ value }),
+      });
+    }
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`PUT ${name} falhou (${res.status}): ${text}`);
+    }
+  };
+
   const saveSiteOptions = async () => {
     try {
       setSavingOptions(true);
 
-      const updates: Array<Promise<any>> = [];
       const currEnabled = String(liveEnabled); // 'true' | 'false'
       const currUrl = liveUrl ?? '';
 
+      const tasks: Array<Promise<any>> = [];
       if (currEnabled !== originalOptions[LIVE_ENABLED_KEY]) {
-        updates.push(
-          fetch(`https://api.multitradingob.com/site-options/${LIVE_ENABLED_KEY}`, {
-            method: 'PUT',
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ key_value: currEnabled }),
-          })
-        );
+        tasks.push(putSiteOption(LIVE_ENABLED_KEY, currEnabled));
       }
-
       if (currUrl !== originalOptions[LIVE_URL_KEY]) {
-        updates.push(
-          fetch(`https://api.multitradingob.com/site-options/${LIVE_URL_KEY}`, {
-            method: 'PUT',
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ key_value: currUrl }),
-          })
-        );
+        tasks.push(putSiteOption(LIVE_URL_KEY, currUrl));
       }
 
-      if (updates.length > 0) {
-        await Promise.all(updates);
-        // refresh baseline
+      if (tasks.length > 0) {
+        await Promise.all(tasks);
         setOriginalOptions({
           [LIVE_ENABLED_KEY]: currEnabled,
           [LIVE_URL_KEY]: currUrl,
@@ -270,7 +316,6 @@ const Admin = () => {
   const fetchLiveList = async () => {
     try {
       setLoadingLiveList(true);
-      // ajuste aqui se necessário
       const res = await fetch('https://api.multitradingob.com/admin/live-trades?limit=20', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -477,7 +522,8 @@ const Admin = () => {
                         placeholder="https://..."
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Salva em <code>/site-options/{LIVE_URL_KEY}</code>.
+                        GET: <code>/site-options/all</code> (Basic Auth) · PUT:{' '}
+                        <code>/site-options/{LIVE_URL_KEY}</code> (Bearer)
                       </p>
                     </div>
 
