@@ -22,16 +22,17 @@ interface User {
 }
 
 /** =========================
- *  Configurações do Site
+ *  Site Options API
  *  ========================= */
-interface SiteSettings {
-  site_name: string;
-  telegram_group_url: string;
-  announcement_banner: string;
-  first_login_alert_enabled: boolean;
-  first_login_alert_url: string;
-  maintenance_mode: boolean;
+interface SiteOption {
+  key_name: string;
+  key_value: string;
+  type: string;
+  description: string;
+  id: number;
 }
+const LIVE_ENABLED_KEY = 'live_enabled';
+const LIVE_URL_KEY = 'live_url';
 
 /** =========================
  *  Lançamentos ao vivo
@@ -41,8 +42,8 @@ type Direction = 'CALL' | 'PUT' | 'BUY' | 'SELL';
 interface LiveTradeForm {
   asset: string;
   direction: Direction;
-  expiration_min: number;               // minutos
-  entry_time: string;                   // datetime-local
+  expiration_min: number;
+  entry_time: string; // datetime-local
   gale_one_enabled: boolean;
   gale_two_enabled: boolean;
   notes: string;
@@ -68,7 +69,7 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('users');
 
   /** =========================
-   *  Aba: Usuários (SEU CÓDIGO)
+   *  Aba: Usuários
    *  ========================= */
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -133,61 +134,110 @@ const Admin = () => {
   }, [users, statusFilter, searchTerm]);
 
   /** ================================
-   *  Aba: Configurações do Site
+   *  Aba: Configurações do Site (site-options)
    *  ================================ */
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>({
-    site_name: 'Multi Trading',
-    telegram_group_url: '',
-    announcement_banner: '',
-    first_login_alert_enabled: false,
-    first_login_alert_url: '',
-    maintenance_mode: false,
-  });
-  const [loadingSettings, setLoadingSettings] = useState(false);
-  const [savingSettings, setSavingSettings] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState(false);
+  const [savingOptions, setSavingOptions] = useState(false);
 
-  const fetchSiteSettings = async () => {
+  // estado espelhado nos 2 parâmetros que você precisa agora
+  const [liveEnabled, setLiveEnabled] = useState<boolean>(false);
+  const [liveUrl, setLiveUrl] = useState<string>('');
+
+  // guarda os valores originais para habilitar/desabilitar o botão Salvar somente se houver mudanças
+  const [originalOptions, setOriginalOptions] = useState<Record<string, string>>({
+    [LIVE_ENABLED_KEY]: 'false',
+    [LIVE_URL_KEY]: '',
+  });
+
+  const parseBool = (v?: string) => {
+    if (!v) return false;
+    const s = String(v).trim().toLowerCase();
+    return s === 'true' || s === '1' || s === 'yes';
+  };
+
+  const fetchSiteOptions = async () => {
     try {
-      setLoadingSettings(true);
-      // 🔧 AJUSTE ENDPOINT
-      const res = await fetch('https://api.multitradingob.com/site-settings', {
+      setLoadingOptions(true);
+      const res = await fetch('https://api.multitradingob.com/site-options/all', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      if (res.ok) {
-        const data = await res.json();
-        setSiteSettings((prev) => ({
-          ...prev,
-          ...data,
-        }));
-      }
-    } catch (err) {
-      console.error('Erro ao carregar site settings:', err);
-    } finally {
-      setLoadingSettings(false);
-    }
-  };
+      const data: SiteOption[] = await res.json();
 
-  const saveSiteSettings = async () => {
-    try {
-      setSavingSettings(true);
-      // 🔧 AJUSTE ENDPOINT
-      await fetch('https://api.multitradingob.com/site-settings', {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(siteSettings),
+      const map = new Map<string, string>();
+      data.forEach((opt) => map.set(opt.key_name, opt.key_value ?? ''));
+
+      const liveEnabledStr = map.get(LIVE_ENABLED_KEY) ?? 'false';
+      const liveUrlStr = map.get(LIVE_URL_KEY) ?? '';
+
+      setLiveEnabled(parseBool(liveEnabledStr));
+      setLiveUrl(liveUrlStr);
+
+      setOriginalOptions({
+        [LIVE_ENABLED_KEY]: liveEnabledStr,
+        [LIVE_URL_KEY]: liveUrlStr,
       });
     } catch (err) {
-      console.error('Erro ao salvar site settings:', err);
+      console.error('Erro ao carregar site-options:', err);
     } finally {
-      setSavingSettings(false);
+      setLoadingOptions(false);
     }
   };
 
+  const saveSiteOptions = async () => {
+    try {
+      setSavingOptions(true);
+
+      const updates: Array<Promise<any>> = [];
+      const currEnabled = String(liveEnabled); // 'true' | 'false'
+      const currUrl = liveUrl ?? '';
+
+      if (currEnabled !== originalOptions[LIVE_ENABLED_KEY]) {
+        updates.push(
+          fetch(`https://api.multitradingob.com/site-options/${LIVE_ENABLED_KEY}`, {
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ key_value: currEnabled }),
+          })
+        );
+      }
+
+      if (currUrl !== originalOptions[LIVE_URL_KEY]) {
+        updates.push(
+          fetch(`https://api.multitradingob.com/site-options/${LIVE_URL_KEY}`, {
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ key_value: currUrl }),
+          })
+        );
+      }
+
+      if (updates.length > 0) {
+        await Promise.all(updates);
+        // refresh baseline
+        setOriginalOptions({
+          [LIVE_ENABLED_KEY]: currEnabled,
+          [LIVE_URL_KEY]: currUrl,
+        });
+      }
+    } catch (err) {
+      console.error('Erro ao salvar site-options:', err);
+    } finally {
+      setSavingOptions(false);
+    }
+  };
+
+  const dirtyOptions =
+    String(liveEnabled) !== originalOptions[LIVE_ENABLED_KEY] ||
+    (liveUrl ?? '') !== originalOptions[LIVE_URL_KEY];
+
   useEffect(() => {
-    if (activeTab === 'settings') fetchSiteSettings();
+    if (activeTab === 'settings') fetchSiteOptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
@@ -208,7 +258,7 @@ const Admin = () => {
     asset: '',
     direction: 'CALL',
     expiration_min: 1,
-    entry_time: nowToDatetimeLocal(new Date(Date.now() + 60_000)), // +1min
+    entry_time: nowToDatetimeLocal(new Date(Date.now() + 60_000)),
     gale_one_enabled: true,
     gale_two_enabled: true,
     notes: '',
@@ -220,7 +270,7 @@ const Admin = () => {
   const fetchLiveList = async () => {
     try {
       setLoadingLiveList(true);
-      // 🔧 AJUSTE ENDPOINT
+      // ajuste aqui se necessário
       const res = await fetch('https://api.multitradingob.com/admin/live-trades?limit=20', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -246,7 +296,6 @@ const Admin = () => {
     try {
       setSubmittingLive(true);
 
-      // monta payload
       const payload = {
         asset: liveForm.asset.trim(),
         direction: liveForm.direction,
@@ -254,17 +303,12 @@ const Admin = () => {
         entry_time: new Date(liveForm.entry_time).toISOString(),
         gale_one_enabled: !!liveForm.gale_one_enabled,
         gale_two_enabled: !!liveForm.gale_two_enabled,
-        // Sugestão: servidor pode agendar automaticamente gale 1/2
-        // para +1 e +2 minutos após entry_time, conforme sua regra.
         notes: liveForm.notes?.trim() || '',
       };
 
-      // validações básicas
       if (!payload.asset) throw new Error('Preencha o ativo.');
-      if (!payload.entry_time) throw new Error('Defina a data/hora da entrada.');
       if (!payload.expiration_min || payload.expiration_min < 1) throw new Error('Expiração inválida.');
 
-      // 🔧 AJUSTE ENDPOINT
       const res = await fetch('https://api.multitradingob.com/admin/live-trades', {
         method: 'POST',
         headers: {
@@ -279,7 +323,6 @@ const Admin = () => {
         throw new Error(text || 'Falha ao lançar trade.');
       }
 
-      // reset leve (mantém direção/expiração)
       setLiveForm((prev) => ({
         ...prev,
         asset: '',
@@ -288,10 +331,8 @@ const Admin = () => {
       }));
 
       fetchLiveList();
-      // opcional: toast/sucesso visual
     } catch (err) {
       console.error(err);
-      // opcional: toast/erro visual
     } finally {
       setSubmittingLive(false);
     }
@@ -326,7 +367,7 @@ const Admin = () => {
           <TabButton k="live" label="Lançar Trades (Ao Vivo)" />
         </div>
 
-        {/* CONTEÚDOS */}
+        {/* === ABA USUÁRIOS === */}
         {activeTab === 'users' && (
           <section aria-label="Aba Usuários">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
@@ -410,113 +451,64 @@ const Admin = () => {
           </section>
         )}
 
+        {/* === ABA CONFIGURAÇÕES (site-options) === */}
         {activeTab === 'settings' && (
           <section aria-label="Aba Configurações do Site">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card className="bg-[#1E293B] border border-cyan-500/20">
-                  <CardContent className="p-4 space-y-3">
-                    <p className="text-lg font-semibold">Informações Gerais</p>
-
-                    <div>
-                      <label className="block text-sm text-gray-300 mb-1">Nome do Site</label>
-                      <Input
-                        value={siteSettings.site_name}
-                        onChange={(e) => setSiteSettings((s) => ({ ...s, site_name: e.target.value }))}
-                        className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                        placeholder="Ex.: Multi Trading"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm text-gray-300 mb-1">URL do Grupo no Telegram</label>
-                      <Input
-                        value={siteSettings.telegram_group_url}
-                        onChange={(e) => setSiteSettings((s) => ({ ...s, telegram_group_url: e.target.value }))}
-                        className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                        placeholder="https://t.me/..."
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm text-gray-300 mb-1">Aviso no topo (banner)</label>
-                      <Input
-                        value={siteSettings.announcement_banner}
-                        onChange={(e) => setSiteSettings((s) => ({ ...s, announcement_banner: e.target.value }))}
-                        className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                        placeholder="Mensagem curta exibida no topo do site"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-[#1E293B] border border-cyan-500/20">
                   <CardContent className="p-4 space-y-4">
-                    <p className="text-lg font-semibold">Experiência do Usuário</p>
+                    <p className="text-lg font-semibold">Live</p>
 
                     <div className="flex items-center justify-between border border-cyan-500/20 rounded-md p-3">
                       <div>
-                        <p className="text-sm font-medium">Alerta no primeiro login</p>
-                        <p className="text-xs text-gray-400">Exibir pop-up com convite do Telegram.</p>
+                        <p className="text-sm font-medium">Habilitar Live</p>
+                        <p className="text-xs text-gray-400">Liga/desliga a transmissão exibida no site.</p>
                       </div>
-                      <Switch
-                        checked={siteSettings.first_login_alert_enabled}
-                        onCheckedChange={(checked) =>
-                          setSiteSettings((s) => ({ ...s, first_login_alert_enabled: !!checked }))
-                        }
-                      />
+                      <Switch checked={liveEnabled} onCheckedChange={(c) => setLiveEnabled(!!c)} />
                     </div>
 
                     <div>
-                      <label className="block text-sm text-gray-300 mb-1">URL do alerta (Telegram)</label>
+                      <label className="block text-sm text-gray-300 mb-1">URL da Live</label>
                       <Input
-                        value={siteSettings.first_login_alert_url}
-                        onChange={(e) => setSiteSettings((s) => ({ ...s, first_login_alert_url: e.target.value }))}
+                        value={liveUrl}
+                        onChange={(e) => setLiveUrl(e.target.value)}
                         className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                        placeholder="https://t.me/..."
+                        placeholder="https://..."
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Salva em <code>/site-options/{LIVE_URL_KEY}</code>.
+                      </p>
                     </div>
 
-                    <div className="flex items-center justify-between border border-cyan-500/20 rounded-md p-3">
-                      <div>
-                        <p className="text-sm font-medium">Modo de Manutenção</p>
-                        <p className="text-xs text-gray-400">Bloqueia acesso dos usuários comuns.</p>
-                      </div>
-                      <Switch
-                        checked={siteSettings.maintenance_mode}
-                        onCheckedChange={(checked) =>
-                          setSiteSettings((s) => ({ ...s, maintenance_mode: !!checked }))
-                        }
-                      />
+                    <div className="pt-2">
+                      <Button
+                        onClick={saveSiteOptions}
+                        disabled={savingOptions || loadingOptions || !dirtyOptions}
+                        className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+                      >
+                        {savingOptions ? (
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="animate-spin" /> Salvando...
+                          </span>
+                        ) : (
+                          'Salvar Configurações'
+                        )}
+                      </Button>
+                      {loadingOptions && (
+                        <span className="inline-flex items-center gap-2 text-gray-400 ml-3">
+                          <Loader2 className="animate-spin" /> Carregando...
+                        </span>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-
-              <div className="mt-6">
-                <Button
-                  onClick={saveSiteSettings}
-                  disabled={savingSettings || loadingSettings}
-                  className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
-                >
-                  {savingSettings ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="animate-spin" /> Salvando...
-                    </span>
-                  ) : (
-                    'Salvar Configurações'
-                  )}
-                </Button>
-                {loadingSettings && (
-                  <span className="inline-flex items-center gap-2 text-gray-400 ml-3">
-                    <Loader2 className="animate-spin" /> Carregando...
-                  </span>
-                )}
               </div>
             </motion.div>
           </section>
         )}
 
+        {/* === ABA LANÇAR TRADES === */}
         {activeTab === 'live' && (
           <section aria-label="Aba Lançar Trades (Ao Vivo)">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
