@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -470,8 +470,7 @@ const Admin = () => {
       if (!name) return;
 
       setSavingEdit(true);
-      // 🔧 Ajuste se seus endpoints diferirem:
-      // assumindo PUT /trade-pairs/{id} com body { pair_name }
+      // Ajuste se seus endpoints diferirem
       const res = await fetch(`https://api.multitradingob.com/trade-pairs/${editingPair.id}`, {
         method: 'PUT',
         headers: {
@@ -497,8 +496,6 @@ const Admin = () => {
     try {
       if (!window.confirm('Deseja realmente excluir este par?')) return;
       setDeletingId(id);
-      // 🔧 Ajuste se seus endpoints diferirem:
-      // assumindo DELETE /trade-pairs/{id}
       const res = await fetch(`https://api.multitradingob.com/trade-pairs/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -531,6 +528,10 @@ const Admin = () => {
     </Button>
   );
 
+  /**
+   * Modal sempre montado (evita perder foco).
+   * Usa classes para esconder/mostrar.
+   */
   const Modal: React.FC<{
     open: boolean;
     title: string;
@@ -538,11 +539,23 @@ const Admin = () => {
     children: React.ReactNode;
     footer?: React.ReactNode;
   }> = ({ open, title, onClose, children, footer }) => {
-    if (!open) return null;
     return (
-      <div className="fixed inset-0 z-[60] flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-        <div className="relative w-[92%] max-w-md rounded-2xl border border-cyan-500/20 bg-[#0f172a] shadow-xl p-4">
+      <div
+        className={`fixed inset-0 z-[60] flex items-center justify-center transition-opacity ${
+          open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        aria-hidden={!open}
+      >
+        {/* backdrop */}
+        <div
+          className="absolute inset-0 bg-black/60"
+          onClick={onClose}
+        />
+        {/* content */}
+        <div
+          className="relative w-[92%] max-w-md rounded-2xl border border-cyan-500/20 bg-[#0f172a] shadow-xl p-4"
+          onClick={(e) => e.stopPropagation()} // garante que clique interno não fecha
+        >
           <div className="flex items-center justify-between mb-3">
             <p className="text-base font-semibold text-white">{title}</p>
             <button
@@ -563,7 +576,7 @@ const Admin = () => {
     <div className="min-h-screen bg-[#111827] text-white">
       <SidebarMenu />
       <main className="pt-16 lg:pl-72 max-w-6xl mx-auto p-4 md:p-6">
-        <h1 className="text-2xl md:4xl lg:text-4xl font-bold mb-6 text-gray-200">Painel Administrativo</h1>
+        <h1 className="text-2xl md:text-4xl lg:text-4xl font-bold mb-6 text-gray-200">Painel Administrativo</h1>
 
         {/* Menu Horizontal */}
         <div className="flex flex-wrap gap-2 mb-8">
@@ -575,7 +588,7 @@ const Admin = () => {
 
         {/* === ABA USUÁRIOS === */}
         {activeTab === 'users' && (
-          <section aria-label="Aba Usuários">
+          <motion.section initial={false} animate={{ opacity: 1 }} aria-label="Aba Usuários">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
               <div className="flex gap-2 flex-wrap">
                 {['all', 'active', 'inactive'].map((type) => (
@@ -601,419 +614,413 @@ const Admin = () => {
               />
             </div>
 
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-              {loadingUsers ? (
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Loader2 className="animate-spin" /> Carregando usuários...
-                </div>
-              ) : filteredUsers.length === 0 ? (
-                <p className="text-gray-400">Nenhum usuário encontrado.</p>
-              ) : (
-                <div className="space-y-4">
-                  {filteredUsers.map((u) => (
-                    <Card key={u.id} className="bg-[#1E293B] border border-cyan-500/20 text-white">
-                      <CardContent className="p-4 w-full flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                        <div>
-                          <p className="font-bold text-lg text-white">{u.complete_name}</p>
-                          <p className="text-sm text-gray-400">Id: {u.id}</p>
-                          <p className="text-sm text-gray-400">{u.email}</p>
-                          <p className="text-sm">
-                            Último login:{' '}
-                            <span className="text-gray-300">
-                              {u.last_login ? new Date(u.last_login).toLocaleString() : 'Nunca'}
-                            </span>
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            Superuser: {u.is_superuser ? 'Sim' : 'Não'} | Ativo: {u.is_active ? 'Sim' : 'Não'}
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            Ativado em: {u.activated_at ? new Date(u.activated_at).toLocaleString() : 'Não ativado'}
-                          </p>
-                        </div>
+            {loadingUsers ? (
+              <div className="flex items-center gap-2 text-gray-400">
+                <Loader2 className="animate-spin" /> Carregando usuários...
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <p className="text-gray-400">Nenhum usuário encontrado.</p>
+            ) : (
+              <div className="space-y-4">
+                {filteredUsers.map((u) => (
+                  <Card key={u.id} className="bg-[#1E293B] border border-cyan-500/20 text-white">
+                    <CardContent className="p-4 w-full flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                      <div>
+                        <p className="font-bold text-lg text-white">{u.complete_name}</p>
+                        <p className="text-sm text-gray-400">Id: {u.id}</p>
+                        <p className="text-sm text-gray-400">{u.email}</p>
+                        <p className="text-sm">
+                          Último login:{' '}
+                          <span className="text-gray-300">
+                            {u.last_login ? new Date(u.last_login).toLocaleString() : 'Nunca'}
+                          </span>
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          Superuser: {u.is_superuser ? 'Sim' : 'Não'} | Ativo: {u.is_active ? 'Sim' : 'Não'}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          Ativado em: {u.activated_at ? new Date(u.activated_at).toLocaleString() : 'Não ativado'}
+                        </p>
+                      </div>
 
-                        <div className="flex flex-wrap gap-2">
-                          {!u.is_active &&
-                            [1, 7, 30].map((day) => (
-                              <Button
-                                key={day}
-                                className="bg-green-600 hover:bg-green-700"
-                                onClick={() => activateUser(u.id, day)}
-                              >
-                                Ativar {day} {day === 1 ? 'dia' : 'dias'}
-                              </Button>
-                            ))}
-                          {u.is_active && (
-                            <Button variant="destructive" onClick={() => deactivateUser(u.id)}>
-                              Desativar
+                      <div className="flex flex-wrap gap-2">
+                        {!u.is_active &&
+                          [1, 7, 30].map((day) => (
+                            <Button
+                              key={day}
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => activateUser(u.id, day)}
+                            >
+                              Ativar {day} {day === 1 ? 'dia' : 'dias'}
                             </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          </section>
+                          ))}
+                        {u.is_active && (
+                          <Button variant="destructive" onClick={() => deactivateUser(u.id)}>
+                            Desativar
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </motion.section>
         )}
 
         {/* === ABA CONFIGURAÇÕES (site-options) === */}
         {activeTab === 'settings' && (
-          <section aria-label="Aba Configurações do Site">
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="bg-[#1E293B] border border-cyan-500/20">
-                  <CardContent className="p-4 space-y-4">
-                    <p className="text-lg font-semibold">Live</p>
+          <motion.section initial={false} animate={{ opacity: 1 }} aria-label="Aba Configurações do Site">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="bg-[#1E293B] border border-cyan-500/20">
+                <CardContent className="p-4 space-y-4">
+                  <p className="text-lg font-semibold">Live</p>
 
-                    <div className="flex items-center justify-between border border-cyan-500/20 rounded-md p-3">
-                      <div>
-                        <p className="text-sm font-medium">Habilitar Live</p>
-                        <p className="text-xs text-gray-400">Liga/desliga a transmissão exibida no site.</p>
-                      </div>
-                      <Switch checked={liveEnabled} onCheckedChange={(c) => setLiveEnabled(!!c)} />
-                    </div>
-
+                  <div className="flex items-center justify-between border border-cyan-500/20 rounded-md p-3">
                     <div>
-                      <label className="block text-sm text-gray-300 mb-1">URL da Live</label>
-                      <Input
-                        value={liveUrl}
-                        onChange={(e) => setLiveUrl(e.target.value)}
-                        className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                        placeholder="https://..."
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        GET: <code>/site-options/all</code> (Basic) · PUT:{' '}
-                        <code>/site-options/{IS_LIVE_KEY}?value=...</code> (Bearer)
-                      </p>
+                      <p className="text-sm font-medium">Habilitar Live</p>
+                      <p className="text-xs text-gray-400">Liga/desliga a transmissão exibida no site.</p>
                     </div>
+                    <Switch checked={liveEnabled} onCheckedChange={(c) => setLiveEnabled(!!c)} />
+                  </div>
 
-                    <div className="pt-2">
-                      <Button
-                        onClick={saveSiteOptions}
-                        disabled={savingOptions || loadingOptions || !dirtyOptions}
-                        className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
-                      >
-                        {savingOptions ? (
-                          <span className="flex items-center gap-2">
-                            <Loader2 className="animate-spin" /> Salvando...
-                          </span>
-                        ) : (
-                          'Salvar Configurações'
-                        )}
-                      </Button>
-                      {loadingOptions && (
-                        <span className="inline-flex items-center gap-2 text-gray-400 ml-3">
-                          <Loader2 className="animate-spin" /> Carregando...
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">URL da Live</label>
+                    <Input
+                      value={liveUrl}
+                      onChange={(e) => setLiveUrl(e.target.value)}
+                      className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
+                      placeholder="https://..."
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      GET: <code>/site-options/all</code> (Basic) · PUT:{' '}
+                      <code>/site-options/{IS_LIVE_KEY}?value=...</code> (Bearer)
+                    </p>
+                  </div>
+
+                  <div className="pt-2">
+                    <Button
+                      onClick={saveSiteOptions}
+                      disabled={savingOptions || loadingOptions || !dirtyOptions}
+                      className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+                    >
+                      {savingOptions ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="animate-spin" /> Salvando...
                         </span>
+                      ) : (
+                        'Salvar Configurações'
                       )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </motion.div>
-          </section>
+                    </Button>
+                    {loadingOptions && (
+                      <span className="inline-flex items-center gap-2 text-gray-400 ml-3">
+                        <Loader2 className="animate-spin" /> Carregando...
+                      </span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </motion.section>
         )}
 
         {/* === ABA LANÇAR TRADES === */}
         {activeTab === 'live' && (
-          <section aria-label="Aba Lançar Trades (Ao Vivo)">
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Formulário */}
-                <Card className="bg-[#1E293B] border border-cyan-500/20">
-                  <CardContent className="p-4 space-y-3">
-                    <p className="text-lg font-semibold">Disparar Sinal Manual</p>
+          <motion.section initial={false} animate={{ opacity: 1 }} aria-label="Aba Lançar Trades (Ao Vivo)">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Formulário */}
+              <Card className="bg-[#1E293B] border border-cyan-500/20">
+                <CardContent className="p-4 space-y-3">
+                  <p className="text-lg font-semibold">Disparar Sinal Manual</p>
 
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Ativo (par)</label>
+                    <Input
+                      value={liveForm.asset}
+                      onChange={(e) => setLiveForm((f) => ({ ...f, asset: e.target.value }))}
+                      className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
+                      placeholder="Ex.: EURUSD, WIN, BTCUSDT..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm text-gray-300 mb-1">Ativo (par)</label>
-                      <Input
-                        value={liveForm.asset}
-                        onChange={(e) => setLiveForm((f) => ({ ...f, asset: e.target.value }))}
-                        className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                        placeholder="Ex.: EURUSD, WIN, BTCUSDT..."
-                      />
+                      <label className="block text-sm text-gray-300 mb-1">Direção</label>
+                      <select
+                        value={liveForm.direction}
+                        onChange={(e) => setLiveForm((f) => ({ ...f, direction: e.target.value as Direction }))}
+                        className="w-full rounded-md bg-[#1F1F1F] border border-cyan-500/20 px-3 py-2"
+                      >
+                        <option value="CALL">CALL</option>
+                        <option value="PUT">PUT</option>
+                        <option value="BUY">BUY</option>
+                        <option value="SELL">SELL</option>
+                      </select>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-sm text-gray-300 mb-1">Direção</label>
-                        <select
-                          value={liveForm.direction}
-                          onChange={(e) => setLiveForm((f) => ({ ...f, direction: e.target.value as Direction }))}
-                          className="w-full rounded-md bg-[#1F1F1F] border border-cyan-500/20 px-3 py-2"
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">Expiração (min)</label>
+                      <Input
+                        inputMode="numeric"
+                        value={String(liveForm.expiration_min)}
+                        onChange={(e) =>
+                          setLiveForm((f) => ({ ...f, expiration_min: Number(e.target.value || 0) }))
+                        }
+                        className="bg-[#1F1F1F] border border-cyan-500/20 text-white text-center"
+                        placeholder="1, 3, 5..."
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Horário da Entrada</label>
+                    <Input
+                      type="datetime-local"
+                      value={liveForm.entry_time}
+                      onChange={(e) => setLiveForm((f) => ({ ...f, entry_time: e.target.value }))}
+                      className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                      Dica: os gales serão agendados pelo servidor a +1min e +2min (se habilitados).
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={liveForm.gale_one_enabled}
+                        onCheckedChange={(checked) => setLiveForm((f) => ({ ...f, gale_one_enabled: !!checked }))}
+                      />
+                      <span className="text-sm">Gale 1</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={liveForm.gale_two_enabled}
+                        onCheckedChange={(checked) => setLiveForm((f) => ({ ...f, gale_two_enabled: !!checked }))}
+                      />
+                      <span className="text-sm">Gale 2</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Observações</label>
+                    <Input
+                      value={liveForm.notes}
+                      onChange={(e) => setLiveForm((f) => ({ ...f, notes: e.target.value }))}
+                      className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
+                      placeholder="Opcional"
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <Button
+                      onClick={handleLaunchTrade}
+                      disabled={submittingLive}
+                      className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+                    >
+                      {submittingLive ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="animate-spin" /> Enviando...
+                        </span>
+                      ) : (
+                        'Lançar Trade'
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Últimos lançamentos */}
+              <Card className="bg-[#1E293B] border border-cyan-500/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-lg font-semibold">Últimos Lançamentos</p>
+                    <Button
+                      variant="outline"
+                      onClick={fetchLiveList}
+                      className="border border-cyan-500/20 text-gray-200 hover:bg-gray-700"
+                    >
+                      Atualizar
+                    </Button>
+                  </div>
+
+                  {loadingLiveList ? (
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Loader2 className="animate-spin" /> Carregando...
+                    </div>
+                  ) : liveList.length === 0 ? (
+                    <p className="text-gray-400">Nenhum lançamento encontrado.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {liveList.map((it) => (
+                        <div
+                          key={it.id}
+                          className="border border-cyan-500/20 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
                         >
-                          <option value="CALL">CALL</option>
-                          <option value="PUT">PUT</option>
-                          <option value="BUY">BUY</option>
-                          <option value="SELL">SELL</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm text-gray-300 mb-1">Expiração (min)</label>
-                        <Input
-                          inputMode="numeric"
-                          value={String(liveForm.expiration_min)}
-                          onChange={(e) =>
-                            setLiveForm((f) => ({ ...f, expiration_min: Number(e.target.value || 0) }))
-                          }
-                          className="bg-[#1F1F1F] border border-cyan-500/20 text-white text-center"
-                          placeholder="1, 3, 5..."
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm text-gray-300 mb-1">Horário da Entrada</label>
-                      <Input
-                        type="datetime-local"
-                        value={liveForm.entry_time}
-                        onChange={(e) => setLiveForm((f) => ({ ...f, entry_time: e.target.value }))}
-                        className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">
-                        Dica: os gales serão agendados pelo servidor a +1min e +2min (se habilitados).
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={liveForm.gale_one_enabled}
-                          onCheckedChange={(checked) => setLiveForm((f) => ({ ...f, gale_one_enabled: !!checked }))}
-                        />
-                        <span className="text-sm">Gale 1</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={liveForm.gale_two_enabled}
-                          onCheckedChange={(checked) => setLiveForm((f) => ({ ...f, gale_two_enabled: !!checked }))}
-                        />
-                        <span className="text-sm">Gale 2</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm text-gray-300 mb-1">Observações</label>
-                      <Input
-                        value={liveForm.notes}
-                        onChange={(e) => setLiveForm((f) => ({ ...f, notes: e.target.value }))}
-                        className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                        placeholder="Opcional"
-                      />
-                    </div>
-
-                    <div className="pt-2">
-                      <Button
-                        onClick={handleLaunchTrade}
-                        disabled={submittingLive}
-                        className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
-                      >
-                        {submittingLive ? (
-                          <span className="flex items-center gap-2">
-                            <Loader2 className="animate-spin" /> Enviando...
-                          </span>
-                        ) : (
-                          'Lançar Trade'
-                        )}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Últimos lançamentos */}
-                <Card className="bg-[#1E293B] border border-cyan-500/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-lg font-semibold">Últimos Lançamentos</p>
-                      <Button
-                        variant="outline"
-                        onClick={fetchLiveList}
-                        className="border border-cyan-500/20 text-gray-200 hover:bg-gray-700"
-                      >
-                        Atualizar
-                      </Button>
-                    </div>
-
-                    {loadingLiveList ? (
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Loader2 className="animate-spin" /> Carregando...
-                      </div>
-                    ) : liveList.length === 0 ? (
-                      <p className="text-gray-400">Nenhum lançamento encontrado.</p>
-                    ) : (
-                      <div className="space-y-3">
-                        {liveList.map((it) => (
-                          <div
-                            key={it.id}
-                            className="border border-cyan-500/20 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-                          >
-                            <div className="space-y-0.5">
-                              <p className="text-sm text-gray-300">
-                                <span className="font-semibold text-white">{it.asset}</span> · {it.direction} ·{' '}
-                                {it.expiration_min}m
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                Entrada: {new Date(it.entry_time).toLocaleString()} · G1:
-                                {it.gale_one_enabled ? ' Sim' : ' Não'} · G2:{' '}
-                                {it.gale_two_enabled ? ' Sim' : ' Não'}
-                              </p>
-                              {it.notes && <p className="text-xs text-gray-500">Obs.: {it.notes}</p>}
-                            </div>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full border ${
-                                it.status === 'done'
-                                  ? 'border-green-400/40 text-green-300'
-                                  : it.status === 'failed'
-                                  ? 'border-red-400/40 text-red-300'
-                                  : it.status === 'sent'
-                                  ? 'border-blue-400/40 text-blue-300'
-                                  : 'border-yellow-400/40 text-yellow-300'
-                              }`}
-                            >
-                              {it.status}
-                            </span>
+                          <div className="space-y-0.5">
+                            <p className="text-sm text-gray-300">
+                              <span className="font-semibold text-white">{it.asset}</span> · {it.direction} ·{' '}
+                              {it.expiration_min}m
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              Entrada: {new Date(it.entry_time).toLocaleString()} · G1:
+                              {it.gale_one_enabled ? ' Sim' : ' Não'} · G2:{' '}
+                              {it.gale_two_enabled ? ' Sim' : ' Não'}
+                            </p>
+                            {it.notes && <p className="text-xs text-gray-500">Obs.: {it.notes}</p>}
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </motion.div>
-          </section>
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full border ${
+                              it.status === 'done'
+                                ? 'border-green-400/40 text-green-300'
+                                : it.status === 'failed'
+                                ? 'border-red-400/40 text-red-300'
+                                : it.status === 'sent'
+                                ? 'border-blue-400/40 text-blue-300'
+                                : 'border-yellow-400/40 text-yellow-300'
+                            }`}
+                          >
+                            {it.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </motion.section>
         )}
 
         {/* === ABA PARES === */}
         {activeTab === 'pairs' && (
-          <section aria-label="Aba Pares">
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                <Input
-                  type="text"
-                  placeholder="Buscar por nome do par..."
-                  value={searchPair}
-                  onChange={(e) => setSearchPair(e.target.value)}
-                  className="w-full md:w-80 bg-[#1E293B] text-white placeholder-gray-400 border border-cyan-500/20"
-                />
-                <Button
-                  onClick={openCreatePair}
-                  className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
-                >
-                  + Novo Par
-                </Button>
-              </div>
+          <motion.section initial={false} animate={{ opacity: 1 }} aria-label="Aba Pares">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+              <Input
+                type="text"
+                placeholder="Buscar por nome do par..."
+                value={searchPair}
+                onChange={(e) => setSearchPair(e.target.value)}
+                className="w-full md:w-80 bg-[#1E293B] text-white placeholder-gray-400 border border-cyan-500/20"
+              />
+              <Button
+                onClick={openCreatePair}
+                className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+              >
+                + Novo Par
+              </Button>
+            </div>
 
-              {loadingPairs ? (
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Loader2 className="animate-spin" /> Carregando pares...
-                </div>
-              ) : filteredPairs.length === 0 ? (
-                <p className="text-gray-400">Nenhum par encontrado.</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredPairs.map((p) => (
-                    <Card key={p.id} className="bg-[#1E293B] border border-cyan-500/20 text-white">
-                      <CardContent className="p-4 flex items-center justify-between">
-                        <div>
-                          <p className="font-semibold text-white">{p.pair_name}</p>
-                          <p className="text-xs text-gray-400">ID: {p.id}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => openEditPair(p)}
-                            className="border border-cyan-500/20 text-gray-200 hover:bg-gray-700"
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() => handleDeletePair(p.id)}
-                            disabled={deletingId === p.id}
-                          >
-                            {deletingId === p.id ? <Loader2 className="animate-spin h-4 w-4" /> : 'Excluir'}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-
-            {/* Modal Criar Par */}
-            <Modal
-              open={creatingPair}
-              title="Novo Par"
-              onClose={() => setCreatingPair(false)}
-              footer={
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setCreatingPair(false)}
-                    className="border border-gray-600 text-gray-300 hover:bg-gray-700"
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleCreatePair}
-                    disabled={savingCreate || !newPairName.trim()}
-                    className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
-                  >
-                    {savingCreate ? <Loader2 className="animate-spin h-4 w-4" /> : 'Criar'}
-                  </Button>
-                </>
-              }
-            >
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Nome do par</label>
-                <Input
-                  value={newPairName}
-                  onChange={(e) => setNewPairName(e.target.value)}
-                  className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                  placeholder="Ex.: EURUSD"
-                />
+            {loadingPairs ? (
+              <div className="flex items-center gap-2 text-gray-400">
+                <Loader2 className="animate-spin" /> Carregando pares...
               </div>
-            </Modal>
-
-            {/* Modal Editar Par */}
-            <Modal
-              open={!!editingPair}
-              title="Editar Par"
-              onClose={() => setEditingPair(null)}
-              footer={
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setEditingPair(null)}
-                    className="border border-gray-600 text-gray-300 hover:bg-gray-700"
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleEditPair}
-                    disabled={savingEdit || !editName.trim()}
-                    className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
-                  >
-                    {savingEdit ? <Loader2 className="animate-spin h-4 w-4" /> : 'Salvar'}
-                  </Button>
-                </>
-              }
-            >
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Nome do par</label>
-                <Input
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                  placeholder="Ex.: EURUSD"
-                />
+            ) : filteredPairs.length === 0 ? (
+              <p className="text-gray-400">Nenhum par encontrado.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredPairs.map((p) => (
+                  <Card key={p.id} className="bg-[#1E293B] border border-cyan-500/20 text-white">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-white">{p.pair_name}</p>
+                        <p className="text-xs text-gray-400">ID: {p.id}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => openEditPair(p)}
+                          className="border border-cyan-500/20 text-gray-200 hover:bg-gray-700"
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => handleDeletePair(p.id)}
+                          disabled={deletingId === p.id}
+                        >
+                          {deletingId === p.id ? <Loader2 className="animate-spin h-4 w-4" /> : 'Excluir'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            </Modal>
-          </section>
+            )}
+          </motion.section>
         )}
+
+        {/* Modal Criar Par (sempre montado) */}
+        <Modal
+          open={creatingPair}
+          title="Novo Par"
+          onClose={() => setCreatingPair(false)}
+          footer={
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setCreatingPair(false)}
+                className="border border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleCreatePair}
+                disabled={savingCreate || !newPairName.trim()}
+                className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+              >
+                {savingCreate ? <Loader2 className="animate-spin h-4 w-4" /> : 'Criar'}
+              </Button>
+            </>
+          }
+        >
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Nome do par</label>
+            <Input
+              autoFocus={creatingPair}
+              value={newPairName}
+              onChange={(e) => setNewPairName(e.target.value)}
+              className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
+              placeholder="Ex.: EURUSD"
+            />
+          </div>
+        </Modal>
+
+        {/* Modal Editar Par (sempre montado) */}
+        <Modal
+          open={!!editingPair}
+          title="Editar Par"
+          onClose={() => setEditingPair(null)}
+          footer={
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setEditingPair(null)}
+                className="border border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleEditPair}
+                disabled={savingEdit || !editName.trim()}
+                className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+              >
+                {savingEdit ? <Loader2 className="animate-spin h-4 w-4" /> : 'Salvar'}
+              </Button>
+            </>
+          }
+        >
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Nome do par</label>
+            <Input
+              autoFocus={!!editingPair}
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
+              placeholder="Ex.: EURUSD"
+            />
+          </div>
+        </Modal>
       </main>
     </div>
   );
