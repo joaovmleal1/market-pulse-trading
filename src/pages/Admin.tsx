@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import SidebarMenu from '@/components/ui/SidebarMenu';
 import { Loader2 } from 'lucide-react';
 
-type TabKey = 'users' | 'settings' | 'live';
+type TabKey = 'users' | 'settings' | 'live' | 'pairs';
 
 interface User {
   id: number;
@@ -77,6 +77,14 @@ interface LiveTradeItem {
   status: 'scheduled' | 'sent' | 'done' | 'failed';
   created_at?: string;
   notes?: string;
+}
+
+/** =========================
+ *  Trade Pairs
+ *  ========================= */
+interface TradePair {
+  id: number;
+  pair_name: string;
 }
 
 const Admin = () => {
@@ -371,6 +379,143 @@ const Admin = () => {
   };
 
   /** ================================
+   *  Aba: Pares (CRUD)
+   *  ================================ */
+  const [pairs, setPairs] = useState<TradePair[]>([]);
+  const [loadingPairs, setLoadingPairs] = useState(false);
+  const [searchPair, setSearchPair] = useState('');
+  const [creatingPair, setCreatingPair] = useState(false);
+  const [newPairName, setNewPairName] = useState('');
+  const [savingCreate, setSavingCreate] = useState(false);
+
+  const [editingPair, setEditingPair] = useState<TradePair | null>(null);
+  const [editName, setEditName] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const fetchPairs = async () => {
+    try {
+      setLoadingPairs(true);
+      const res = await fetch('https://api.multitradingob.com/trade-pairs/all', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) {
+        console.error('Falha ao listar pares:', res.status, await res.text());
+        setPairs([]);
+        return;
+      }
+      const data: TradePair[] = await res.json();
+      setPairs(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Erro ao buscar pares:', err);
+    } finally {
+      setLoadingPairs(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'pairs') fetchPairs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const filteredPairs = useMemo(() => {
+    const q = searchPair.trim().toLowerCase();
+    if (!q) return pairs;
+    return pairs.filter((p) => p.pair_name?.toLowerCase().includes(q));
+  }, [pairs, searchPair]);
+
+  const openCreatePair = () => {
+    setNewPairName('');
+    setCreatingPair(true);
+  };
+
+  const handleCreatePair = async () => {
+    try {
+      const name = newPairName.trim();
+      if (!name) return;
+
+      setSavingCreate(true);
+      const res = await fetch('https://api.multitradingob.com/trade-pairs/create', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ pair_name: name }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Falha ao criar par.');
+      }
+      setCreatingPair(false);
+      setNewPairName('');
+      fetchPairs();
+    } catch (err) {
+      console.error('Erro ao criar par:', err);
+    } finally {
+      setSavingCreate(false);
+    }
+  };
+
+  const openEditPair = (pair: TradePair) => {
+    setEditingPair(pair);
+    setEditName(pair.pair_name);
+  };
+
+  const handleEditPair = async () => {
+    if (!editingPair) return;
+    try {
+      const name = editName.trim();
+      if (!name) return;
+
+      setSavingEdit(true);
+      // 🔧 Ajuste se seus endpoints diferirem:
+      // assumindo PUT /trade-pairs/{id} com body { pair_name }
+      const res = await fetch(`https://api.multitradingob.com/trade-pairs/${editingPair.id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ pair_name: name }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Falha ao editar par.');
+      }
+      setEditingPair(null);
+      fetchPairs();
+    } catch (err) {
+      console.error('Erro ao editar par:', err);
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleDeletePair = async (id: number) => {
+    try {
+      if (!window.confirm('Deseja realmente excluir este par?')) return;
+      setDeletingId(id);
+      // 🔧 Ajuste se seus endpoints diferirem:
+      // assumindo DELETE /trade-pairs/{id}
+      const res = await fetch(`https://api.multitradingob.com/trade-pairs/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Falha ao excluir par.');
+      }
+      setDeletingId(null);
+      fetchPairs();
+    } catch (err) {
+      console.error('Erro ao excluir par:', err);
+      setDeletingId(null);
+    }
+  };
+
+  /** ================================
    *  UI
    *  ================================ */
   const TabButton = ({ k, label }: { k: TabKey; label: string }) => (
@@ -386,6 +531,34 @@ const Admin = () => {
     </Button>
   );
 
+  const Modal: React.FC<{
+    open: boolean;
+    title: string;
+    onClose: () => void;
+    children: React.ReactNode;
+    footer?: React.ReactNode;
+  }> = ({ open, title, onClose, children, footer }) => {
+    if (!open) return null;
+    return (
+      <div className="fixed inset-0 z-[60] flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+        <div className="relative w-[92%] max-w-md rounded-2xl border border-cyan-500/20 bg-[#0f172a] shadow-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-base font-semibold text-white">{title}</p>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-200 rounded px-2 py-1 border border-transparent hover:border-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="space-y-3">{children}</div>
+          {footer && <div className="mt-4 flex justify-end gap-2">{footer}</div>}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#111827] text-white">
       <SidebarMenu />
@@ -397,6 +570,7 @@ const Admin = () => {
           <TabButton k="users" label="Usuários" />
           <TabButton k="settings" label="Configurações do Site" />
           <TabButton k="live" label="Lançar Trades (Ao Vivo)" />
+          <TabButton k="pairs" label="Pares" />
         </div>
 
         {/* === ABA USUÁRIOS === */}
@@ -508,6 +682,10 @@ const Admin = () => {
                         className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
                         placeholder="https://..."
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        GET: <code>/site-options/all</code> (Basic) · PUT:{' '}
+                        <code>/site-options/{IS_LIVE_KEY}?value=...</code> (Bearer)
+                      </p>
                     </div>
 
                     <div className="pt-2">
@@ -704,6 +882,136 @@ const Admin = () => {
                 </Card>
               </div>
             </motion.div>
+          </section>
+        )}
+
+        {/* === ABA PARES === */}
+        {activeTab === 'pairs' && (
+          <section aria-label="Aba Pares">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                <Input
+                  type="text"
+                  placeholder="Buscar por nome do par..."
+                  value={searchPair}
+                  onChange={(e) => setSearchPair(e.target.value)}
+                  className="w-full md:w-80 bg-[#1E293B] text-white placeholder-gray-400 border border-cyan-500/20"
+                />
+                <Button
+                  onClick={openCreatePair}
+                  className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+                >
+                  + Novo Par
+                </Button>
+              </div>
+
+              {loadingPairs ? (
+                <div className="flex items-center gap-2 text-gray-400">
+                  <Loader2 className="animate-spin" /> Carregando pares...
+                </div>
+              ) : filteredPairs.length === 0 ? (
+                <p className="text-gray-400">Nenhum par encontrado.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredPairs.map((p) => (
+                    <Card key={p.id} className="bg-[#1E293B] border border-cyan-500/20 text-white">
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-white">{p.pair_name}</p>
+                          <p className="text-xs text-gray-400">ID: {p.id}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => openEditPair(p)}
+                            className="border border-cyan-500/20 text-gray-200 hover:bg-gray-700"
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleDeletePair(p.id)}
+                            disabled={deletingId === p.id}
+                          >
+                            {deletingId === p.id ? <Loader2 className="animate-spin h-4 w-4" /> : 'Excluir'}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+
+            {/* Modal Criar Par */}
+            <Modal
+              open={creatingPair}
+              title="Novo Par"
+              onClose={() => setCreatingPair(false)}
+              footer={
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCreatingPair(false)}
+                    className="border border-gray-600 text-gray-300 hover:bg-gray-700"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleCreatePair}
+                    disabled={savingCreate || !newPairName.trim()}
+                    className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+                  >
+                    {savingCreate ? <Loader2 className="animate-spin h-4 w-4" /> : 'Criar'}
+                  </Button>
+                </>
+              }
+            >
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Nome do par</label>
+                <Input
+                  value={newPairName}
+                  onChange={(e) => setNewPairName(e.target.value)}
+                  className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
+                  placeholder="Ex.: EURUSD"
+                />
+              </div>
+            </Modal>
+
+            {/* Modal Editar Par */}
+            <Modal
+              open={!!editingPair}
+              title="Editar Par"
+              onClose={() => setEditingPair(null)}
+              footer={
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditingPair(null)}
+                    className="border border-gray-600 text-gray-300 hover:bg-gray-700"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleEditPair}
+                    disabled={savingEdit || !editName.trim()}
+                    className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+                  >
+                    {savingEdit ? <Loader2 className="animate-spin h-4 w-4" /> : 'Salvar'}
+                  </Button>
+                </>
+              }
+            >
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Nome do par</label>
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
+                  placeholder="Ex.: EURUSD"
+                />
+              </div>
+            </Modal>
           </section>
         )}
       </main>
