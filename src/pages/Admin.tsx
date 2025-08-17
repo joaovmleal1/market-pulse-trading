@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -34,7 +34,7 @@ interface SiteOption {
 const IS_LIVE_KEY = 'is_live';
 const LIVE_URL_KEY = 'live_url';
 
-// Helpers para Basic Auth a partir do .env (Vite)
+// Helpers para Basic Auth (Vite)
 const BASIC_USER = import.meta.env.VITE_BASIC_AUTH_USER as string | undefined;
 const BASIC_PASS = import.meta.env.VITE_BASIC_AUTH_PASS as string | undefined;
 
@@ -44,7 +44,6 @@ function toBase64(str: string) {
   for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
   return btoa(binary);
 }
-
 function buildBasicAuthHeader() {
   if (!BASIC_USER || !BASIC_PASS) return undefined;
   const token = toBase64(`${BASIC_USER}:${BASIC_PASS}`);
@@ -54,22 +53,25 @@ function buildBasicAuthHeader() {
 /** =========================
  *  Lançamentos ao vivo
  *  ========================= */
-type Direction = 'CALL' | 'PUT' | 'BUY' | 'SELL';
+type Direction = 'BUY' | 'SELL';
+type Timeframe = '1' | '5';
+type BrokerChoice = 'Avalon' | 'Polarium' | 'both';
 
-interface LiveTradeForm {
-  asset: string;
+interface LiveOpenForm {
+  trade_pair: string;
   direction: Direction;
-  expiration_min: number;
-  entry_time: string; // datetime-local
-  gale_one_enabled: boolean;
-  gale_two_enabled: boolean;
-  notes: string;
+  timeframe: Timeframe;
+  broker: BrokerChoice;
+}
+interface LiveCloseForm {
+  result: 'WIN' | 'LOSS';
+  broker: BrokerChoice;
 }
 
 interface LiveTradeItem {
   id: number;
   asset: string;
-  direction: Direction;
+  direction: string;
   expiration_min: number;
   entry_time: string;
   gale_one_enabled: boolean;
@@ -151,9 +153,7 @@ const Admin = () => {
         statusFilter === 'all' ||
         (statusFilter === 'active' && u.is_active) ||
         (statusFilter === 'inactive' && !u.is_active);
-
       const matchesSearch = u.complete_name?.toLowerCase().includes(searchTerm.toLowerCase());
-
       return matchesStatus && matchesSearch;
     });
   }, [users, statusFilter, searchTerm]);
@@ -181,38 +181,30 @@ const Admin = () => {
   const fetchSiteOptions = async () => {
     try {
       setLoadingOptions(true);
-
       const basicAuth = buildBasicAuthHeader();
       if (!basicAuth) {
         console.error('Faltam VITE_BASIC_AUTH_USER / VITE_BASIC_AUTH_PASS no .env');
         setLoadingOptions(false);
         return;
       }
-
       const res = await fetch('https://api.multitradingob.com/site-options/all', {
         headers: {
-          Authorization: basicAuth, // BASIC
+          Authorization: basicAuth,
           Accept: 'application/json',
         },
       });
-
       if (!res.ok) {
         console.error('Falha ao carregar site-options/all:', res.status, await res.text());
         setLoadingOptions(false);
         return;
       }
-
       const data: SiteOption[] = await res.json();
-
       const map = new Map<string, string>();
       data.forEach((opt) => map.set(opt.key_name, opt.key_value ?? ''));
-
       const liveEnabledStr = map.get(IS_LIVE_KEY) ?? 'false';
       const liveUrlStr = map.get(LIVE_URL_KEY) ?? '';
-
       setLiveEnabled(parseBool(liveEnabledStr));
       setLiveUrl(liveUrlStr);
-
       setOriginalOptions({
         [IS_LIVE_KEY]: liveEnabledStr,
         [LIVE_URL_KEY]: liveUrlStr,
@@ -224,20 +216,17 @@ const Admin = () => {
     }
   };
 
-  // PUT com Bearer; envia value como query param (?value=...)
   const putSiteOption = async (name: string, value: string) => {
-    const url = `https://api.multitradingob.com/site-options/${encodeURIComponent(
-      name
-    )}?value=${encodeURIComponent(value)}`;
-
+    const url = `https://api.multitradingob.com/site-options/${encodeURIComponent(name)}?value=${encodeURIComponent(
+      value
+    )}`;
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${accessToken}`, // OAuth Bearer
+        Authorization: `Bearer ${accessToken}`,
         Accept: 'application/json',
       },
     });
-
     if (!res.ok) {
       const text = await res.text();
       throw new Error(`PUT ${name} falhou (${res.status}): ${text}`);
@@ -247,24 +236,14 @@ const Admin = () => {
   const saveSiteOptions = async () => {
     try {
       setSavingOptions(true);
-
-      const currEnabled = String(liveEnabled); // 'true' | 'false'
+      const currEnabled = String(liveEnabled);
       const currUrl = liveUrl ?? '';
-
       const tasks: Array<Promise<any>> = [];
-      if (currEnabled !== originalOptions[IS_LIVE_KEY]) {
-        tasks.push(putSiteOption(IS_LIVE_KEY, currEnabled));
-      }
-      if (currUrl !== originalOptions[LIVE_URL_KEY]) {
-        tasks.push(putSiteOption(LIVE_URL_KEY, currUrl));
-      }
-
+      if (currEnabled !== originalOptions[IS_LIVE_KEY]) tasks.push(putSiteOption(IS_LIVE_KEY, currEnabled));
+      if (currUrl !== originalOptions[LIVE_URL_KEY]) tasks.push(putSiteOption(LIVE_URL_KEY, currUrl));
       if (tasks.length > 0) {
         await Promise.all(tasks);
-        setOriginalOptions({
-          [IS_LIVE_KEY]: currEnabled,
-          [LIVE_URL_KEY]: currUrl,
-        });
+        setOriginalOptions({ [IS_LIVE_KEY]: currEnabled, [LIVE_URL_KEY]: currUrl });
       }
     } catch (err) {
       console.error('Erro ao salvar site-options:', err);
@@ -274,109 +253,12 @@ const Admin = () => {
   };
 
   const dirtyOptions =
-    String(liveEnabled) !== originalOptions[IS_LIVE_KEY] ||
-    (liveUrl ?? '') !== originalOptions[LIVE_URL_KEY];
+    String(liveEnabled) !== originalOptions[IS_LIVE_KEY] || (liveUrl ?? '') !== originalOptions[LIVE_URL_KEY];
 
   useEffect(() => {
     if (activeTab === 'settings') fetchSiteOptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
-
-  /** ================================
-   *  Aba: Lançar Trades (Ao Vivo)
-   *  ================================ */
-  const nowToDatetimeLocal = (d = new Date()) => {
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const yyyy = d.getFullYear();
-    const mm = pad(d.getMonth() + 1);
-    const dd = pad(d.getDate());
-    const hh = pad(d.getHours());
-    const mi = pad(d.getMinutes());
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-  };
-
-  const [liveForm, setLiveForm] = useState<LiveTradeForm>({
-    asset: '',
-    direction: 'CALL',
-    expiration_min: 1,
-    entry_time: nowToDatetimeLocal(new Date(Date.now() + 60_000)),
-    gale_one_enabled: true,
-    gale_two_enabled: true,
-    notes: '',
-  });
-  const [submittingLive, setSubmittingLive] = useState(false);
-  const [liveList, setLiveList] = useState<LiveTradeItem[]>([]);
-  const [loadingLiveList, setLoadingLiveList] = useState(false);
-
-  const fetchLiveList = async () => {
-    try {
-      setLoadingLiveList(true);
-      const res = await fetch('https://api.multitradingob.com/admin/live-trades?limit=20', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setLiveList(Array.isArray(data) ? data : []);
-      } else {
-        setLiveList([]);
-      }
-    } catch (err) {
-      console.error('Erro ao buscar lançamentos:', err);
-    } finally {
-      setLoadingLiveList(false);
-    }
-  };
-
-  useEffect(() => {
-    if (activeTab === 'live') fetchLiveList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
-
-  const handleLaunchTrade = async () => {
-    try {
-      setSubmittingLive(true);
-
-      const payload = {
-        asset: liveForm.asset.trim(),
-        direction: liveForm.direction,
-        expiration_min: Number(liveForm.expiration_min),
-        entry_time: new Date(liveForm.entry_time).toISOString(),
-        gale_one_enabled: !!liveForm.gale_one_enabled,
-        gale_two_enabled: !!liveForm.gale_two_enabled,
-        notes: liveForm.notes?.trim() || '',
-      };
-
-      if (!payload.asset) throw new Error('Preencha o ativo.');
-      if (!payload.expiration_min || payload.expiration_min < 1) throw new Error('Expiração inválida.');
-
-      const res = await fetch('https://api.multitradingob.com/admin/live-trades', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || 'Falha ao lançar trade.');
-      }
-
-      setLiveForm((prev) => ({
-        ...prev,
-        asset: '',
-        entry_time: nowToDatetimeLocal(new Date(Date.now() + 60_000)),
-        notes: '',
-      }));
-
-      fetchLiveList();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubmittingLive(false);
-    }
-  };
 
   /** ================================
    *  Aba: Pares (CRUD)
@@ -391,7 +273,6 @@ const Admin = () => {
   const [editingPair, setEditingPair] = useState<TradePair | null>(null);
   const [editName, setEditName] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
-
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const fetchPairs = async () => {
@@ -434,7 +315,6 @@ const Admin = () => {
     try {
       const name = newPairName.trim();
       if (!name) return;
-
       setSavingCreate(true);
       const res = await fetch('https://api.multitradingob.com/trade-pairs/create', {
         method: 'POST',
@@ -462,15 +342,12 @@ const Admin = () => {
     setEditingPair(pair);
     setEditName(pair.pair_name);
   };
-
   const handleEditPair = async () => {
     if (!editingPair) return;
     try {
       const name = editName.trim();
       if (!name) return;
-
       setSavingEdit(true);
-      // Ajuste se seus endpoints diferirem
       const res = await fetch(`https://api.multitradingob.com/trade-pairs/${editingPair.id}`, {
         method: 'PUT',
         headers: {
@@ -491,7 +368,6 @@ const Admin = () => {
       setSavingEdit(false);
     }
   };
-
   const handleDeletePair = async (id: number) => {
     try {
       if (!window.confirm('Deseja realmente excluir este par?')) return;
@@ -513,6 +389,95 @@ const Admin = () => {
   };
 
   /** ================================
+   *  Aba: Lançar Trades (usando trade-pairs + open/close)
+   *  ================================ */
+  // Carregar pares também quando a aba "live" abrir (para o select)
+  const [pairLiveSearch, setPairLiveSearch] = useState('');
+  useEffect(() => {
+    if (activeTab === 'live' && pairs.length === 0) fetchPairs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const filteredPairsForLive = useMemo(() => {
+    const q = pairLiveSearch.trim().toLowerCase();
+    if (!q) return pairs;
+    return pairs.filter((p) => p.pair_name?.toLowerCase().includes(q));
+  }, [pairs, pairLiveSearch]);
+
+  const [openForm, setOpenForm] = useState<LiveOpenForm>({
+    trade_pair: '',
+    direction: 'BUY',
+    timeframe: '1',
+    broker: 'Avalon',
+  });
+  const [closeForm, setCloseForm] = useState<LiveCloseForm>({
+    result: 'WIN',
+    broker: 'Avalon',
+  });
+  const [submittingOpen, setSubmittingOpen] = useState(false);
+  const [submittingClose, setSubmittingClose] = useState(false);
+
+  const postOpen = async (payload: { trade_pair: string; timeframe: string; direction: string; broker: string }) => {
+    const res = await fetch('https://api.multitradingob.com/trade-order-info/open', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(await res.text());
+  };
+  const postClose = async (payload: { result: string; broker: string }) => {
+    const res = await fetch('https://api.multitradingob.com/trade-order-info/close', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(await res.text());
+  };
+
+  const handleOpenTrade = async () => {
+    try {
+      if (!openForm.trade_pair) throw new Error('Selecione um par.');
+      setSubmittingOpen(true);
+
+      const base = {
+        trade_pair: openForm.trade_pair,
+        timeframe: openForm.timeframe, // "1" | "5"
+        direction: openForm.direction, // "BUY" | "SELL"
+      };
+
+      if (openForm.broker === 'both') {
+        await Promise.all([
+          postOpen({ ...base, broker: 'Avalon' }),
+          postOpen({ ...base, broker: 'Polarium' }),
+        ]);
+      } else {
+        await postOpen({ ...base, broker: openForm.broker });
+      }
+    } catch (err) {
+      console.error('Falha ao abrir trade:', err);
+    } finally {
+      setSubmittingOpen(false);
+    }
+  };
+
+  const handleCloseTrade = async () => {
+    try {
+      setSubmittingClose(true);
+      const base = { result: closeForm.result };
+
+      if (closeForm.broker === 'both') {
+        await Promise.all([postClose({ ...base, broker: 'Avalon' }), postClose({ ...base, broker: 'Polarium' })]);
+      } else {
+        await postClose({ ...base, broker: closeForm.broker });
+      }
+    } catch (err) {
+      console.error('Falha ao lançar resultado:', err);
+    } finally {
+      setSubmittingClose(false);
+    }
+  };
+
+  /** ================================
    *  UI
    *  ================================ */
   const TabButton = ({ k, label }: { k: TabKey; label: string }) => (
@@ -528,10 +493,7 @@ const Admin = () => {
     </Button>
   );
 
-  /**
-   * Modal sempre montado (evita perder foco).
-   * Usa classes para esconder/mostrar.
-   */
+  // Modal sempre montado (evita perder foco)
   const Modal: React.FC<{
     open: boolean;
     title: string;
@@ -546,16 +508,8 @@ const Admin = () => {
         }`}
         aria-hidden={!open}
       >
-        {/* backdrop */}
-        <div
-          className="absolute inset-0 bg-black/60"
-          onClick={onClose}
-        />
-        {/* content */}
-        <div
-          className="relative w-[92%] max-w-md rounded-2xl border border-cyan-500/20 bg-[#0f172a] shadow-xl p-4"
-          onClick={(e) => e.stopPropagation()} // garante que clique interno não fecha
-        >
+        <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+        <div className="relative w-[92%] max-w-md rounded-2xl border border-cyan-500/20 bg-[#0f172a] shadow-xl p-4" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-3">
             <p className="text-base font-semibold text-white">{title}</p>
             <button
@@ -724,168 +678,143 @@ const Admin = () => {
           </motion.section>
         )}
 
-        {/* === ABA LANÇAR TRADES === */}
+        {/* === ABA LANÇAR TRADES (Open/Close) === */}
         {activeTab === 'live' && (
           <motion.section initial={false} animate={{ opacity: 1 }} aria-label="Aba Lançar Trades (Ao Vivo)">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Formulário */}
+              {/* Abrir Trade */}
               <Card className="bg-[#1E293B] border border-cyan-500/20">
-                <CardContent className="p-4 space-y-3">
-                  <p className="text-lg font-semibold">Disparar Sinal Manual</p>
+                <CardContent className="p-4 space-y-4">
+                  <p className="text-lg font-semibold">Abrir Trade</p>
 
+                  {/* Busca + Select de Par */}
                   <div>
-                    <label className="block text-sm text-gray-300 mb-1">Ativo (par)</label>
+                    <label className="block text-sm text-gray-300 mb-1">Buscar Par</label>
                     <Input
-                      value={liveForm.asset}
-                      onChange={(e) => setLiveForm((f) => ({ ...f, asset: e.target.value }))}
+                      value={pairLiveSearch}
+                      onChange={(e) => setPairLiveSearch(e.target.value)}
                       className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                      placeholder="Ex.: EURUSD, WIN, BTCUSDT..."
+                      placeholder="Ex.: EURUSD"
                     />
+                    <label className="block text-sm text-gray-300 mt-3 mb-1">Par</label>
+                    <select
+                      value={openForm.trade_pair}
+                      onChange={(e) => setOpenForm((f) => ({ ...f, trade_pair: e.target.value }))}
+                      className="w-full rounded-md bg-[#1F1F1F] border border-cyan-500/20 px-3 py-2 text-white"
+                    >
+                      <option value="">Selecione</option>
+                      {filteredPairsForLive.map((p) => (
+                        <option key={p.id} value={p.pair_name}>
+                          {p.pair_name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm text-gray-300 mb-1">Direção</label>
                       <select
-                        value={liveForm.direction}
-                        onChange={(e) => setLiveForm((f) => ({ ...f, direction: e.target.value as Direction }))}
-                        className="w-full rounded-md bg-[#1F1F1F] border border-cyan-500/20 px-3 py-2"
+                        value={openForm.direction}
+                        onChange={(e) => setOpenForm((f) => ({ ...f, direction: e.target.value as Direction }))}
+                        className="w-full rounded-md bg-[#1F1F1F] border border-cyan-500/20 px-3 py-2 text-white"
                       >
-                        <option value="CALL">CALL</option>
-                        <option value="PUT">PUT</option>
                         <option value="BUY">BUY</option>
                         <option value="SELL">SELL</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-sm text-gray-300 mb-1">Expiração (min)</label>
-                      <Input
-                        inputMode="numeric"
-                        value={String(liveForm.expiration_min)}
-                        onChange={(e) =>
-                          setLiveForm((f) => ({ ...f, expiration_min: Number(e.target.value || 0) }))
-                        }
-                        className="bg-[#1F1F1F] border border-cyan-500/20 text-white text-center"
-                        placeholder="1, 3, 5..."
-                      />
+                      <label className="block text-sm text-gray-300 mb-1">Expiração</label>
+                      <select
+                        value={openForm.timeframe}
+                        onChange={(e) => setOpenForm((f) => ({ ...f, timeframe: e.target.value as Timeframe }))}
+                        className="w-full rounded-md bg-[#1F1F1F] border border-cyan-500/20 px-3 py-2 text-white"
+                      >
+                        <option value="1">1 minuto</option>
+                        <option value="5">5 minutos</option>
+                      </select>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-1">Horário da Entrada</label>
-                    <Input
-                      type="datetime-local"
-                      value={liveForm.entry_time}
-                      onChange={(e) => setLiveForm((f) => ({ ...f, entry_time: e.target.value }))}
-                      className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                    />
-                    <p className="text-xs text-gray-400 mt-1">
-                      Dica: os gales serão agendados pelo servidor a +1min e +2min (se habilitados).
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={liveForm.gale_one_enabled}
-                        onCheckedChange={(checked) => setLiveForm((f) => ({ ...f, gale_one_enabled: !!checked }))}
-                      />
-                      <span className="text-sm">Gale 1</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={liveForm.gale_two_enabled}
-                        onCheckedChange={(checked) => setLiveForm((f) => ({ ...f, gale_two_enabled: !!checked }))}
-                      />
-                      <span className="text-sm">Gale 2</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm text-gray-300 mb-1">Observações</label>
-                    <Input
-                      value={liveForm.notes}
-                      onChange={(e) => setLiveForm((f) => ({ ...f, notes: e.target.value }))}
-                      className="bg-[#1F1F1F] border border-cyan-500/20 text-white"
-                      placeholder="Opcional"
-                    />
+                    <label className="block text-sm text-gray-300 mb-1">Broker</label>
+                    <select
+                      value={openForm.broker}
+                      onChange={(e) => setOpenForm((f) => ({ ...f, broker: e.target.value as BrokerChoice }))}
+                      className="w-full rounded-md bg-[#1F1F1F] border border-cyan-500/20 px-3 py-2 text-white"
+                    >
+                      <option value="Avalon">Avalon</option>
+                      <option value="Polarium">Polarium</option>
+                      <option value="both">Avalon e Polarium</option>
+                    </select>
                   </div>
 
                   <div className="pt-2">
                     <Button
-                      onClick={handleLaunchTrade}
-                      disabled={submittingLive}
+                      onClick={handleOpenTrade}
+                      disabled={submittingOpen || !openForm.trade_pair}
                       className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
                     >
-                      {submittingLive ? (
+                      {submittingOpen ? (
                         <span className="flex items-center gap-2">
                           <Loader2 className="animate-spin" /> Enviando...
                         </span>
                       ) : (
-                        'Lançar Trade'
+                        'Abrir Trade'
                       )}
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Últimos lançamentos */}
+              {/* Lançar Resultado */}
               <Card className="bg-[#1E293B] border border-cyan-500/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-lg font-semibold">Últimos Lançamentos</p>
-                    <Button
-                      variant="outline"
-                      onClick={fetchLiveList}
-                      className="border border-cyan-500/20 text-gray-200 hover:bg-gray-700"
-                    >
-                      Atualizar
-                    </Button>
+                <CardContent className="p-4 space-y-4">
+                  <p className="text-lg font-semibold">Lançar Resultado</p>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">Resultado</label>
+                      <select
+                        value={closeForm.result}
+                        onChange={(e) => setCloseForm((f) => ({ ...f, result: e.target.value as 'WIN' | 'LOSS' }))}
+                        className="w-full rounded-md bg-[#1F1F1F] border border-cyan-500/20 px-3 py-2 text-white"
+                      >
+                        <option value="WIN">WIN</option>
+                        <option value="LOSS">LOSS</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">Broker</label>
+                      <select
+                        value={closeForm.broker}
+                        onChange={(e) => setCloseForm((f) => ({ ...f, broker: e.target.value as BrokerChoice }))}
+                        className="w-full rounded-md bg-[#1F1F1F] border border-cyan-500/20 px-3 py-2 text-white"
+                      >
+                        <option value="Avalon">Avalon</option>
+                        <option value="Polarium">Polarium</option>
+                        <option value="both">Avalon e Polarium</option>
+                      </select>
+                    </div>
                   </div>
 
-                  {loadingLiveList ? (
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <Loader2 className="animate-spin" /> Carregando...
-                    </div>
-                  ) : liveList.length === 0 ? (
-                    <p className="text-gray-400">Nenhum lançamento encontrado.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {liveList.map((it) => (
-                        <div
-                          key={it.id}
-                          className="border border-cyan-500/20 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-                        >
-                          <div className="space-y-0.5">
-                            <p className="text-sm text-gray-300">
-                              <span className="font-semibold text-white">{it.asset}</span> · {it.direction} ·{' '}
-                              {it.expiration_min}m
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              Entrada: {new Date(it.entry_time).toLocaleString()} · G1:
-                              {it.gale_one_enabled ? ' Sim' : ' Não'} · G2:{' '}
-                              {it.gale_two_enabled ? ' Sim' : ' Não'}
-                            </p>
-                            {it.notes && <p className="text-xs text-gray-500">Obs.: {it.notes}</p>}
-                          </div>
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full border ${
-                              it.status === 'done'
-                                ? 'border-green-400/40 text-green-300'
-                                : it.status === 'failed'
-                                ? 'border-red-400/40 text-red-300'
-                                : it.status === 'sent'
-                                ? 'border-blue-400/40 text-blue-300'
-                                : 'border-yellow-400/40 text-yellow-300'
-                            }`}
-                          >
-                            {it.status}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div className="pt-2">
+                    <Button
+                      onClick={handleCloseTrade}
+                      disabled={submittingClose}
+                      className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+                    >
+                      {submittingClose ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="animate-spin" /> Enviando...
+                        </span>
+                      ) : (
+                        'Lançar Resultado'
+                      )}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -904,7 +833,10 @@ const Admin = () => {
                 className="w-full md:w-80 bg-[#1E293B] text-white placeholder-gray-400 border border-cyan-500/20"
               />
               <Button
-                onClick={openCreatePair}
+                onClick={() => {
+                  setNewPairName('');
+                  setCreatingPair(true);
+                }}
                 className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
               >
                 + Novo Par
@@ -929,7 +861,10 @@ const Admin = () => {
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
-                          onClick={() => openEditPair(p)}
+                          onClick={() => {
+                            setEditingPair(p);
+                            setEditName(p.pair_name);
+                          }}
                           className="border border-cyan-500/20 text-gray-200 hover:bg-gray-700"
                         >
                           Editar
