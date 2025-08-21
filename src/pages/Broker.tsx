@@ -163,19 +163,6 @@ export const Broker = () => {
     HB_BALANCE: 'https://bot-wallet-api.homebroker.com/balance/',
   } as const;
 
-  // --- HB app basic auth helper ---
-  function getHbBasicAuthHeader() {
-    const appUser = import.meta.env.VITE_HB_APP_USER;
-    const appPass = import.meta.env.VITE_HB_APP_PASS;
-    if (!appUser || !appPass) {
-      console.warn('[HB] VITE_HB_APP_USER / VITE_HB_APP_PASS não configurados.');
-      return undefined;
-    }
-    const token = btoa(`${appUser}:${appPass}`);
-    return `Basic ${token}`;
-  }
-  // --------------------------------
-
   const fetchWallets = async () => {
     if (!id) return;
 
@@ -258,7 +245,7 @@ export const Broker = () => {
         return;
       }
 
-      // 5) HB → login (Basic do app) e depois balance (Bearer)
+      // 5) HB → login (Basic COM credenciais do usuário) e depois balance (Bearer)
       if (key === 'HB') {
         const username = ubData?.brokerage_username; // "johndoe"
         const password = ubData?.brokerage_password; // "strongPassword123"
@@ -268,19 +255,12 @@ export const Broker = () => {
           return;
         }
 
-        const basicHeader = getHbBasicAuthHeader();
-        if (!basicHeader) {
-          console.warn('[wallets] HB app credentials não configuradas (VITE_HB_APP_USER/PASS).');
-          setWallets({});
-          return;
-        }
-
-        // 5.1) LOGIN
+        // 5.1) LOGIN (Authorization: Basic base64(username:password))
         const loginRes = await fetch(BROKER_ENDPOINTS.HB_LOGIN, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: basicHeader, // Authorization: Basic <base64 login_app:password_app>
+            Authorization: 'Basic ' + btoa(`${username}:${password}`),
           },
           body: JSON.stringify({
             username,
@@ -299,17 +279,17 @@ export const Broker = () => {
         }
 
         const loginData = await loginRes.json().catch(() => ({}));
-        const accessToken: string | undefined = loginData?.access_token;
-        if (!accessToken) {
+        const accessJwt: string | undefined = loginData?.access_token;
+        if (!accessJwt) {
           console.warn('[wallets] HB access_token ausente na resposta de login.');
           setWallets({});
           return;
         }
 
-        // 5.2) BALANCE
+        // 5.2) BALANCE (Authorization: Bearer <jwt>)
         const balRes = await fetch(BROKER_ENDPOINTS.HB_BALANCE, {
           method: 'GET',
-          headers: { Authorization: `Bearer ${accessToken}` }, // Authorization: Bearer <jwt>
+          headers: { Authorization: `Bearer ${accessJwt}` },
         });
 
         if (balRes.status === 401) {
