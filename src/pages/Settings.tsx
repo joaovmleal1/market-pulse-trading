@@ -1,627 +1,427 @@
-// src/pages/Broker.tsx
-import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Card, CardContent } from '@/components/ui/card';
-import BrokerSidebarMenu from '@/components/ui/BrokerSidebarMenu';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
+import SecureField from '@/components/ui/SecureField';
+import { Switch } from '@/components/ui/switch';
+import { motion } from 'framer-motion';
+import BrokerSidebarMenu from '@/components/ui/BrokerSidebarMenu';
 
-interface BrokerageInfo {
-  name?: string;
-  icon?: string;
-}
-interface BotOptions {
-  bot_status?: number;
-  is_demo?: boolean;
-  user_id?: number | null;
-}
-interface TradeOrder {
-  status?: string;
-  pnl: number;
-  symbol?: string;
-  date_time?: string;
-}
+const settingsFields = [
+  { label: 'Stop Loss', key: 'stop_loss' },
+  { label: 'Stop Win', key: 'stop_win' },
+  { label: 'Valor de Entrada (Preço)', key: 'entry_price' },
 
-export const Broker = () => {
+  // ✅ Novos campos de valor para gales
+  { label: 'Valor Gale 1 (Preço)', key: 'gale_one_value' },
+  { label: 'Valor Gale 2 (Preço)', key: 'gale_two_value' },
+
+  // ✅ Switches
+  { label: 'Conta Demo', key: 'is_demo', type: 'boolean' },
+  { label: 'Gale 1', key: 'gale_one', type: 'boolean' },
+  { label: 'Gale 2', key: 'gale_two', type: 'boolean' },
+
+  // ✅ Novo switch solicitado
+  { label: 'Modo Automático', key: 'is_auto', type: 'boolean' },
+
+  // Campos sensíveis / corretora
+  { label: 'API Key da Corretora', key: 'api_key', type: 'secure', brokerageOnly: true },
+  { label: 'Usuário da Corretora', key: 'brokerage_username', brokerageOnly: true },
+  { label: 'Senha da Corretora', key: 'brokerage_password', type: 'secure', brokerageOnly: true },
+];
+
+const brokerageFieldConfig: Record<string, string[]> = {
+  '1': ['api_key'],
+  '2': ['brokerage_username', 'brokerage_password'],
+  '3': ['brokerage_username', 'brokerage_password'],
+  '4': ['brokerage_username', 'brokerage_password'],
+};
+
+const containerVariants = {
+  hidden: { opacity: 0, visibility: 'hidden' },
+  visible: {
+    opacity: 1,
+    visibility: 'visible',
+    transition: { staggerChildren: 0.08 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.05 },
+  }),
+};
+
+const numericKeys = new Set([
+  'stop_loss',
+  'stop_win',
+  'entry_price',
+  'gale_one_value',
+  'gale_two_value',
+]);
+
+const SettingsPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { accessToken } = useSelector((state: any) => state.token);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { accessToken } = useSelector((state: any) => state.token);
 
-  const [wallets, setWallets] = useState<{ REAL?: number; DEMO?: number }>({});
-  const [brokerInfo, setBrokerInfo] = useState<BrokerageInfo>({});
-  const [selectedWallet, setSelectedWallet] = useState<'REAL' | 'DEMO'>('REAL');
-  const [botStatus, setBotStatus] = useState<number>(0);
-  const [isDemo, setIsDemo] = useState<boolean>(true);
-  const [recentOrders, setRecentOrders] = useState<TradeOrder[]>([]);
-  const [userId, setUserId] = useState<number | null>(null);
-  const [dailyStats, setDailyStats] = useState({ wins: 0, losses: 0, lucro: 0 });
-  const [totalStats, setTotalStats] = useState({ wins: 0, losses: 0, lucro: 0 });
-  const [roiValue, setRoiValue] = useState<number>(0);
-  const [roiPercent, setRoiPercent] = useState<number>(0);
-  const [roiTotalPercent, setRoiTotalPercent] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [formData, setFormData] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [brokerageInfo, setBrokerageInfo] = useState<any>(null);
+  const [userBrokerageCreated, setUserBrokerageCreated] = useState(false);
 
-  // ---------- LIVE TOAST ----------
-  const [isLive, setIsLive] = useState(false);
-  const [liveUrl, setLiveUrl] = useState<string | null>(null);
-  const prevLive = useRef(false);
-
+  // ✅ Carrega infos da corretora
   useEffect(() => {
-    const controller = new AbortController();
-    const fetchLiveStatus = async () => {
+    const fetchBrokerageInfo = async () => {
+      if (!id) return;
       try {
-        const basicUser = import.meta.env.VITE_BASIC_AUTH_USER;
-        const basicPass = import.meta.env.VITE_BASIC_AUTH_PASS;
-        const credentials = btoa(`${basicUser}:${basicPass}`);
-
-        const res = await fetch('https://api.multitradingob.com/site-options/all', {
+        const res = await fetch(`https://api.multitradingob.com/brokerages/${id}`, {
           headers: {
-            Authorization: `Basic ${credentials}`,
+            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
-          signal: controller.signal,
         });
-        if (!res.ok) throw new Error(`site-options ${res.status}`);
-        const data: Array<{ key_name: string; key_value: string }> = await res.json();
-        const map = Object.fromEntries(data.map((o) => [o.key_name, o.key_value]));
-        const isLiveRaw = String(map['is_live'] ?? '').trim().toLowerCase();
-        const live = isLiveRaw === 'true' || isLiveRaw === '1';
-        const url = (map['live_url'] || '').toString().trim();
-
-        setIsLive(live);
-        setLiveUrl(url || null);
-
-        if (!prevLive.current && live) {
-          toast.success('🚨 A Live começou! Clique para entrar.', {
-            action: {
-              label: 'Entrar',
-              onClick: () => window.open(url || '', '_blank'),
-            },
-          });
-        }
-        prevLive.current = live;
-      } catch {
-        // silencioso
-      }
-    };
-
-    fetchLiveStatus();
-    const iv = setInterval(fetchLiveStatus, 30000);
-    return () => {
-      controller.abort();
-      clearInterval(iv);
-    };
-  }, []);
-  // --------------------------------
-
-  // --- assets helper ---
-  const imageMap = import.meta.glob('@/assets/imgs/*', { eager: true, import: 'default' }) as Record<
-    string,
-    string
-  >;
-  const getImagePath = (filename?: string) => {
-    if (!filename) return '';
-    const entry = Object.entries(imageMap).find(([key]) => key.endsWith(filename));
-    return entry ? entry[1] : '';
-  };
-
-  // ---------- CARTEIRAS ----------
-  function normalizeWallets(payload: any): { REAL?: number; DEMO?: number } {
-    const list = Array.isArray(payload)
-      ? payload
-      : Array.isArray(payload?.balances)
-      ? payload.balances
-      : [];
-
-    let REAL: number | undefined;
-    let DEMO: number | undefined;
-
-    for (const w of list) {
-      const t = String(w.type || w.account_type || '').toLowerCase();
-      const valRaw = w.amount ?? w.balance ?? w.value;
-      const val = typeof valRaw === 'number' ? valRaw : Number(valRaw);
-      if (t === 'real') REAL = val;
-      if (t === 'demo') DEMO = val;
-    }
-
-    if (!list.length && typeof payload === 'object' && payload) {
-      const maybeReal = payload.REAL ?? payload.real;
-      const maybeDemo = payload.DEMO ?? payload.demo;
-      if (maybeReal != null) REAL = Number(maybeReal);
-      if (maybeDemo != null) DEMO = Number(maybeDemo);
-    }
-
-    return { REAL, DEMO };
-  }
-
-  // ---------- MAPEAMENTO ----------
-  type BrokerKey = 'HB' | 'XOFRE' | 'AVALON' | 'POLARIUM' | 'UNKNOWN';
-
-  const BROKER_ALIASES: Record<BrokerKey, string[]> = {
-    HB: ['HB', 'HOME BROKER', 'HYPERBIT', 'HYPERBIT BROKER'],
-    XOFRE: ['XOFRE'],
-    AVALON: ['AVALON'],
-    POLARIUM: ['POLARIUM'],
-    UNKNOWN: [],
-  };
-
-  function resolveBrokerKey(raw?: string): BrokerKey {
-    const name = String(raw || '').trim().toUpperCase();
-    for (const key of Object.keys(BROKER_ALIASES) as BrokerKey[]) {
-      if (BROKER_ALIASES[key].some(a => a.toUpperCase() === name)) return key;
-    }
-    return 'UNKNOWN';
-  }
-
-  // Mantidas as URLs originais + endpoints da HB
-  const BROKER_ENDPOINTS = {
-    XOFRE: '/internal/xofre/wallets',
-    AVALON: '/internal/avalon/balance',
-    POLARIUM: '/internal/polarium/balance',
-    HB_LOGIN: 'https://bot-account-manager-api.homebroker.com/v3/login',
-    HB_BALANCE: 'https://bot-wallet-api.homebroker.com/balance/',
-  } as const;
-
-  // --- HB app basic auth helper ---
-  function getHbBasicAuthHeader() {
-    const appUser = import.meta.env.VITE_HB_APP_USER;
-    const appPass = import.meta.env.VITE_HB_APP_PASS;
-    if (!appUser || !appPass) {
-      console.warn('[HB] VITE_HB_APP_USER / VITE_HB_APP_PASS não configurados.');
-      return undefined;
-    }
-    const token = btoa(`${appUser}:${appPass}`);
-    return `Basic ${token}`;
-  }
-  // --------------------------------
-
-  const fetchWallets = async () => {
-    if (!id) return;
-
-    try {
-      // 1) user-brokerages
-      const ubRes = await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!ubRes.ok) throw new Error(`Falha user-brokerages: ${ubRes.status}`);
-      const ubData = await ubRes.json();
-
-      // 2) nome da corretora defensivo
-      let rawName =
-        ubData?.brokerage_name ??
-        ubData?.brokerage?.brokerage_name ??
-        ubData?.brokerage?.name ??
-        '';
-      rawName = String(rawName).trim();
-
-      if (!rawName) {
-        const brokerageId = ubData?.brokerage_id;
-        if (brokerageId) {
-          try {
-            const bRes = await fetch(`https://api.multitradingob.com/brokerages/${brokerageId}`, {
-              headers: { Authorization: `Bearer ${accessToken}` },
-            });
-            if (bRes.ok) {
-              const bData = await bRes.json();
-              rawName = String(bData?.brokerage_name ?? bData?.name ?? '').trim();
-            }
-          } catch {}
-        }
-      }
-
-      const key = resolveBrokerKey(rawName);
-
-      // 3) XOFRE → GET com apiKey
-      if (key === 'XOFRE') {
-        const apiKeyB64: string | undefined = ubData?.api_key ?? ubData?.api_token;
-        if (!apiKeyB64) {
-          console.warn('[wallets] XOFRE sem api_key/api_token no user-brokerages');
-          setWallets({});
-          return;
-        }
-        const res = await fetch(BROKER_ENDPOINTS.XOFRE, {
-          headers: { 'X-Api-Key': apiKeyB64 },
-        });
-        if (!res.ok) throw new Error(`XOFRE wallets falhou: ${res.status}`);
-        const walletData = await res.json();
-
-        const { REAL, DEMO } = normalizeWallets(walletData);
-        setWallets({ REAL: REAL ?? 0, DEMO: DEMO ?? 0 });
-        return;
-      }
-
-      // 4) AVALON / POLARIUM → POST com credenciais
-      if (key === 'AVALON' || key === 'POLARIUM') {
-        const email = ubData?.brokerage_username;
-        const password = ubData?.brokerage_password;
-        if (!email || !password) {
-          console.warn('[wallets] Credenciais ausentes para', rawName, { email: !!email, password: !!password });
-          setWallets({});
-          return;
-        }
-
-        const balanceUrl = key === 'AVALON'
-          ? BROKER_ENDPOINTS.AVALON
-          : BROKER_ENDPOINTS.POLARIUM;
-
-        const res = await fetch(balanceUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
-        if (!res.ok) throw new Error(`${key} balance falhou: ${res.status}`);
         const data = await res.json();
-
-        const { REAL, DEMO } = normalizeWallets(data);
-        setWallets({ REAL: REAL ?? 0, DEMO: DEMO ?? 0 });
-        return;
+        setBrokerageInfo(data);
+      } catch (error) {
+        console.error('Erro ao buscar dados da corretora:', error);
       }
-
-      // 5) HB → login (Basic do app) e depois balance (Bearer)
-      if (key === 'HB') {
-        const username = ubData?.brokerage_username; // "johndoe"
-        const password = ubData?.brokerage_password; // "strongPassword123"
-        if (!username || !password) {
-          console.warn('[wallets] Credenciais ausentes para HB', { username: !!username, password: !!password });
-          setWallets({});
-          return;
-        }
-
-        const basicHeader = getHbBasicAuthHeader();
-        if (!basicHeader) {
-          console.warn('[wallets] HB app credentials não configuradas (VITE_HB_APP_USER/PASS).');
-          setWallets({});
-          return;
-        }
-
-        // 5.1) LOGIN
-        const loginRes = await fetch(BROKER_ENDPOINTS.HB_LOGIN, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: basicHeader, // Authorization: Basic <base64 login_app:password_app>
-          },
-          body: JSON.stringify({
-            username,
-            password,
-            role: 'hbb',
-          }),
-        });
-
-        if (loginRes.status === 401) {
-          console.warn('[wallets] HB login 401 Unauthorized (credenciais inválidas).');
-          setWallets({});
-          return;
-        }
-        if (!loginRes.ok) {
-          throw new Error(`HB login falhou: ${loginRes.status}`);
-        }
-
-        const loginData = await loginRes.json().catch(() => ({}));
-        const accessToken: string | undefined = loginData?.access_token;
-        if (!accessToken) {
-          console.warn('[wallets] HB access_token ausente na resposta de login.');
-          setWallets({});
-          return;
-        }
-
-        // 5.2) BALANCE
-        const balRes = await fetch(BROKER_ENDPOINTS.HB_BALANCE, {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${accessToken}` }, // Authorization: Bearer <jwt>
-        });
-
-        if (balRes.status === 401) {
-          console.warn('[wallets] HB balance 401 (token inválido/expirado).');
-          setWallets({});
-          return;
-        }
-        if (!balRes.ok) {
-          throw new Error(`HB balance falhou: ${balRes.status}`);
-        }
-
-        const balData = await balRes.json();
-        const { REAL, DEMO } = normalizeWallets(balData);
-        setWallets({ REAL: REAL ?? 0, DEMO: DEMO ?? 0 });
-        return;
-      }
-
-      // 6) Não mapeada
-      console.warn('Corretora não configurada:', rawName);
-      setWallets({});
-    } catch (err) {
-      console.error('Erro ao buscar wallets:', err);
-      setWallets({});
-    }
-  };
-  // --------------------------------
-
-  const fetchBrokerInfo = async () => {
-    if (!id) return;
-    try {
-      const res = await fetch(`https://api.multitradingob.com/brokerages/${id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const data = await res.json();
-      setBrokerInfo({ name: data?.brokerage_name, icon: data?.brokerage_icon });
-    } catch {
-      setBrokerInfo({});
-    }
-  };
-
-  const fetchBotOptions = async () => {
-    if (!id) return;
-    try {
-      const res = await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const data: BotOptions = await res.json();
-      setBotStatus(data?.bot_status ?? 0);
-      setIsDemo(data?.is_demo ?? true);
-      setUserId(data?.user_id ?? null);
-    } catch {
-      setBotStatus(0);
-      setIsDemo(true);
-    }
-  };
-
-  const fetchTodayTrades = async () => {
-    if (!id) return;
-    try {
-      const res = await fetch(`https://api.multitradingob.com/trade-order-info/today/${id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const data = res.ok ? await res.json() : [];
-      const arr: TradeOrder[] = Array.isArray(data) ? data : [];
-
-      setRecentOrders(arr);
-
-      let wins = 0;
-      let losses = 0;
-      let lucro = 0;
-      arr.forEach((op) => {
-        const s = op.status?.toUpperCase();
-        if (s?.includes('WON')) {
-          wins++;
-          lucro += op.pnl;
-        } else if (s?.includes('LOST')) {
-          losses++;
-          lucro -= op.pnl;
-        }
-      });
-      setDailyStats({ wins, losses, lucro });
-
-      const total = arr.reduce((acc, op) => acc + op.pnl, 0);
-      setRoiValue(lucro);
-      setRoiPercent(total ? (lucro / total) * 100 : 0);
-    } catch {
-      setRecentOrders([]);
-      setDailyStats({ wins: 0, losses: 0, lucro: 0 });
-      setRoiValue(0);
-      setRoiPercent(0);
-    }
-  };
-
-  const fetchAllTrades = async () => {
-    if (!id) return;
-    try {
-      const res = await fetch(`https://api.multitradingob.com/trade-order-info/all/${id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const data = res.ok ? await res.json() : [];
-      const arr: TradeOrder[] = Array.isArray(data) ? data : [];
-
-      let wins = 0;
-      let losses = 0;
-      let lucro = 0;
-      arr.forEach((op) => {
-        const s = op.status?.toUpperCase();
-        if (s?.includes('WON')) {
-          wins++;
-          lucro += op.pnl;
-        } else if (s?.includes('LOST')) {
-          losses++;
-          lucro -= op.pnl;
-        }
-      });
-      setTotalStats({ wins, losses, lucro });
-
-      const total = arr.reduce((acc, op) => acc + op.pnl, 0);
-      setRoiTotalPercent(total ? (lucro / total) * 100 : 0);
-    } catch {
-      setTotalStats({ wins: 0, losses: 0, lucro: 0 });
-      setRoiTotalPercent(0);
-    }
-  };
-
-  const toggleBot = async () => {
-    if (!userId || !id) return;
-    const action = botStatus === 1 ? 'stop' : 'start';
-    const url = `https://bot.multitradingob.com/${action}/${userId}/${id}`;
-
-    const username = import.meta.env.VITE_BASIC_AUTH_USER;
-    const password = import.meta.env.VITE_BASIC_AUTH_PASS;
-    const credentials = btoa(`${username}:${password}`);
-
-    try {
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: { Authorization: `Basic ${credentials}` },
-      });
-      if (res.ok) setBotStatus((prev) => (prev === 1 ? 0 : 1));
-    } catch (err) {
-      console.error('Erro ao alternar o bot:', err);
-    }
-  };
-
-  useEffect(() => {
-    const loadAll = async () => {
-      setLoading(true);
-      await Promise.all([fetchWallets(), fetchBrokerInfo(), fetchBotOptions(), fetchTodayTrades(), fetchAllTrades()]);
-      setLoading(false);
     };
-    if (accessToken) loadAll();
-  }, [accessToken, id]);
 
-  const getWinrate = (s: { wins: number; losses: number }) => {
-    const total = s.wins + s.losses;
-    return total === 0 ? 0 : Math.round((s.wins / total) * 100);
+    fetchBrokerageInfo();
+  }, [id]);
+
+  // ✅ Bot Options
+  useEffect(() => {
+    const fetchBotOptions = async () => {
+      if (!id || !user?.id) return;
+
+      try {
+        const res = await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (res.status === 404) {
+          // ✅ CRIAÇÃO com gale_one_value, gale_two_value e is_auto:false
+          const createRes = await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              bot_status: 0,
+              stop_loss: 0,
+              stop_win: 0,
+              entry_price: 0,
+              user_id: user.id,
+              is_demo: false,
+              win_value: 0,
+              loss_value: 0,
+              gale_one: true,
+              gale_two: true,
+              brokerage_id: Number(id),
+              gale_one_value: 0,
+              gale_two_value: 0,
+              // 🔹 conforme requisito
+              is_auto: false,
+            }),
+          });
+
+          const created = await createRes.json();
+          setFormData((prev: any) => ({
+            ...prev,
+            stop_loss: created.stop_loss ?? 0,
+            stop_win: created.stop_win ?? 0,
+            entry_price: created.entry_price ?? 0,
+            is_demo: created.is_demo ?? false,
+            gale_one: created.gale_one ?? true,
+            gale_two: created.gale_two ?? true,
+            gale_one_value: created.gale_one_value ?? 0,
+            gale_two_value: created.gale_two_value ?? 0,
+            // ✅ popula UI
+            is_auto: created.is_auto ?? false,
+          }));
+        } else {
+          const data = await res.json();
+          setFormData((prev: any) => ({
+            ...prev,
+            stop_loss: data.stop_loss ?? 0,
+            stop_win: data.stop_win ?? 0,
+            entry_price: data.entry_price ?? 0,
+            is_demo: data.is_demo ?? false,
+            gale_one: data.gale_one ?? true,
+            gale_two: data.gale_two ?? true,
+            gale_one_value: data.gale_one_value ?? 0,
+            gale_two_value: data.gale_two_value ?? 0,
+            // ✅ popula UI
+            is_auto: data.is_auto ?? false,
+          }));
+        }
+      } catch (error) {
+        console.error('Erro ao buscar/criar bot_options:', error);
+      }
+    };
+
+    const fetchUserBrokerage = async () => {
+      if (!id || !user?.id) return;
+
+      try {
+        const res = await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        let data;
+        if (res.status === 404) {
+          const createRes = await fetch(`https://api.multitradingob.com/user-brokerages`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: user?.id || 0,
+              brokerage_id: Number(id),
+            }),
+          });
+          data = await createRes.json();
+          setUserBrokerageCreated(true);
+        } else {
+          data = await res.json();
+          setUserBrokerageCreated(false);
+        }
+
+        setFormData((prev: any) => ({
+          ...prev,
+          api_key: data.api_key || '',
+          brokerage_username: data.brokerage_username || '',
+          brokerage_password: data.brokerage_password || '',
+        }));
+      } catch (error) {
+        console.error('Erro ao carregar configurações da corretora:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (accessToken && id) {
+      fetchBotOptions();
+      fetchUserBrokerage();
+    }
+  }, [accessToken, id, user?.id]);
+
+  const handleChange = (key: string, value: any) => {
+    setFormData((prev: any) => ({ ...prev, [key]: value }));
   };
 
-  const imageSrc = getImagePath(brokerInfo.icon);
-  const isReal = selectedWallet === 'REAL';
-  const saldo = isReal ? wallets.REAL ?? 0 : wallets.DEMO ?? 0;
-  const saldoColor = isReal ? 'text-green-400' : 'text-orange-400';
-  const contaLabel = isReal ? 'Conta real' : 'Conta demo';
+  const handleSaveConfig = async () => {
+    try {
+      setIsSaving(true);
 
-  const handleToggleWallet = () => setSelectedWallet((p) => (p === 'REAL' ? 'DEMO' : 'REAL'));
+      // ✅ UPDATE incluindo is_auto
+      await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bot_status: 0,
+          user_id: user?.id || 0,
+          stop_loss: Number(formData.stop_loss),
+          stop_win: Number(formData.stop_win),
+          entry_price: Number(formData.entry_price),
+          is_demo: !!formData.is_demo,
+          gale_one: !!formData.gale_one,
+          gale_two: !!formData.gale_two,
+          win_value: 0,
+          loss_value: 0,
+          brokerage_id: Number(id),
+
+          // 🔹 novos campos convertidos
+          gale_one_value: Number(formData.gale_one_value ?? 0),
+          gale_two_value: Number(formData.gale_two_value ?? 0),
+
+          // 🔹 novo campo solicitado
+          is_auto: !!formData.is_auto,
+        }),
+      });
+
+      await fetch(`https://api.multitradingob.com/user-brokerages/${id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user?.id || 0,
+          brokerage_id: Number(id),
+          api_key: formData.api_key,
+          brokerage_username: formData.brokerage_username,
+          brokerage_password: formData.brokerage_password,
+        }),
+      });
+
+      setTimeout(() => navigate('/dashboard'), 1000);
+    } catch (error) {
+      console.error('Erro ao atualizar configurações:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const isFormReady = settingsFields.every(field => formData.hasOwnProperty(field.key));
+  const allowedFields = brokerageFieldConfig[id || ''] || [];
+
+  const showCreateAccountButton =
+    brokerageInfo?.brokerage_register_url &&
+    (
+      !formData.api_key ||
+      (!formData.brokerage_username && !formData.brokerage_password) ||
+      userBrokerageCreated
+    );
 
   return (
-    <div className="min-h-screen bg-[#111827] text-white relative">
+    <div className="min-h-screen bg-[#111827] text-white">
       <BrokerSidebarMenu />
-
-      {loading ? (
-        <div className="flex items-center justify-center h-screen">
-          <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : (
-        <main className="p-4 sm:p-6 md:pl-72 md:pr-10 md:py-10 pt-20 transition-all">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Saldo */}
-            <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
-              <CardContent className="p-5 space-y-2">
-                <p className="text-gray-400 text-sm">Saldo disponível</p>
-                <p className={`text-3xl font-bold ${saldoColor}`}>$ {saldo.toFixed(2)}</p>
-                <p className="text-gray-400 text-sm">{contaLabel}</p>
-                <Button
-                  onClick={handleToggleWallet}
-                  className="mt-4 w-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 rounded-xl"
-                >
-                  Trocar para {isReal ? 'Demo' : 'Real'}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Bot status */}
-            <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex justify-between items-center">
-                  <p className="text-cyan-400 font-semibold">🤖 Status do Bot</p>
-                  <span
-                    className={`px-3 py-1 text-sm rounded-full ${
-                      botStatus === 1 ? 'bg-green-500' : 'bg-red-500'
-                    } text-white`}
-                  >
-                    {botStatus === 1 ? 'Ativo' : 'Parado'}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-400">{isDemo ? 'Conta demo' : 'Conta real'}</p>
-                {brokerInfo.icon && (
-                  <img src={imageSrc} alt="Logo corretora" className="w-16 h-16 object-contain mx-auto mt-2" />
-                )}
-                <Button
-                  onClick={toggleBot}
-                  className={`mt-4 w-full rounded-xl font-semibold text-white ${
-                    botStatus === 1 ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
-                  }`}
-                >
-                  {botStatus === 1 ? 'Parar bot' : 'Ativar bot'}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* ROI Diário */}
-            <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
-              <CardContent className="p-5">
-                <p className="text-cyan-400 font-semibold mb-1">📈 ROI Diário</p>
-                <p className={`text-3xl font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {roiPercent.toFixed(2)}%
-                </p>
-                <p className="text-sm text-gray-400 mt-2">
-                  Lucro:{' '}
-                  <span className={`font-bold ${roiValue >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    $ {roiValue.toFixed(2)}
-                  </span>
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Estatísticas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {[{ label: '📊 Estatísticas Diárias', stats: dailyStats }, { label: '📈 Estatísticas Totais', stats: totalStats }].map(
-              (item, index) => (
-                <Card key={index} className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
-                  <CardContent className="p-5">
-                    <p className="text-cyan-400 font-semibold mb-2">{item.label}</p>
-                    <p className="text-lg text-gray-400">
-                      Winrate: <span className="font-bold text-green-400">{getWinrate(item.stats)}%</span>
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Derrotas: <span className="font-bold text-red-400">{100 - getWinrate(item.stats)}%</span>
-                    </p>
-                    <div className="w-full h-4 bg-gray-700 rounded-full overflow-hidden mt-2 flex">
-                      <div className="h-full bg-green-400" style={{ width: `${getWinrate(item.stats)}%` }} />
-                      <div className="h-full bg-red-500" style={{ width: `${100 - getWinrate(item.stats)}%` }} />
-                    </div>
-                    <p className="text-green-400 text-sm mt-2">Vitórias: {item.stats.wins}</p>
-                    <p className="text-red-400 text-sm">Derrotas: {item.stats.losses}</p>
-                    <p className={`text-sm font-semibold ${item.stats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      Lucro: $ {item.stats.lucro.toFixed(2)}
-                    </p>
-                  </CardContent>
-                </Card>
-              ),
-            )}
-
-            <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
-              <CardContent className="p-5">
-                <p className="text-cyan-400 font-semibold mb-1">📉 ROI Total</p>
-                <p className={`text-3xl font-bold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {roiTotalPercent.toFixed(2)}%
-                </p>
-                <p className={`text-sm font-semibold ${totalStats.lucro >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  $ {totalStats.lucro.toFixed(2)}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Últimas operações */}
-          <div className="mt-10">
-            <Card className="bg-[#1E293B] border border-cyan-500/20 rounded-2xl shadow-md">
-              <CardContent className="p-5">
-                <div className="flex justify-between items-center mb-4">
-                  <p className="text-cyan-400 font-semibold">📊 Últimas Operações</p>
-                  <button
-                    className="text-sm text-cyan-400 hover:text-cyan-300 transition"
-                    onClick={() => navigate(`/broker/${id}/history`)}
-                  >
-                    Ver histórico
-                  </button>
-                </div>
-                {recentOrders.length === 0 ? (
-                  <p className="text-gray-400">Nenhuma operação registrada hoje.</p>
-                ) : (
-                  <ul className="space-y-2 text-sm">
-                    {recentOrders.slice(0, 5).map((op, idx) => (
-                      <li key={idx} className="flex justify-between">
-                        <span>{op.symbol}</span>
-                        <span className={op.status === 'WIN' ? 'text-green-400' : 'text-red-400'}>
-                          {op.status === 'WIN' ? '+' : '-'}$ {op.pnl.toFixed(2)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+      {isLoading || !isFormReady ? (
+        <main className="flex-grow flex items-center justify-center p-6">
+          <Loader2 className="animate-spin h-6 w-6 mr-2 text-cyan-400" />
+          <span className="text-gray-300">Carregando configurações...</span>
         </main>
+      ) : (
+        <motion.main
+          className="flex flex-col items-center justify-center p-4 md:p-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">
+            Configurações do Robô
+          </h2>
+
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-6xl"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {settingsFields.map((field, index) => {
+              const isBrokerField = (field as any).brokerageOnly;
+              const isEnabled = !isBrokerField || allowedFields.includes(field.key);
+              return (
+                <motion.div
+                  variants={itemVariants}
+                  custom={index}
+                  key={field.key}
+                  className="w-full"
+                >
+                  <Card
+                    className={`bg-[#1E293B] border border-cyan-500/20 rounded-xl shadow ${!isEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <CardContent className="p-4">
+                      {field.type === 'boolean' ? (
+                        <>
+                          <label className="block text-sm text-gray-200 mb-2">{field.label}</label>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={!!formData[field.key]}
+                              onCheckedChange={(checked) => handleChange(field.key, !!checked)}
+                              disabled={!isEnabled}
+                            />
+                            <span className="text-sm text-gray-300">
+                              {formData[field.key] ? 'Ativado' : 'Desativado'}
+                            </span>
+                          </div>
+                        </>
+                      ) : field.type === 'secure' ? (
+                        <SecureField
+                          label={field.label}
+                          name={field.key}
+                          value={formData[field.key] || ''}
+                          onChange={handleChange}
+                          disabled={!isEnabled}
+                        />
+                      ) : (
+                        <>
+                          <label className="block text-sm text-gray-200 mb-2">{field.label}</label>
+                          <Input
+                            className="bg-[#1F1F1F] border border-cyan-500/20 text-white text-center"
+                            placeholder={`Digite ${field.label.toLowerCase()}`}
+                            value={formData[field.key] ?? ''}
+                            onChange={(e) => handleChange(field.key, e.target.value)}
+                            disabled={!isEnabled}
+                            inputMode={numericKeys.has(field.key) ? 'decimal' : 'text'}
+                          />
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+
+          {showCreateAccountButton && (
+            <div className="w-full max-w-sm mt-6">
+              <Button
+                asChild
+                className="w-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300 hover:bg-cyan-500/10"
+              >
+                <a
+                  href={brokerageInfo.brokerage_register_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Criar Conta na Corretora
+                </a>
+              </Button>
+            </div>
+          )}
+
+          <div className="flex flex-col items-center gap-4 mt-8 w-full max-w-sm">
+            <Button
+              onClick={handleSaveConfig}
+              className="w-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:text-cyan-300"
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Salvando...
+                </div>
+              ) : (
+                'Atualizar Configurações'
+              )}
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => navigate(-1)}
+              className="w-full border border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              Cancelar
+            </Button>
+          </div>
+        </motion.main>
       )}
     </div>
   );
 };
 
-export default Broker;
+export default SettingsPage;

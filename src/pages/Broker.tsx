@@ -135,11 +135,11 @@ export const Broker = () => {
     return { REAL, DEMO };
   }
 
-  // ---------- MAPEAMENTO (primeira opção) ----------
+  // ---------- MAPEAMENTO ----------
   type BrokerKey = 'HB' | 'XOFRE' | 'AVALON' | 'POLARIUM' | 'UNKNOWN';
 
   const BROKER_ALIASES: Record<BrokerKey, string[]> = {
-    HB: ['HB', 'HOME BROKER'],
+    HB: ['HB', 'HOME BROKER', 'HYPERBIT', 'HYPERBIT BROKER'],
     XOFRE: ['XOFRE'],
     AVALON: ['AVALON'],
     POLARIUM: ['POLARIUM'],
@@ -154,7 +154,7 @@ export const Broker = () => {
     return 'UNKNOWN';
   }
 
-  // Mantive as MESMAS URLs do arquivo original + HB externas que você passou
+  // Mantidas as URLs originais + endpoints da HB
   const BROKER_ENDPOINTS = {
     XOFRE: '/internal/xofre/wallets',
     AVALON: '/internal/avalon/balance',
@@ -162,7 +162,19 @@ export const Broker = () => {
     HB_LOGIN: 'https://bot-account-manager-api.homebroker.com/v3/login',
     HB_BALANCE: 'https://bot-wallet-api.homebroker.com/balance/',
   } as const;
-  // -----------------------------------------------
+
+  // --- HB app basic auth helper ---
+  function getHbBasicAuthHeader() {
+    const appUser = import.meta.env.VITE_HB_APP_USER;
+    const appPass = import.meta.env.VITE_HB_APP_PASS;
+    if (!appUser || !appPass) {
+      console.warn('[HB] VITE_HB_APP_USER / VITE_HB_APP_PASS não configurados.');
+      return undefined;
+    }
+    const token = btoa(`${appUser}:${appPass}`);
+    return `Basic ${token}`;
+  }
+  // --------------------------------
 
   const fetchWallets = async () => {
     if (!id) return;
@@ -200,7 +212,7 @@ export const Broker = () => {
 
       const key = resolveBrokerKey(rawName);
 
-      // 3) XOFRE → GET com apiKey (mantida sua URL)
+      // 3) XOFRE → GET com apiKey
       if (key === 'XOFRE') {
         const apiKeyB64: string | undefined = ubData?.api_key ?? ubData?.api_token;
         if (!apiKeyB64) {
@@ -219,7 +231,7 @@ export const Broker = () => {
         return;
       }
 
-      // 4) AVALON / POLARIUM → POST com credenciais (mantidas suas URLs)
+      // 4) AVALON / POLARIUM → POST com credenciais
       if (key === 'AVALON' || key === 'POLARIUM') {
         const email = ubData?.brokerage_username;
         const password = ubData?.brokerage_password;
@@ -246,57 +258,65 @@ export const Broker = () => {
         return;
       }
 
-      // 5) HB → login (JWT) e depois balance com Bearer
+      // 5) HB → login (Basic do app) e depois balance (Bearer)
       if (key === 'HB') {
-        const email = ubData?.brokerage_username;
-        const password = ubData?.brokerage_password;
-        if (!email || !password) {
-          console.warn('[wallets] Credenciais ausentes para HB', { email: !!email, password: !!password });
+        const username = ubData?.brokerage_username; // "johndoe"
+        const password = ubData?.brokerage_password; // "strongPassword123"
+        if (!username || !password) {
+          console.warn('[wallets] Credenciais ausentes para HB', { username: !!username, password: !!password });
           setWallets({});
           return;
         }
 
-        // login
+        const basicHeader = getHbBasicAuthHeader();
+        if (!basicHeader) {
+          console.warn('[wallets] HB app credentials não configuradas (VITE_HB_APP_USER/PASS).');
+          setWallets({});
+          return;
+        }
+
+        // 5.1) LOGIN
         const loginRes = await fetch(BROKER_ENDPOINTS.HB_LOGIN, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: basicHeader, // Authorization: Basic <base64 login_app:password_app>
+          },
+          body: JSON.stringify({
+            username,
+            password,
+            role: 'hbb',
+          }),
         });
 
+        if (loginRes.status === 401) {
+          console.warn('[wallets] HB login 401 Unauthorized (credenciais inválidas).');
+          setWallets({});
+          return;
+        }
         if (!loginRes.ok) {
           throw new Error(`HB login falhou: ${loginRes.status}`);
         }
 
-        // tenta extrair token de maneira defensiva
         const loginData = await loginRes.json().catch(() => ({}));
-        let token: string | undefined =
-          loginData?.token ||
-          loginData?.access_token ||
-          loginData?.jwt ||
-          (typeof loginData?.Authorization === 'string'
-            ? String(loginData.Authorization).replace(/^Bearer\s+/i, '')
-            : undefined);
-
-        // alguns servidores retornam o token via cabeçalho Authorization
-        if (!token) {
-          const authHeader = loginRes.headers.get('Authorization') || loginRes.headers.get('authorization');
-          if (authHeader?.toLowerCase().startsWith('bearer ')) {
-            token = authHeader.slice(7);
-          }
-        }
-
-        if (!token) {
-          console.warn('[wallets] HB token não encontrado na resposta de login.');
+        const accessToken: string | undefined = loginData?.access_token;
+        if (!accessToken) {
+          console.warn('[wallets] HB access_token ausente na resposta de login.');
           setWallets({});
           return;
         }
 
-        // balance com Bearer
+        // 5.2) BALANCE
         const balRes = await fetch(BROKER_ENDPOINTS.HB_BALANCE, {
           method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${accessToken}` }, // Authorization: Bearer <jwt>
         });
 
+        if (balRes.status === 401) {
+          console.warn('[wallets] HB balance 401 (token inválido/expirado).');
+          setWallets({});
+          return;
+        }
         if (!balRes.ok) {
           throw new Error(`HB balance falhou: ${balRes.status}`);
         }
