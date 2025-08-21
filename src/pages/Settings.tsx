@@ -59,6 +59,14 @@ const itemVariants = {
   }),
 };
 
+const numericKeys = new Set([
+  'stop_loss',
+  'stop_win',
+  'entry_price',
+  'gale_one_value',
+  'gale_two_value',
+]);
+
 const SettingsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -358,7 +366,7 @@ const SettingsPage = () => {
                             value={formData[field.key] ?? ''}
                             onChange={(e) => handleChange(field.key, e.target.value)}
                             disabled={!isEnabled}
-                            inputMode="decimal"
+                            inputMode={numericKeys.has(field.key) ? 'decimal' : 'text'}
                           />
                         </>
                       )}
