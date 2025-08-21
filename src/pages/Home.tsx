@@ -65,7 +65,7 @@ const Home = () => {
     fetchIsLive();
     return () => controller.abort();
   }, []);
-  
+
   const features = [
     {
       icon: Zap,
@@ -132,25 +132,14 @@ const Home = () => {
               <LiveIndicator
                 isLive={isLive}
                 viewerCount={847}
-                onJoinLive={() => alert("Redirecionando para a live...")}
               />
 
               <Card className="bg-gradient-card backdrop-blur-sm border-border/50 p-6 shadow-card">
-                <h3 className="font-bold text-foreground mb-3">Próximas Lives</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Hoje</span>
-                    <span className="text-primary font-medium">15:00 - EUR/USD</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Amanhã</span>
-                    <span className="text-primary font-medium">09:00 - BTC/USDT</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Quinta</span>
-                    <span className="text-primary font-medium">14:30 - GBP/JPY</span>
-                  </div>
-                </div>
+                <h3 className="font-bold text-foreground mb-3">Nossas Lives</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Acompanhe nossas transmissões ao vivo para aprender estratégias, ver análises de mercado e
+                  operar junto com especialistas. Um espaço para evoluir e ganhar experiência real no trading.
+                </p>
               </Card>
             </div>
           </div>
@@ -304,7 +293,7 @@ const Home = () => {
                     </svg>
                     ENTRAR NO TELEGRAM
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="lg"

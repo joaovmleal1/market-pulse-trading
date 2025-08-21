@@ -20,9 +20,15 @@ const settingsFields = [
   { label: 'Valor Gale 1 (Preço)', key: 'gale_one_value' },
   { label: 'Valor Gale 2 (Preço)', key: 'gale_two_value' },
 
+  // ✅ Switches
   { label: 'Conta Demo', key: 'is_demo', type: 'boolean' },
   { label: 'Gale 1', key: 'gale_one', type: 'boolean' },
   { label: 'Gale 2', key: 'gale_two', type: 'boolean' },
+
+  // ✅ Novo switch solicitado
+  { label: 'Modo Automático (Sala de Sinal)', key: 'is_auto', type: 'boolean' },
+
+  // Campos sensíveis / corretora
   { label: 'API Key da Corretora', key: 'api_key', type: 'secure', brokerageOnly: true },
   { label: 'Usuário da Corretora', key: 'brokerage_username', brokerageOnly: true },
   { label: 'Senha da Corretora', key: 'brokerage_password', type: 'secure', brokerageOnly: true },
@@ -99,7 +105,7 @@ const SettingsPage = () => {
         });
 
         if (res.status === 404) {
-          // ✅ CRIAÇÃO com gale_one_value e gale_two_value
+          // ✅ CRIAÇÃO com gale_one_value, gale_two_value e is_auto:false
           const createRes = await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
             method: 'POST',
             headers: {
@@ -118,9 +124,10 @@ const SettingsPage = () => {
               gale_one: true,
               gale_two: true,
               brokerage_id: Number(id),
-              // 🔹 novos campos conforme API
               gale_one_value: 0,
               gale_two_value: 0,
+              // 🔹 conforme requisito
+              is_auto: false,
             }),
           });
 
@@ -135,6 +142,8 @@ const SettingsPage = () => {
             gale_two: created.gale_two ?? true,
             gale_one_value: created.gale_one_value ?? 0,
             gale_two_value: created.gale_two_value ?? 0,
+            // ✅ popula UI
+            is_auto: created.is_auto ?? false,
           }));
         } else {
           const data = await res.json();
@@ -148,6 +157,8 @@ const SettingsPage = () => {
             gale_two: data.gale_two ?? true,
             gale_one_value: data.gale_one_value ?? 0,
             gale_two_value: data.gale_two_value ?? 0,
+            // ✅ popula UI
+            is_auto: data.is_auto ?? false,
           }));
         }
       } catch (error) {
@@ -213,7 +224,7 @@ const SettingsPage = () => {
     try {
       setIsSaving(true);
 
-      // ✅ UPDATE com gale_one_value e gale_two_value
+      // ✅ UPDATE incluindo is_auto
       await fetch(`https://api.multitradingob.com/bot-options/${id}`, {
         method: 'PUT',
         headers: {
@@ -236,6 +247,9 @@ const SettingsPage = () => {
           // 🔹 novos campos convertidos
           gale_one_value: Number(formData.gale_one_value ?? 0),
           gale_two_value: Number(formData.gale_two_value ?? 0),
+
+          // 🔹 novo campo solicitado
+          is_auto: !!formData.is_auto,
         }),
       });
 

@@ -83,7 +83,14 @@ export const Navbar = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-4">
-                <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsOpen(false);
+                    window.location.assign("/login");
+                  }}
+                >
                   Login
                 </Button>
                 <Button variant="default" size="sm" onClick={scrollToSignup}>

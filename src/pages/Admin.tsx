@@ -747,6 +747,8 @@ const Admin = () => {
                       <option value="Avalon">Avalon</option>
                       <option value="Polarium">Polarium</option>
                       <option value="both">Avalon e Polarium</option>
+                      <option value="Xofre">Xofre</option>
+                      <option value="Home Broker">Home Broker</option>
                     </select>
                   </div>
 

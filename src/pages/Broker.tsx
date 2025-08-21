@@ -135,6 +135,35 @@ export const Broker = () => {
     return { REAL, DEMO };
   }
 
+  // ---------- MAPEAMENTO (primeira opção) ----------
+  type BrokerKey = 'HB' | 'XOFRE' | 'AVALON' | 'POLARIUM' | 'UNKNOWN';
+
+  const BROKER_ALIASES: Record<BrokerKey, string[]> = {
+    HB: ['HB', 'HOME BROKER'],
+    XOFRE: ['XOFRE'],
+    AVALON: ['AVALON'],
+    POLARIUM: ['POLARIUM'],
+    UNKNOWN: [],
+  };
+
+  function resolveBrokerKey(raw?: string): BrokerKey {
+    const name = String(raw || '').trim().toUpperCase();
+    for (const key of Object.keys(BROKER_ALIASES) as BrokerKey[]) {
+      if (BROKER_ALIASES[key].some(a => a.toUpperCase() === name)) return key;
+    }
+    return 'UNKNOWN';
+  }
+
+  // Mantive as MESMAS URLs do arquivo original + HB externas que você passou
+  const BROKER_ENDPOINTS = {
+    XOFRE: '/internal/xofre/wallets',
+    AVALON: '/internal/avalon/balance',
+    POLARIUM: '/internal/polarium/balance',
+    HB_LOGIN: 'https://bot-account-manager-api.homebroker.com/v3/login',
+    HB_BALANCE: 'https://bot-wallet-api.homebroker.com/balance/',
+  } as const;
+  // -----------------------------------------------
+
   const fetchWallets = async () => {
     if (!id) return;
 
@@ -169,63 +198,118 @@ export const Broker = () => {
         }
       }
 
-      const nameKey = rawName.toUpperCase();
+      const key = resolveBrokerKey(rawName);
 
-      // 3) XOFRE → via proxy interno GET /internal/xofre/wallets
-      if (nameKey === 'XOFRE') {
+      // 3) XOFRE → GET com apiKey (mantida sua URL)
+      if (key === 'XOFRE') {
         const apiKeyB64: string | undefined = ubData?.api_key ?? ubData?.api_token;
         if (!apiKeyB64) {
           console.warn('[wallets] XOFRE sem api_key/api_token no user-brokerages');
           setWallets({});
           return;
         }
-        const res = await fetch('/internal/xofre/wallets', {
+        const res = await fetch(BROKER_ENDPOINTS.XOFRE, {
           headers: { 'X-Api-Key': apiKeyB64 },
         });
         if (!res.ok) throw new Error(`XOFRE wallets falhou: ${res.status}`);
         const walletData = await res.json();
 
         const { REAL, DEMO } = normalizeWallets(walletData);
-        setWallets({
-          REAL: REAL ?? 0,
-          DEMO: DEMO ?? 0,
+        setWallets({ REAL: REAL ?? 0, DEMO: DEMO ?? 0 });
+        return;
+      }
+
+      // 4) AVALON / POLARIUM → POST com credenciais (mantidas suas URLs)
+      if (key === 'AVALON' || key === 'POLARIUM') {
+        const email = ubData?.brokerage_username;
+        const password = ubData?.brokerage_password;
+        if (!email || !password) {
+          console.warn('[wallets] Credenciais ausentes para', rawName, { email: !!email, password: !!password });
+          setWallets({});
+          return;
+        }
+
+        const balanceUrl = key === 'AVALON'
+          ? BROKER_ENDPOINTS.AVALON
+          : BROKER_ENDPOINTS.POLARIUM;
+
+        const res = await fetch(balanceUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
         });
+        if (!res.ok) throw new Error(`${key} balance falhou: ${res.status}`);
+        const data = await res.json();
+
+        const { REAL, DEMO } = normalizeWallets(data);
+        setWallets({ REAL: REAL ?? 0, DEMO: DEMO ?? 0 });
         return;
       }
 
-      // 4) Avalon/Polarium → via proxy interno POST
-      if (nameKey !== 'AVALON' && nameKey !== 'POLARIUM') {
-        console.warn('Corretora não configurada:', rawName);
-        setWallets({});
+      // 5) HB → login (JWT) e depois balance com Bearer
+      if (key === 'HB') {
+        const email = ubData?.brokerage_username;
+        const password = ubData?.brokerage_password;
+        if (!email || !password) {
+          console.warn('[wallets] Credenciais ausentes para HB', { email: !!email, password: !!password });
+          setWallets({});
+          return;
+        }
+
+        // login
+        const loginRes = await fetch(BROKER_ENDPOINTS.HB_LOGIN, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (!loginRes.ok) {
+          throw new Error(`HB login falhou: ${loginRes.status}`);
+        }
+
+        // tenta extrair token de maneira defensiva
+        const loginData = await loginRes.json().catch(() => ({}));
+        let token: string | undefined =
+          loginData?.token ||
+          loginData?.access_token ||
+          loginData?.jwt ||
+          (typeof loginData?.Authorization === 'string'
+            ? String(loginData.Authorization).replace(/^Bearer\s+/i, '')
+            : undefined);
+
+        // alguns servidores retornam o token via cabeçalho Authorization
+        if (!token) {
+          const authHeader = loginRes.headers.get('Authorization') || loginRes.headers.get('authorization');
+          if (authHeader?.toLowerCase().startsWith('bearer ')) {
+            token = authHeader.slice(7);
+          }
+        }
+
+        if (!token) {
+          console.warn('[wallets] HB token não encontrado na resposta de login.');
+          setWallets({});
+          return;
+        }
+
+        // balance com Bearer
+        const balRes = await fetch(BROKER_ENDPOINTS.HB_BALANCE, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!balRes.ok) {
+          throw new Error(`HB balance falhou: ${balRes.status}`);
+        }
+
+        const balData = await balRes.json();
+        const { REAL, DEMO } = normalizeWallets(balData);
+        setWallets({ REAL: REAL ?? 0, DEMO: DEMO ?? 0 });
         return;
       }
 
-      const email = ubData?.brokerage_username;
-      const password = ubData?.brokerage_password;
-      if (!email || !password) {
-        console.warn('[wallets] Credenciais ausentes para', rawName, { email: !!email, password: !!password });
-        setWallets({});
-        return;
-      }
-
-      const balanceUrl =
-        nameKey === 'AVALON'
-          ? '/internal/avalon/balance'
-          : '/internal/polarium/balance';
-
-      const res = await fetch(balanceUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) throw new Error(`${nameKey} balance falhou: ${res.status}`);
-      const data = await res.json();
-
-      const { REAL, DEMO } = normalizeWallets(data);
-      setWallets({
-        REAL: REAL ?? 0,
-        DEMO: DEMO ?? 0,
-      });
+      // 6) Não mapeada
+      console.warn('Corretora não configurada:', rawName);
+      setWallets({});
     } catch (err) {
       console.error('Erro ao buscar wallets:', err);
       setWallets({});
