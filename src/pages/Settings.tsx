@@ -26,7 +26,7 @@ const settingsFields = [
   { label: 'Gale 2', key: 'gale_two', type: 'boolean' },
 
   // ✅ Novo switch solicitado
-  { label: 'Modo Automático (Sala de Sinal)', key: 'is_auto', type: 'boolean' },
+  { label: 'Modo Automático', key: 'is_auto', type: 'boolean' },
 
   // Campos sensíveis / corretora
   { label: 'API Key da Corretora', key: 'api_key', type: 'secure', brokerageOnly: true },
@@ -38,6 +38,7 @@ const brokerageFieldConfig: Record<string, string[]> = {
   '1': ['api_key'],
   '2': ['brokerage_username', 'brokerage_password'],
   '3': ['brokerage_username', 'brokerage_password'],
+  '4': ['brokerage_username', 'brokerage_password'],
 };
 
 const containerVariants = {
